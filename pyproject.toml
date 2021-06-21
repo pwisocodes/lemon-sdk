@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "lemon-sdk"
+version = "0.1.0"
+description = ""
+authors = ["Patrick Wisotzki <pwisocodes@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.7"
+requests = "^2.25.1"
+PyYAML = "^5.4.1"
+
+[tool.poetry.dev-dependencies]
+pytest = "^6.2.4"
+autopep8 = "^1.5.7"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
