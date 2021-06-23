@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+import logging
 from typing import List
 import datetime
 from datetime import timedelta
@@ -13,6 +14,7 @@ class Strategy(ABC):
     The Context uses this interface to call the algorithm defined by Concrete
     Strategies.
     """
+    
 
     @abstractmethod
     def do_algorithm(self, data: List):
@@ -20,6 +22,7 @@ class Strategy(ABC):
 
 
 class TradingStrategy(Strategy):
+    is_running: bool = False
 
     def seconds_till_market_opens(self, entered_time):
         """
@@ -43,30 +46,40 @@ class TradingStrategy(Strategy):
         return seconds  # we can then later combine this function with the time.sleep()-function to determine
         # how long we need to wait until our next execution
 
-    def do_algorithm(self, account) -> None:
+
+    @property
+    def running(self):
+        return self.is_running
+
+    @running.setter
+    def cancel(self, b:bool = True):
+        self.is_running = not b # Wenn 
+
+    def do_algorithm(self) -> None:
         """
         Trading Algorithm
         """
-        print(account.total_balance)
-        while True:
+        self.cancel = False
+        while self.is_running:
             market_open = False
             current_day_time = datetime.datetime.now()
-            print()
             if current_day_time.weekday() <= 4:
                 if current_day_time.hour in range(7, 24):
-                    print('Market open, order creation possible')
+                    logging.info('Market open, order creation possible')
                     market_open = True
                 else:
-                    print('Market currently not open, checking again soon')
+                    logging.info('Market currently not open, checking again soon')
                     market_open = False
                     seconds = self.seconds_till_market_opens(
                         datetime.datetime.now())
-                    print(f"Market will open in {seconds} seconds.")
+                    logging.info(f"Market will open in {seconds} seconds.")
                     time.sleep(seconds)
             else:
                 market_open = False
                 seconds = self.seconds_till_market_opens(
                     datetime.datetime.now())
-                print(
+                logging.info(
                     f"Market currently not open, will be open in {seconds} seconds. Sleeping for that time.")
                 time.sleep(seconds)
+            time.sleep(5)
+  
