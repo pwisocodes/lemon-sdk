@@ -1,6 +1,8 @@
+from datetime import datetime
 import logging
 import signal
 import threading
+from dataclasses import dataclass
 from typing import Any
 from urllib.parse import urlencode
 
@@ -103,13 +105,22 @@ class Space(Session):
                              authorization_token=self.session.token)
         return request.response
 
-    def transactions(self) -> dict:
+    def transactions(self, **kwargs) -> dict:
         """Requesting all transactions that are related to this space
 
         Returns:
             dict: returns the api response as a dict
         """
-        request = ApiRequest(endpoint="/spaces/{}/transactions/".format(self._uuid),
+        payload = {name: kwargs[name]
+                   for name in kwargs if kwargs[name] is not None}
+       
+        if sum(payload.values())is not 0:
+            payload = "?=" + urlencode(payload, doseq=True)
+        else: 
+            payload = ""
+
+    
+        request = ApiRequest(endpoint="/spaces/{}/transactions/{}".format(self._uuid, payload),
                              method="GET",
                              authorization_token=self.session.token)
         return request.response
@@ -137,8 +148,11 @@ class Space(Session):
         """
         payload = {name: kwargs[name]
                    for name in kwargs if kwargs[name] is not None}
-        if payload is not None:
-            payload = "query=" + urlencode(payload, doseq=True)
+       
+        if sum(payload.values())is not 0:
+            payload = "?=" + urlencode(payload, doseq=True)
+        else: 
+            payload = ""
 
         request = ApiRequest(endpoint="/spaces/{}/orders/{}".format(self._uuid, payload),
                              method="GET",
@@ -158,6 +172,66 @@ class Space(Session):
                              method="GET",
                              authorization_token=self.session.token)
         return request.response
+
+    def create_order(self ,isin:str, valid_until:datetime.timestamp, side:str, quantity:int, stop_price:int = None, limit_price:int = None):
+        """Create an inactive order within this space
+
+        Args:
+            isin (str): Insturment ID
+            valid_until (datetime.timestamp): Datetime, until the order will be vaild and inactive
+            side (str): "buy" or "sell2
+            quantity (int): Number of positions traded
+            stop_price (int, optional):  Defaults to None.
+            limit_price (int, optional): Defaults to None.
+            
+            Market Order:	    The order is immediately executed at the next possible price.
+            Stop Market Order:	Once the stop price is met, the order is converted into a market order. After that, the order is executed immediately at the next possible price.
+            Limit Order:	    The order is executed once the limit price is reached.
+            Stop Limit Order:   Once the stop price is met, the order is converted into a limit order. Then, the order is executed once the limit price is met. 
+
+        Returns:
+            [type]: [description]
+        """
+        data = locals()
+        del data['self'] # delete self argument from dict
+        
+        request = ApiRequest(endpoint="/spaces/{}/orders/".format(self._uuid),
+                             method="POST",
+                             body=data,
+                             authorization_token=self.session.token)
+
+        return request.response , request.response['uuid']        
+
+        
+
+    def place_order(self, order_uuid:str) -> dict:
+        """Activates a pervious created order and set its state to activated
+
+        Args:
+            order_uuid (str): Order ID
+
+        Returns:
+            dict: status -> activated
+        """
+        request = ApiRequest(endpoint="/spaces/{}/orders/{}".format(self._uuid, order_uuid),
+                             method="PUT",
+                             authorization_token=self.session.token)
+        return request.response
+
+    def delete_order(self, order_uuid:str) -> int:
+        """Deleting a order
+
+        Args:
+            order_uuid (str): Order ID
+
+        Returns:
+            int: Request status code
+        """
+
+        request = ApiRequest(endpoint="/spaces/{}/orders/{}".format(self._uuid, order_uuid),
+                             method="delete",
+                             authorization_token=self.session.token)
+        return request.status
 
     @property
     def strategy(self) -> Strategy:
@@ -190,3 +264,4 @@ class Space(Session):
         else:
             logging.warning(
                 f"Space {self.name} has no actual strategy! Nothing to do!")
+
