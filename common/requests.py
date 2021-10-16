@@ -3,7 +3,7 @@ import json
 from typing import Dict, Union
 
 import requests
-from common.settings import BASE_REST_API_URL, BASE_AUTH_API_URL
+from common.settings import BASE_PAPER_TRADING_API_URL, BASE_PAPER_MARKET_DATA_API_URL, BASE_AUTH_API_URL
 
 
 
@@ -65,22 +65,24 @@ class ApiRequest:
     _kwargs: dict
     _response: ApiResponse
 
-    def __init__(self, endpoint: str, method: str = "GET", body: dict = None,
+    def __init__(self, type:str, endpoint: str, method: str = "GET", body: dict = None,
                  authorization_token: str = None, url_params: dict = None, **kwargs):
         if authorization_token:
-            # do not double check with if above as this if should override the previous one
             self.authorization_token = str(authorization_token)
 
         self.url_params = url_params
         self._kwargs = kwargs
         self.method = method.lower()
         self.body = body
-        self._build_url(endpoint)
+        self._build_url(type.lower() , endpoint)
 
         self._perform_request()
 
-    def _build_url(self, endpoint: str):
-        self.url = BASE_REST_API_URL + endpoint
+    def _build_url(self, type:str, endpoint: str):
+        if type == "trading":
+            self.url = BASE_PAPER_TRADING_API_URL + endpoint
+        else:
+            self.url = BASE_PAPER_MARKET_DATA_API_URL + endpoint
 
     def _perform_request(self):
         headers = {
@@ -93,12 +95,8 @@ class ApiRequest:
                 response = requests.delete(self.url, headers=headers, params=self.url_params)
             elif self.method == "patch":
                 response = requests.patch(self.url, data=self.body, headers=headers, params=self.url_params)
-            else:  # get
+            else:
                 response = requests.get(self.url, headers=headers, params=self.url_params)
-                # response_org = requests.get("https://paper.lemon.markets/rest/v1/spaces/",
-                #        headers=headers)
-                # print(response_org.content)
-                # print(response.content)
             self._response = ApiResponse(content=response.content, status=response.status_code, is_success=response.ok)
         except Exception as e:
             raise e
