@@ -1,4 +1,4 @@
-from common import __version__
+from lemon.common import __version__
 
 
 def test_version():

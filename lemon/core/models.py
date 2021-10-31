@@ -6,9 +6,9 @@ from dataclasses import dataclass
 from typing import Any
 from urllib.parse import urlencode
 
-from common.requests import ApiOauth2, ApiRequest
+from lemon.common.requests import ApiOauth2, ApiRequest
 
-from core.strategy import Strategy
+from lemon.core.strategy import Strategy
 
 
 class Session:

@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "lemon-sdk"
+name = "lemon"
 version = "0.1.0"
 description = ""
 authors = ["Patrick Wisotzki <pwisocodes@gmail.com>"]

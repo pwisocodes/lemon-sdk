@@ -3,7 +3,7 @@ import json
 from typing import Dict, Union
 
 import requests
-from common.settings import BASE_PAPER_TRADING_API_URL, BASE_PAPER_MARKET_DATA_API_URL, BASE_AUTH_API_URL
+from lemon.common.settings import BASE_PAPER_TRADING_API_URL, BASE_PAPER_MARKET_DATA_API_URL, BASE_AUTH_API_URL
 
 
 class ApiResponse:

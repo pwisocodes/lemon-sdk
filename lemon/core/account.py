@@ -1,22 +1,19 @@
-import logging
+
 from typing import List
 from urllib.parse import urlencode
+
 import pandas as pd
-from requests.api import request
-from requests.models import Response
-from client.auth import credentials
-from common.errors import *
-from common.helpers import Singleton
-from common.requests import ApiRequest
-
-
-from core.models import Space
+from lemon.client.auth import credentials
+from lemon.common.errors import *
+from lemon.common.helpers import Singleton
+from lemon.common.requests import ApiRequest
+from lemon.core.models import Space
 
 
 class AccountState:
-    _balance: float = None
-    _cash_accounts: int = None
-    _securities_account_number: int = None
+    __balance: float = None
+    __cash_accounts: int = None
+    __securities_account_number: int = None
 
     def fetch_account_state(self):
         request = ApiRequest(type="trading",
@@ -25,25 +22,25 @@ class AccountState:
                              authorization_token=Account().token
                              )
 
-        self._balance = request.response['state']['balance']
-        self._cash_accounts = request.response['cash_account_number'] if not None else None
-        self._cash_accounts_securities_account_number = request.response[
+        self.__balance = request.response['state']['balance']
+        self.__cash_accounts = request.response['cash_account_number'] if not None else None
+        self.__securities_account_number = request.response[
             'securities_account_number'] if not None else None
 
     @property
     def balance(self) -> float:
         self.fetch_account_state()
-        return self._balance
+        return self.__balance
 
     @property
     def cash_accounts(self) -> int:
         self.fetch_account_state()
-        return self._cash_accounts
+        return self.__cash_accounts
 
     @property
     def securities_accounts(self) -> int:
         self.fetch_account_state()
-        return self._securities_account_number
+        return self.__securities_account_number
 
 
 class Account(AccountState, metaclass=Singleton):
@@ -121,6 +118,11 @@ class Account(AccountState, metaclass=Singleton):
             return "No instrument found!"
 
     def trading_venues(self, **kwargs):
+        """[summary]
+
+        Returns:
+            [type]: [description]
+        """
         payload = {name: kwargs[name]
                    for name in kwargs if kwargs[name] is not None}
 
@@ -136,6 +138,14 @@ class Account(AccountState, metaclass=Singleton):
         return request.response
 
     def quotes(self, isin: str, **kwargs):
+        """[summary]
+
+        Args:
+            isin (str): [description]
+
+        Returns:
+            [type]: [description]
+        """
         payload = {name: kwargs[name]
                    for name in kwargs if kwargs[name] is not None}
 
@@ -152,7 +162,18 @@ class Account(AccountState, metaclass=Singleton):
         return request.response
 
     def ohlc(self, isin: str, timespan: str = ["m", "h", "d"], **kwargs):
+        """[summary]
 
+        Args:
+            isin (str): [description]
+            timespan (str, optional): [description]. Defaults to ["m", "h", "d"].
+
+        Raises:
+            ValueError: [description]
+
+        Returns:
+            [type]: [description]
+        """
         if timespan not in ["m", "h", "d"]:
             raise ValueError(f"Parameter {type} is not a valid parameter!")
 
@@ -173,6 +194,15 @@ class Account(AccountState, metaclass=Singleton):
         return request.response
 
     def trades(self, mic: str, isin: str, **kwargs):
+        """[summary]
+
+        Args:
+            mic (str): [description]
+            isin (str): [description]
+
+        Returns:
+            [type]: [description]
+        """
         payload = {name: kwargs[name]
                    for name in kwargs if kwargs[name] is not None}
 

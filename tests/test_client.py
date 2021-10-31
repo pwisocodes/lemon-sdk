@@ -1,4 +1,4 @@
-from client import __version__
+from lemon.client import __version__
 
 
 def test_version():

@@ -6,4 +6,4 @@ BASE_PAPER_MARKET_DATA_API_URL = "https://paper-data.lemon.markets/v1"
 
 
 
-logging.basicConfig(format='%(asctime)s %(levelname)s %(threadName)s: %(message)s', filename='example.log', filemode='w',level=logging.DEBUG)
+logging.basicConfig(format='%(asctime)s %(levelname)s %(threadName)s: %(message)s', filename='lemon_markets.log', filemode='w',level=logging.DEBUG)
