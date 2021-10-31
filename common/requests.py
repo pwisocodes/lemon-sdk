@@ -59,7 +59,6 @@ class ApiRequest:
     method: str = "GET"
     body: dict
     authorization_token: str
-    _account: "Account" = None
     _kwargs: dict
     _response: ApiResponse
 

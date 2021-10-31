@@ -52,11 +52,11 @@ class Account(AccountState, metaclass=Singleton):
     def __init__(self) -> None:
         super().__init__()
         self.spaces = list()
-        self.create_spaces()
+        self.__create_spaces()
         self._token = self.spaces[0].session.token
 
-    def create_spaces(self):
-        """[summary]
+    def __create_spaces(self):
+        """ Creating objects for any spaces dedicated in the credential file
         """
         for s in credentials():
             self.spaces.append(Space(credentials=s))
@@ -76,9 +76,9 @@ class Account(AccountState, metaclass=Singleton):
         """[summary]
 
         Args:
-            name (str): [description]
-            type (str, optional): [description]. Defaults to ["stock", "bond", "fond", "ETF", "warrant"].
-            kwargs** (optional): keyword arguments
+            name (str): Could be a ISIN, WKN or stock name. At least 3 charakters are needed. Otherwise an error will occur.
+            type (str, optional): One type of ["stock", "bond", "fond", "ETF", "warrant"].
+            kwargs** (optional): optional keyword arguments
 
         Keyword arguments:
             mic (string):           Enter a Market Identifier Code (MIC) in there. Default is XMUN.
@@ -90,8 +90,8 @@ class Account(AccountState, metaclass=Singleton):
         Raises:
             ValueError:  Parameter {type} is not a valid parameter!
         """
-        if not (len(name) > 2):
-            raise ValueError(f"Paramter {name} is to short (min 3 char)!")
+        if len(name) < 3:
+            raise ValueError(f"Paramter {name} is too short (min 3 char)!")
 
         if type not in ["stock", "bond", "fond", "ETF", "warrant"]:
             raise ValueError(f"Parameter {type} is not a valid parameter!")
@@ -111,6 +111,7 @@ class Account(AccountState, metaclass=Singleton):
                                  query_str + payload),
                              method="GET",
                              authorization_token=self._token)
+
         if request.response != None:
             df = pd.DataFrame()
             for item in request.response:
@@ -118,6 +119,74 @@ class Account(AccountState, metaclass=Singleton):
             return df
         else:
             return "No instrument found!"
+
+    def trading_venues(self, **kwargs):
+        payload = {name: kwargs[name]
+                   for name in kwargs if kwargs[name] is not None}
+
+        if payload:
+            payload = "&" + urlencode(payload, doseq=True)
+        else:
+            payload = "&"
+
+        request = ApiRequest(type="market",
+                             endpoint="/venues?{}/".format(payload),
+                             method="GET",
+                             authorization_token=self._token)
+        return request.response
+
+    def quotes(self, isin: str, **kwargs):
+        payload = {name: kwargs[name]
+                   for name in kwargs if kwargs[name] is not None}
+
+        if payload:
+            payload = "&" + urlencode(payload, doseq=True)
+        else:
+            payload = "&"
+
+        request = ApiRequest(type="market",
+                             endpoint="/quotes?isin={}{}/".format(
+                                 isin, payload),
+                             method="GET",
+                             authorization_token=self._token)
+        return request.response
+
+    def ohlc(self, isin: str, timespan: str = ["m", "h", "d"], **kwargs):
+
+        if timespan not in ["m", "h", "d"]:
+            raise ValueError(f"Parameter {type} is not a valid parameter!")
+
+        payload = {name: kwargs[name]
+                   for name in kwargs if kwargs[name] is not None}
+
+        if payload:
+            payload = "&" + urlencode(payload, doseq=True)
+        else:
+            payload = "&"
+
+        request = ApiRequest(type="market",
+                             endpoint="/ohlc/{}1/?isin={}{}/".format(
+                                 timespan, isin, payload),
+                             method="GET",
+                             authorization_token=self._token)
+
+        return request.response
+
+    def trades(self, mic: str, isin: str, **kwargs):
+        payload = {name: kwargs[name]
+                   for name in kwargs if kwargs[name] is not None}
+
+        if payload:
+            payload = "&" + urlencode(payload, doseq=True)
+        else:
+            payload = "&"
+
+        request = ApiRequest(type="market",
+                             endpoint="/trades/?isin={}{}/".format(
+                                 isin, payload),
+                             method="GET",
+                             authorization_token=self._token)
+        return request.response
 
     def run(self):
         for space in self.spaces:

@@ -1,16 +1,8 @@
 from datetime import datetime
-from requests.models import Response
-from common.requests import ApiRequest
 
 
 class Singleton(type):
     """ Metaclass Singleton
-
-    Args:
-        type ([type]): [description]
-
-    Returns:
-        [type]: [description]
     """
     _instances = {}
 
