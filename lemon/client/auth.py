@@ -14,5 +14,5 @@ def key_path() -> str:
 def credentials():
     import yaml
     with open(key_path(), "r") as yamlfile:
-        return yaml.load(yamlfile, Loader=yaml.FullLoader)["lemon-markets"]['Space']
+        return yaml.load(yamlfile, Loader=yaml.FullLoader)["lemon-markets"]['api_key']
     

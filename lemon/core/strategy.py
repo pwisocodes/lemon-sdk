@@ -14,16 +14,6 @@ class Strategy(ABC):
     The Context uses this interface to call the algorithm defined by Concrete
     Strategies.
     """
-    
-
-    @abstractmethod
-    def do_algorithm(self, data: List):
-        pass
-
-
-class TradingStrategy(Strategy):
-    is_running: bool = False
-
     def seconds_till_market_opens(self, entered_time):
         """
         Helper function with which we can determine how many more seconds need to pass until the stock market opens
@@ -42,9 +32,19 @@ class TradingStrategy(Strategy):
         # slightly later than actual market open time to avoid unstable market
         next_day = datetime.datetime.combine(d, datetime.time(10, 30))
         # number of seconds until market reopens
-        seconds = (next_day - entered_time).total_seconds()
-        return seconds  # we can then later combine this function with the time.sleep()-function to determine
-        # how long we need to wait until our next execution
+        return (next_day - entered_time).total_seconds() 
+        
+    def websocket(self):
+        pass
+
+    @abstractmethod
+    def do_algorithm(self, data: List):
+        pass
+
+
+class TradingStrategy(Strategy):
+    is_running: bool = False
+
 
 
     @property
