@@ -42,7 +42,8 @@ Tip: If you're using a virtual enviroment you can copy the two lines above and p
 4. You're good to go! :) 
 
 ## How to use?
-For a detailed example usage please open up the example_usage.ipynb notebook 
+For a detailed example usage please open up the example_usage.ipynb notebook.
+
 Get a account instance and show its balance and spaces.
 ```Python
 from lemon.core.account import Account
@@ -53,7 +54,7 @@ from lemon.client.auth import credentials
 # loading credentails from your credentials.yaml file or manually load your key
 $ cred = credentials()
 $ acc = Account(credentials=cred)
-'85000.0000'
+
 
 # list your spaces
 $ acc.spaces
@@ -98,4 +99,21 @@ show more (open the raw output data in a text editor) ...
 502  [{'name': 'Börse München - Gettex', 'title': '...  
 503  [{'name': 'Börse München - Gettex', 'title': '...  
 
+
+$ m.ohlc(isin="DE0005933931",timespan="h", start="2021-11-01",end="2021-11-26")
+         isin       o       h       l       c  \
+0   DE0005933931  133.60  133.66  133.46  133.60   
+1   DE0005933931  133.84  134.30  133.80  134.26   
+2   DE0005933931  134.26  134.40  134.20  134.20   
+3   DE0005933931  134.32  134.32  134.12  134.12   
+4   DE0005933931  134.12  134.12  133.96  134.10   
+5   DE0005933931  133.90  133.94  133.90  133.90   
+6   DE0005933931  133.90  133.90  133.80  133.86   
+7   DE0005933931  133.70  133.88  133.70  133.88   
+8   DE0005933931  134.12  134.16  134.08  134.16  
+...
+
+$ m.quotes(isin="DE0005933931",mic="XMUN")
+  isin	        b_v	a_v	  b	      a	              t	                mic
+	DE0005933931	160	160	130.04	130.1	2021-11-29T17:20:55.000+00:00	XMUN
 ```
