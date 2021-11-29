@@ -6,7 +6,7 @@ from datetime import timedelta
 import time
 
 
-class Strategy(ABC):
+class IStrategy(ABC):
     """
     The Strategy interface declares operations common to all supported versions
     of some algorithm.
@@ -42,7 +42,7 @@ class Strategy(ABC):
         pass
 
 
-class TradingStrategy(Strategy):
+class TradingStrategy(IStrategy):
     is_running: bool = False
 
 

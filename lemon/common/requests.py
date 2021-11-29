@@ -118,10 +118,10 @@ class ApiRequest:
                         # Next available
                         pagination_results = []
                         pagination_results.append(response['results']) # Save 100 items from first request
-                        # r = response
-                        print(f"Collecting {response['count']} results....")
-                        # count = 2000 = 20 requests a 100 
-                        for offset in range(0, response['count'], 100):
+               
+                        print(f"Collecting {response['total']} results....")
+                        # count = 2000 = 20 requsts a 100 (limit)
+                        for offset in range(0, response['total'], 100):
                             response = requests.get(
                                 url=response['next'], headers=headers, params=self.url_params).json()
                             pagination_results.append(response['results'])
@@ -141,5 +141,7 @@ class ApiRequest:
     @property
     def response(self):
         if self._response:
-            # return json.loads(self._response)
             return self._response
+        else:
+            raise Exception(f"No response available!")
+            

@@ -128,154 +128,6 @@ class Space():
         else:
             raise Exception(request.response['status'])
 
-    def portfolio(self) -> dict:
-        """lists all portfolio transactions that affect the cash amount available for your space
-
-        Returns:
-            dict: [description]
-        """
-        request = ApiRequest(type="trading",
-                             endpoint="/spaces/{}/portfolio/".format(
-                                 self._uuid),
-                             method="GET",
-                             authorization_token=self.session.token)
-        return request.response
-
-    def portfolio_tranactions(self) -> dict:
-        """Requesting which positions were added to your portfolio through which transaction.
-        Returns:
-            dict: [description]
-        """
-        request = ApiRequest(type="trading", endpoint="/spaces/{}/portfolio/transactions/".format(self._uuid),
-                             method="GET",
-                             authorization_token=self.session.token)
-        return request.response
-
-    def transactions(self, **kwargs) -> dict:
-        """Requesting all transactions that are related to this space
-
-        Returns:
-            dict: returns the api response as a dict
-        """
-        payload = {name: kwargs[name]
-                   for name in kwargs if kwargs[name] is not None}
-
-        if sum(payload.values()) is not 0:
-            payload = "?=" + urlencode(payload, doseq=True)
-        else:
-            payload = ""
-
-        request = ApiRequest(type="trading", endpoint="/spaces/{}/transactions/{}".format(self._uuid, payload),
-                             method="GET",
-                             authorization_token=self.session.token)
-        return request.response
-
-    def transaction_by_id(self, t_uuid) -> dict:
-        """Requesting a specific transaction that is related to this space
-
-        Args:
-            t_uuid ([type]): Basic unique transaction identifier 
-
-        Returns:
-            dict: returns the api response as a dict
-        """
-        request = ApiRequest(type="trading", endpoint="/spaces/{}/transactions/{}/".format(self._uuid, t_uuid),
-                             method="GET",
-                             authorization_token=self.session.token)
-        return request.response
-
-    def orders(self, **kwargs) -> dict:
-        """Requesting all orders that are related to this space
-
-        Returns:
-            dict:  api response as a dict
-
-        """
-        payload = {name: kwargs[name]
-                   for name in kwargs if kwargs[name] is not None}
-
-        if sum(payload.values()) is not 0:
-            payload = "?=" + urlencode(payload, doseq=True)
-        else:
-            payload = ""
-
-        request = ApiRequest(type="trading", endpoint="/spaces/{}/orders/{}".format(self._uuid, payload),
-                             method="GET",
-                             authorization_token=self.session.token)
-        return request.response
-
-    def order_by_id(self, order_uuid: str) -> dict:
-        """Requesting a specific order that is related to this space
-
-        Args:
-            order_uuid (str): Basic unique identifier 
-
-        Returns:
-            dict: returns the api response as a dict
-        """
-        request = ApiRequest(type="trading", endpoint="/spaces/{}/orders/{}/".format(self._uuid, order_uuid),
-                             method="GET",
-                             authorization_token=self.session.token)
-        return request.response
-
-    def create_order(self, isin: str, valid_until: datetime.timestamp, side: str, quantity: int, stop_price: int = None, limit_price: int = None):
-        """Create an inactive order within this space
-
-        Args:
-            isin (str): Insturment ID
-            valid_until (datetime.timestamp): Datetime, until the order will be vaild and inactive
-            side (str): "buy" or "sell2
-            quantity (int): Number of positions traded
-            stop_price (int, optional):  Defaults to None.
-            limit_price (int, optional): Defaults to None.
-
-            Market Order:	    The order is immediately executed at the next possible price.
-            Stop Market Order:	Once the stop price is met, the order is converted into a market order. After that, the order is executed immediately at the next possible price.
-            Limit Order:	    The order is executed once the limit price is reached.
-            Stop Limit Order:   Once the stop price is met, the order is converted into a limit order. Then, the order is executed once the limit price is met. 
-
-        Returns:
-            [type]: [description]
-        """
-        data = locals()
-        del data['self']  # delete self argument from dict
-
-        request = ApiRequest(type="trading", endpoint="/spaces/{}/orders/".format(self._uuid),
-                             method="POST",
-                             body=data,
-                             authorization_token=self.session.token)
-
-        return request.response, request.response['uuid']
-
-    def place_order(self, order_uuid: str) -> dict:
-        """Activates a pervious created order and set its state to activated
-
-        Args:
-            order_uuid (str): Order ID
-
-        Returns:
-            dict: status -> activated
-        """
-        request = ApiRequest(type="trading", endpoint="/spaces/{}/orders/{}".format(self._uuid, order_uuid),
-                             method="PUT",
-                             authorization_token=self.session.token)
-        return request.response
-
-    def delete_order(self, order_uuid: str) -> int:
-        """Deleting a order
-
-        Args:
-            order_uuid (str): Order ID
-
-        Returns:
-            int: Request status code
-        """
-
-        request = ApiRequest(type="trading", endpoint="/spaces/{}/orders/{}".format(self._uuid, order_uuid),
-                             method="delete",
-                             authorization_token=self.session.token)
-        return request.status
-
     @property
     def strategy(self) -> Strategy:
         """
@@ -325,6 +177,10 @@ class Account(AccountState, metaclass=Singleton):
     @property
     def token(self) -> str:
         return self._token
+    
+    @property
+    def spaces(self):
+        return self.paper_spaces + self.real_money_spaces
 
     def withdraw(self, amount: float) -> str:
         """ Withdraw money from your bank account to your lemon.markets account e.g. amount = 100.0 means 100€ and will be multiplyed by 10000 to get the int value the api handels. Take a look at: https://docs.lemon.markets/trading/overview#working-with-numbers-in-the-trading-api 
@@ -385,10 +241,6 @@ class Account(AccountState, metaclass=Singleton):
                              authorization_token=self._token)
 
         return request.response['status']
-
-    @property
-    def spaces(self):
-        return self.paper_spaces + self.real_money_spaces
 
     def __get_spaces(self):
         """ Creating objects for any spaces dedicated in the credential file
@@ -526,7 +378,7 @@ class Account(AccountState, metaclass=Singleton):
 
         if request.response['status'] == "ok":
             return request.response['results']
-        return request.response['status']
+        return request.response['error_message']
 
     def delete_order(self, order_id: str, type: str) -> str:
         request = ApiRequest(type=type,
