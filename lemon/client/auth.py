@@ -1,6 +1,3 @@
-
-
-
 def key_path() -> str:
     import os
     credential_file = os.environ.get("LEMON_CREDENTIALS")
@@ -10,9 +7,7 @@ def key_path() -> str:
         raise ValueError("LEMON_CREDENTIALS not set in ENVIRONMENT_VARIABLES")
 
 
-
 def credentials():
     import yaml
     with open(key_path(), "r") as yamlfile:
         return yaml.load(yamlfile, Loader=yaml.FullLoader)["lemon-markets"]['api_key']
-    

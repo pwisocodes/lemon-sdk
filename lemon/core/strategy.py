@@ -6,6 +6,8 @@ from datetime import timedelta
 import time
 
 
+
+
 class IStrategy(ABC):
     """
     The Strategy interface declares operations common to all supported versions
@@ -36,6 +38,18 @@ class IStrategy(ABC):
         
     def websocket(self):
         pass
+
+    def backtest(self, isin:str, start:datetime, end:datetime):
+        """ Backtest strategy for a histrical period of time
+
+        Args:
+            isin (str): [description]
+            start (datetime): [description]
+            end (datetime): [description]
+        """
+        # MarketData().ohlc(isin="DE0005933931",timespan="h", start="2021-11-01",end="2021-11-26")
+
+
 
     @abstractmethod
     def do_algorithm(self, data: List):

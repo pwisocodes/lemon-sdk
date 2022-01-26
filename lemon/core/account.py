@@ -9,77 +9,7 @@ from urllib.parse import urlencode
 from lemon.common.errors import *
 from lemon.common.helpers import Singleton
 from lemon.common.requests import ApiRequest
-from lemon.core.strategy import Strategy
-
-
-
-@dataclass
-class AccountState():
-    account_id: str = None
-    firstname: str = None
-    lastname: str = None
-    email: str = None
-    phone: str = None
-    address: str = None
-    billing_email: str = None
-    billing_address: str = None
-    billing_name: str = None
-    billing_vat: str = None
-    mode: str = None
-    deposit_id: str = None
-    client_id: str = None
-    account_number: str = None
-    iban_brokerage: str = None
-    iban_origin: str = None
-    bank_name_origin: str = None
-    balance: int = None
-    cash_to_invest: int = None
-    cash_to_withdraw: int = None
-    trading_plan: str = None
-    data_plan: str = None
-    tax_allowance: int = None
-    tax_allowance_start: str = None
-    tax_allowance_end: str = None
-
-    def ___post_init__(self):
-        try:
-            self.fetch_state()
-        except:
-            logging.warning("Cant fetch account state")
-
-    def fetch_state(self):
-        request = ApiRequest(type="paper",
-                             endpoint="/account/",
-                             method="GET",
-                             authorization_token=Account().token
-                             )
-
-        if request.response['status'] == "ok":
-            self.account_id = request.response['results']['account_id']
-            self.firstname = request.response['results']['firstname']
-            self.lastname = request.response['results']['lastname']
-            self.email = request.response['results']['email']
-            self.phone = request.response['results']['phone']
-            self.address = request.response['results']['address']
-            self.billing_email = request.response['results']['billing_email']
-            self.billing_address = request.response['results']['billing_address']
-            self.billing_name = request.response['results']['billing_name']
-            self.billing_vat = request.response['results']['billing_vat']
-            self.mode = request.response['results']['mode']
-            self.deposit_id = request.response['results']['deposit_id']
-            self.client_id = request.response['results']['client_id']
-            self.account_number = request.response['results']['account_number']
-            self.iban_brokerage = request.response['results']['iban_brokerage']
-            self.iban_origin = request.response['results']['iban_origin']
-            self.bank_name_origin = request.response['results']['bank_name_origin']
-            self.balance = request.response['results']['balance']
-            self.cash_to_invest = request.response['results']['cash_to_invest']
-            self.cash_to_withdraw = request.response['results']['cash_to_withdraw']
-            self.trading_plan = request.response['results']['trading_plan']
-            self.data_plan = request.response['results']['data_plan']
-            self.tax_allowance = request.response['results']['tax_allowance']
-            self.tax_allowance_start = request.response['results']['tax_allowance_start']
-            self.tax_allowance_end = request.response['results']['tax_allowance_end']
+from lemon.core.strategy import IStrategy
 
 
 class Space():
@@ -87,18 +17,17 @@ class Space():
     So each Space has his own balance and cash_to_invest.
     """
 
-    def __init__(self, init_values: dict = None, name: str = None, type: str = None, risk_limit: str = None, trading_type: str = "paper", s: Strategy = None) -> None:
+    def __init__(self, init_values: dict = None, name: str = None, type: str = None, risk_limit: str = None, trading_type: str = "paper", s: IStrategy = None) -> None:
         self._strategy = s
         self.name = name
         self.type = type
         self.risk_limit = risk_limit
         self.trading_type = trading_type
 
-        if not init_values == None:
+        if init_values != None:
             self.name = init_values['name']
             self.description = init_values['description']
             self._uuid = init_values['id']
-            self.type = init_values['type']
             self.risk_limit = float(init_values['risk_limit'])
             self.buying_power = float(init_values['buying_power'])
             self.earnings = float(init_values['earnings'])
@@ -115,10 +44,10 @@ class Space():
 
     def fetch_space_state(self):
         request = ApiRequest(type="paper",
-                             endpoint="/spaces/{}".format(self._uuid),
+                             endpoint="/spaces/{}/".format(self._uuid),
                              method="GET",
                              authorization_token=Account().token)
-
+        logging.info(request.keys())
         if request.response['status'] == "ok":
             self.risk_limit = float(request.response['results']['risk_limit'])
             self.buying_power = float(
@@ -129,7 +58,7 @@ class Space():
             raise Exception(request.response['status'])
 
     @property
-    def strategy(self) -> Strategy:
+    def strategy(self) -> IStrategy:
         """
         The Context maintains a reference to one of the Strategy objects. The
         Context does not know the concrete class of a strategy. It should work
@@ -138,7 +67,7 @@ class Space():
         return self._strategy if self._strategy != None else None
 
     @strategy.setter
-    def strategy(self, strategy: Strategy) -> None:
+    def strategy(self, strategy: IStrategy) -> None:
         """Replace Strategie wihle running 
 
         Args:
@@ -164,6 +93,75 @@ class Space():
         pass
 
 
+@dataclass(init=True)
+class AccountState():
+    account_id: str = None
+    firstname: str = None
+    lastname: str = None
+    email: str = None
+    phone: str = None
+    address: str = None
+    billing_email: str = None
+    billing_address: str = None
+    billing_name: str = None
+    billing_vat: str = None
+    mode: str = None
+    deposit_id: str = None
+    client_id: str = None
+    account_number: str = None
+    iban_brokerage: str = None
+    iban_origin: str = None
+    bank_name_origin: str = None
+    balance: float = None
+    cash_to_invest: float = None
+    cash_to_withdraw: float = None
+    trading_plan: str = None
+    data_plan: str = None
+    tax_allowance: float = None
+    tax_allowance_start: str = None
+    tax_allowance_end: str = None
+
+    def __post_init__(self):
+        try:
+            self.fetch_state()
+        except:
+            logging.warning("Cant fetch account state")
+
+    def fetch_state(self):
+        request = ApiRequest(type="paper",
+                             endpoint="/account/",
+                             method="GET",
+                             authorization_token=self.token
+                             )
+
+        if request.response['status'] == "ok":
+            self.account_id = request.response['results']['account_id']
+            self.firstname = request.response['results']['firstname']
+            self.lastname = request.response['results']['lastname']
+            self.email = request.response['results']['email']
+            self.phone = request.response['results']['phone']
+            self.address = request.response['results']['address']
+            self.billing_email = request.response['results']['billing_email']
+            self.billing_address = request.response['results']['billing_address']
+            self.billing_name = request.response['results']['billing_name']
+            self.billing_vat = request.response['results']['billing_vat']
+            self.mode = request.response['results']['mode']
+            self.deposit_id = request.response['results']['deposit_id']
+            self.client_id = request.response['results']['client_id']
+            self.account_number = request.response['results']['account_number']
+            self.iban_brokerage = request.response['results']['iban_brokerage']
+            self.iban_origin = request.response['results']['iban_origin']
+            self.bank_name_origin = request.response['results']['bank_name_origin']
+            self.balance = float(request.response['results']['balance']/10000)
+            self.cash_to_invest = float(request.response['results']['cash_to_invest']/10000)
+            self.cash_to_withdraw = float(request.response['results']['cash_to_withdraw']/10000)
+            self.trading_plan = request.response['results']['trading_plan']
+            self.data_plan = request.response['results']['data_plan']
+            self.tax_allowance = float(request.response['results']['tax_allowance']/10000)
+            self.tax_allowance_start = request.response['results']['tax_allowance_start']
+            self.tax_allowance_end = request.response['results']['tax_allowance_end']
+
+
 class Account(AccountState, metaclass=Singleton):
     spaces: list
 
@@ -177,12 +175,12 @@ class Account(AccountState, metaclass=Singleton):
     @property
     def token(self) -> str:
         return self._token
-    
+
     @property
     def spaces(self):
         return self.paper_spaces + self.real_money_spaces
 
-    def withdraw(self, amount: float) -> str:
+    def withdrawl(self, type: str, amount: int, pin: int, idempotency: str = None):
         """ Withdraw money from your bank account to your lemon.markets account e.g. amount = 100.0 means 100€ and will be multiplyed by 10000 to get the int value the api handels. Take a look at: https://docs.lemon.markets/trading/overview#working-with-numbers-in-the-trading-api 
 
         Args:
@@ -196,7 +194,7 @@ class Account(AccountState, metaclass=Singleton):
 
             body = {"amount": int(value)}
             request = ApiRequest(type="paper",
-                                 endpoint="/account/withdraw",
+                                 endpoint="/account/withdrawals/",
                                  method="POST",
                                  body=body,
                                  authorization_token=self._token)
@@ -252,6 +250,7 @@ class Account(AccountState, metaclass=Singleton):
 
         if request.response['status'] == "ok":
             for space in request.response['results']:
+                print(space)
                 self.paper_spaces.append(
                     Space(init_values=space, trading_type="paper"))
 
@@ -398,23 +397,25 @@ class Account(AccountState, metaclass=Singleton):
             return request.response['results']
         return request.response['error_message']
 
-    def transactions(self, type: str):
+    def withdrawls(self, type: str):
         request = ApiRequest(type=type,
-                             endpoint="/transactions/",
+                             endpoint="/account/withdrawals/",
                              method="GET",
                              authorization_token=self._token)
         if request.response['status'] == "ok":
             return request.response['results']
         return request.response['error_message']
 
-    def transaction(self, tx_id: str, type: str):
-        request = ApiRequest(type=type,
-                             endpoint="/transactions/{}".format(tx_id),
-                             method="GET",
-                             authorization_token=self._token)
-        if request.response['status'] == "ok":
-            return request.response['results']
-        return request.response['error_message']
+    # def withdraw(self, type: str, amount:int, pin:int, idempotency:str = None):
+    #     body = {"amount": amount*10000, "pin": str(pin)}
+    #     request = ApiRequest(type=type,
+    #                          endpoint="/account/withdrawals/",
+    #                          method="POST",
+    #                          body=body,
+    #                          authorization_token=self._token)
+    #     if request.response['status'] == "ok":
+    #         return request.response['results']
+    #     return request.response['error_message']
 
     def portfolio(self, type: str, **kwargs):
         query = {name: kwargs[name]

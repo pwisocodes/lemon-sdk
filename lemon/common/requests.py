@@ -1,11 +1,11 @@
-
-import json
 import logging
 from typing import Dict, Union
 
-import requests
+from lemon.common.settings import (BASE_MARKET_DATA_API_URL,
+                                   BASE_PAPER_TRADING_API_URL,
+                                   BASE_REAL_MONEY_TRADING_API_URL)
 
-from lemon.common.settings import BASE_PAPER_TRADING_API_URL, BASE_REAL_MONEY_TRADING_API_URL, BASE_MARKET_DATA_API_URL
+import requests
 
 
 class ApiResponse:
@@ -27,34 +27,6 @@ class ApiResponse:
     @property
     def has_errored(self):
         return not self._is_success
-
-"""
-class ApiOauth2:
-    url: str = BASE_AUTH_API_URL
-    method: str = "POST"
-    _data: dict
-    _kwargs = dict
-    _response = ApiResponse
-
-    def __init__(self, credentials: dict, **kwargs) -> None:
-        self._data = credentials
-        self._kwargs = kwargs
-        self._auth()
-
-    def _auth(self):
-        try:
-            response = requests.post(self.url, authorization_token=self._data)
-            self._response = ApiResponse(
-                content=response.content, status=response.status_code, is_success=response.ok)
-        except Exception as e:
-            raise e
-
-    @property
-    def response(self):
-        if self._response.content:
-            return json.loads(self._response.content)
-        return self._response.content
-s"""
 
 
 class ApiRequest:
@@ -87,7 +59,7 @@ class ApiRequest:
             self.url = BASE_MARKET_DATA_API_URL + endpoint
         else:
             raise ValueError("Type is not valid!")
-        
+
     def _perform_request(self):
         headers = {
             "Authorization": "Bearer {}".format(self.authorization_token)
@@ -117,8 +89,9 @@ class ApiRequest:
                     if response['next'] != None:
                         # Next available
                         pagination_results = []
-                        pagination_results.append(response['results']) # Save 100 items from first request
-               
+                        # Save 100 items from first request
+                        pagination_results.append(response['results'])
+
                         print(f"Collecting {response['total']} results....")
                         # count = 2000 = 20 requsts a 100 (limit)
                         for offset in range(0, response['total'], 100):
@@ -128,8 +101,9 @@ class ApiRequest:
 
                             if response['next'] == None:
                                 break
-                           
-                        self._response = {"results": [item for sublist in pagination_results for item in sublist]}
+
+                        self._response = {"results": [
+                            item for sublist in pagination_results for item in sublist]}
                     else:
                         self._response = response
                 else:
@@ -144,4 +118,3 @@ class ApiRequest:
             return self._response
         else:
             raise Exception(f"No response available!")
-            
