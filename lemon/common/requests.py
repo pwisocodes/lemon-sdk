@@ -96,7 +96,7 @@ class ApiRequest:
                         # count = 2000 = 20 requsts a 100 (limit)
                         for offset in range(0, response['total'], 100):
                             response = requests.get(
-                                url=response['next'], headers=headers, params=self.url_params).json()
+                                url=response['next'], headers=headers).json()
                             pagination_results.append(response['results'])
 
                             if response['next'] == None:
