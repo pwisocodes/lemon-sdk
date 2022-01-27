@@ -1,16 +1,15 @@
-from urllib.parse import urlencode
+from urllib.parse import urlencode, quote
 
 import pandas as pd
+import urllib3
 from lemon.common.requests import ApiRequest
 from lemon.core.account import Account
-
-
 
 
 class MarketData(object):
 
     def search_instrument(self, search: str = None, **kwargs):
-        """[summary]
+        """ Searching for instruments on Lang+Schwarz 
 
         Args:
             search (str): Could be a ISIN, WKN or stock name.
@@ -21,35 +20,33 @@ class MarketData(object):
             isin (string):          Specify the ISIN you are interested in. You can also specify multiple ISINs. Maximum 10 ISINs per Request.
             currency (string):      letter abbreviation, e.g. "EUR" or "USD"
             tradeable (boolean):    true or false
+            type (str):             i.e. type="etf"
             limit (integer):        Needed for pagination, default is 100.
-            offset (integer):        Needed for pagination, default is 0.
+            offset (integer):       Needed for pagination, default is 0.
 
         Raises:
-            ValueError:  Parameter {type} is not a valid parameter!
+            ValueError:  Keyword <keyword> is not a valid argument!
         """
 
         payload = {name: kwargs[name]
                    for name in kwargs if kwargs[name] is not None}
 
-        if payload:
-            payload = urlencode(payload, doseq=True)
-        else:
-            payload = ""
-
         if search != None:
-            query_str = urlencode({'search': search}, doseq=True)
+            query = f"search={search}"
         else:
-            query_str = ""
+            query = ""
 
         request = ApiRequest(type="data",
-                             endpoint="/instruments/?{}".format(
-                                 query_str + payload),
+                             endpoint="/instruments/?{}".format(query),
+                             url_params=payload,
                              method="GET",
                              authorization_token=Account().token)
-
-        if request.response['results'] != []:
-            df = pd.DataFrame(request.response['results'])
-            return df
+        if "results" in request.response.keys():
+            if request.response['results'] != []:
+                df = pd.DataFrame(request.response['results'])
+                return df
+            else:
+                "No "
         else:
             return "No instrument found!"
 
