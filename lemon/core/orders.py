@@ -4,7 +4,6 @@ from lemon.common.requests import ApiRequest
 from lemon.core.account import *
 
 class Order():
-    space_id:str
     isin:str
     side:str
     quantity:int
@@ -16,8 +15,8 @@ class Order():
     id:str
     regulatory_information:dict = None
 
-    def __init__(self, isin:str, expired_at, side:str, quantity:int, venue:str, space_id:str, stop_price:int = None, limit_price:int = None, notes:str= None) -> None:
-        self.space_id = space_id
+    def __init__(self, isin:str, expired_at, side:str, quantity:int, venue:str, trading_type:str, stop_price:int = None, limit_price:int = None, notes:str= None) -> None:
+        self.trading_type = trading_type
         self.isin = isin
         self.side = side
         self.quantity = quantity
@@ -29,12 +28,8 @@ class Order():
         self.__create()
 
     def __create(self):
-        if list(filter(lambda x: x._uuid == self.space_id, Account().spaces))[0].trading_type == "paper":
-            type="paper"
-        else:
-            type="money"
 
-        request = ApiRequest(type=type,
+        request = ApiRequest(type=self.trading_type,
                              endpoint="/orders/",
                              method="POST",
                              body=self.__dict__,
@@ -52,7 +47,7 @@ class Order():
         
         
     def activate(self, pin:str=None)->str:
-        if list(filter(lambda x: x._uuid == self.space_id, Account().spaces))[0].trading_type == "paper":
+        if self.trading_type == "paper":
             type="paper"
         else:
             type="money"
@@ -60,7 +55,7 @@ class Order():
 
 
         request = ApiRequest(type=type,
-                             endpoint="/orders/{}/activate/".format(self.id),
+                             endpoint=f"/orders/{self.id}/activate/",
                              method="POST",
                              body=data if type=="money" else None,
                              authorization_token=Account().token
