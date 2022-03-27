@@ -224,7 +224,7 @@ class Account(AccountState, metaclass=Singleton):
             if request.response['status'] == 'error':
                 raise ValueError(request.response['error_message'])
         else:
-            raise ValueError(f"{amount} is not a valid parameter!")
+            raise ValueError(f"Amount if {amount} is not a valid!")
 
         return request.response['status']
 
