@@ -3,13 +3,11 @@
 # Unoffical Python SDK for lemon.markets trading API
 
 ## What features are currently included in this SDK?
-- [x] Management of account properties and spaces
+- [x] Management of account properties
 - [x] Creating, deleting and executing market orders
 - [x] Receiving historical (m1, h1, d1) market data  
 - [x] Searching for instruments, funds, etfs, etc. 
-- [x] Creating and executing strategies in separate spaces  
 - [x] Pagination handling
-- [ ] Backtesting of strategies
 ## Install
 
 Running following command will install all project dependencies. You have to install python and poetry first or using pip by default.
@@ -54,12 +52,6 @@ from lemon.client.auth import credentials
 # loading credentails from your credentials.yaml file or manually load your key
 $ cred = credentials()
 $ acc = Account(credentials=cred)
-
-
-# list your spaces
-$ acc.spaces
-[Space(Name: MasterStrategy, Buying_power: 500000000.0, Risk_limit: 500000000.0, Trading_type: paper,
- Space(Name: Default, Buying_power: 100000000.0, Risk_limit: 100000000.0, Trading_type: paper]
 ```
 
 ```python
