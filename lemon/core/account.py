@@ -107,10 +107,6 @@ class AccountState():
         return self._billing_vat
 
     @property
-    def mode(self):
-        return self._mode
-
-    @property
     def deposit_id(self):
         return self._deposit_id
 
@@ -189,6 +185,15 @@ class AccountState():
         self.fetch_state()
         return self._tax_allowance_end
 
+    @property
+    def mode(self):
+        return self._mode
+    
+    @mode.setter
+    def mode(self, value):
+        self._mode = value
+
+
 class Account(AccountState, metaclass=Singleton):
 
     def __init__(self, credentials: str) -> None:
@@ -199,7 +204,7 @@ class Account(AccountState, metaclass=Singleton):
     def token(self) -> str:
         return self._token
 
-    def withdrawl(self, type: str, amount: int, pin: int, idempotency: str = None):
+    def withdraw(self, amount: int, pin: int, idempotency: str = None):
         """ Withdraw money from your bank account to your lemon.markets account e.g. amount = 1000000 means 100€ (hundreths of a cent). Take a look at: https://docs.lemon.markets/trading/overview#working-with-numbers-in-the-trading-api 
 
         Args:
@@ -211,7 +216,7 @@ class Account(AccountState, metaclass=Singleton):
         if amount > 0:
 
             body = {"amount": amount}
-            request = ApiRequest(type="paper",
+            request = ApiRequest(type=self.mode,
                                  endpoint="/account/withdrawals/",
                                  method="POST",
                                  body=body,
@@ -229,7 +234,7 @@ class Account(AccountState, metaclass=Singleton):
         Returns:
             list: arraylist of dicts
         """
-        request = ApiRequest(type="paper",
+        request = ApiRequest(type=self.mode,
                              endpoint="/account/documents/",
                              method="GET",
                              authorization_token=self._token)
@@ -251,15 +256,15 @@ class Account(AccountState, metaclass=Singleton):
         Returns:
             str: status
         """
-        request = ApiRequest(type="paper",
+        request = ApiRequest(type=self.mode,
                              endpoint="/account/documents/{}".format(doc_id),
                              method="GET",
                              authorization_token=self._token)
 
         return request.response['status']
 
-    def orders(self, type: str):
-        request = ApiRequest(type=type,
+    def orders(self):
+        request = ApiRequest(type=self.mode,
                              endpoint="/orders/",
                              method="GET",
                              authorization_token=self._token)
@@ -268,16 +273,16 @@ class Account(AccountState, metaclass=Singleton):
             return request.response['results']
         return request.response['error_message']
 
-    def delete_order(self, order_id: str, type: str) -> str:
-        request = ApiRequest(type=type,
+    def delete_order(self, order_id: str) -> str:
+        request = ApiRequest(type=self.mode,
                              endpoint="/orders/{}".format(order_id),
                              method="DELETE",
                              authorization_token=self._token)
 
         return request.response['status']
 
-    def order(self, order_id: str, type: str):
-        request = ApiRequest(type=type,
+    def get_order(self, order_id: str):
+        request = ApiRequest(type=self.mode,
                              endpoint="/orders/{}".format(order_id),
                              method="GET",
                              authorization_token=self._token)
@@ -286,8 +291,8 @@ class Account(AccountState, metaclass=Singleton):
             return request.response['results']
         return request.response['error_message']
 
-    def withdrawls(self, type: str):
-        request = ApiRequest(type=type,
+    def withdrawls(self):
+        request = ApiRequest(type=self.mode,
                              endpoint="/account/withdrawals/",
                              method="GET",
                              authorization_token=self._token)
@@ -295,23 +300,12 @@ class Account(AccountState, metaclass=Singleton):
             return request.response['results']
         return request.response['error_message']
 
-    # def withdraw(self, type: str, amount:int, pin:int, idempotency:str = None):
-    #     body = {"amount": amount*10000, "pin": str(pin)}
-    #     request = ApiRequest(type=type,
-    #                          endpoint="/account/withdrawals/",
-    #                          method="POST",
-    #                          body=body,
-    #                          authorization_token=self._token)
-    #     if request.response['status'] == "ok":
-    #         return request.response['results']
-    #     return request.response['error_message']
-
-    def portfolio(self, type: str, **kwargs):
+    def portfolio(self, **kwargs):
         query = {name: kwargs[name]
                  for name in kwargs if kwargs[name] is not None}
         urlencode(query)
 
-        request = ApiRequest(type=type,
+        request = ApiRequest(type=self.mode,
                              endpoint="/portfolio/?{}".format(query),
                              method="GET",
                              authorization_token=self._token)
