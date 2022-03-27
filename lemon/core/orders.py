@@ -79,8 +79,10 @@ class Order():
         return request.response['status']
 
     def cancel(self)->str:
-        #TODO: test
-        return Account().cancel_order(self._id)
+        if self._is_placed:
+            return Account().cancel_order(self._id)
+        else:
+            return 'ok'
         
 
     @property
