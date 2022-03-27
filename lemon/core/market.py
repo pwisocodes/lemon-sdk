@@ -102,12 +102,12 @@ class MarketData(object):
         else:
             return "No quotes found!"
 
-    def ohlc(self, isin: str, timespan: str = ["m", "h", "d"], start: str = None, end: str = None):
+    def ohlc(self, isin: str, timespan: str = "d", start: str = None, end: str = None):
         """[summary]
 
         Args:
             isin (str): [description]
-            timespan (str, optional): [description]. Defaults to ["m", "h", "d"].
+            timespan (str, optional): [description]. Either 'd' (day), 'h' (hour), 'm' (minute). Defaults to "d". 
 
         Raises:
             ValueError: [description]
@@ -127,19 +127,18 @@ class MarketData(object):
         #     payload = ""
 
         request = ApiRequest(type="data",
-                             endpoint="/ohlc/{}1/?isin={}&from={}&to={}".format(
-                                 timespan, isin, start, end),
+                             endpoint=f"/ohlc/{timespan}1/?isin={isin}&from={start}&to={end}",
                              method="GET",
                              authorization_token=Account().token)
 
-        if "results" in request.response.keys():
+        if "results" in request.response:
             if request.response['results'] != []:
                 df = pd.DataFrame(request.response['results'])
                 return df
             else:
                 return "No quotes found!"
         else:
-            print("No data found!")
+            raise Exception(f"No data found: {request.response['error_message']}") # TODO
 
     def trades(self, mic: str, isin: str, **kwargs):
         """[summary]
