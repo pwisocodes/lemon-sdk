@@ -300,13 +300,13 @@ class Account(AccountState, metaclass=Singleton):
             return request.response['results']
         return request.response['error_message']
 
-    def portfolio(self, **kwargs):
+    def positions(self, **kwargs):
         query = {name: kwargs[name]
                  for name in kwargs if kwargs[name] is not None}
         urlencode(query)
 
         request = ApiRequest(type=self.mode,
-                             endpoint="/portfolio/?{}".format(query),
+                             endpoint="/positions/?{}".format(query),
                              method="GET",
                              authorization_token=self._token)
         if request.response['status'] == "ok":
