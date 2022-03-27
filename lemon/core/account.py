@@ -12,38 +12,38 @@ from lemon.common.requests import ApiRequest
 
 @dataclass(init=True)
 class AccountState():
-    _created_at: datetime
-    _account_id: str
-    _firstname: str
-    _lastname: str
-    _email: str
-    _phone: str
-    _address: str
-    _billing_address: str
-    _billing_email: str
-    _billing_name: str
-    _billing_vat: str
-    _mode: str
-    _deposit_id: str
-    _client_id: str
-    _account_number: str
-    _iban_brokerage: str
-    _iban_origin: str
-    _bank_name_origin: str
-    _balance: int
-    _cash_to_invest: int
-    _cash_to_withdraw: int
-    _amount_bought_intraday: int
-    _amount_sold_intraday: int
-    _amount_open_orders: int
-    _amount_open_withdrawals: int
-    _amount_estimate_taxes: int
-    _approved_at: datetime
-    _trading_plan: str
-    _data_plan: str
-    _tax_allowance: int
-    _tax_allowance_start: datetime
-    _tax_allowance_end: datetime
+    _created_at: datetime = None
+    _account_id: str = None
+    _firstname: str = None
+    _lastname: str = None
+    _email: str = None
+    _phone: str = None
+    _address: str = None
+    _billing_address: str = None
+    _billing_email: str = None
+    _billing_name: str = None
+    _billing_vat: str = None
+    _mode: str = None
+    _deposit_id: str = None
+    _client_id: str = None
+    _account_number: str = None
+    _iban_brokerage: str = None
+    _iban_origin: str = None
+    _bank_name_origin: str = None
+    _balance: int = None
+    _cash_to_invest: int = None
+    _cash_to_withdraw: int = None
+    _amount_bought_intraday: int = None
+    _amount_sold_intraday: int = None
+    _amount_open_orders: int = None
+    _amount_open_withdrawals: int = None
+    _amount_estimate_taxes: int = None
+    _approved_at: datetime = None
+    _trading_plan: str = None
+    _data_plan: str = None
+    _tax_allowance: int = None
+    _tax_allowance_start: datetime = None
+    _tax_allowance_end: datetime = None
 
     def __post_init__(self):
         try:
