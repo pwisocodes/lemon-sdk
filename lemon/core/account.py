@@ -273,7 +273,7 @@ class Account(AccountState, metaclass=Singleton):
             return request.response['results']
         return request.response['error_message']
 
-    def delete_order(self, order_id: str) -> str:
+    def cancel_order(self, order_id: str) -> str:
         request = ApiRequest(type=self.mode,
                              endpoint="/orders/{}".format(order_id),
                              method="DELETE",
