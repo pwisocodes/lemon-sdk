@@ -12,10 +12,10 @@ class Order():
     _limit_price:int = None
     _notes:str = None
 
-    _status:str
-    _id:str
+    _status:str= None
+    _id:str = None
     _regulatory_information:dict = None
-    _estimated_price: int
+    _estimated_price: int = None
 
     _is_placed: bool = False
 
@@ -34,23 +34,28 @@ class Order():
         if self._is_placed:
             raise Exception(f"Order is already placed. Order-ID: {self._id}") #TODO
         
+        # Remove _ from self.__dict__ to make names fit
+        body= {k[1:] : v for k,v in self.__dict__.items()}
+
         request = ApiRequest(type=self._trading_type,
                              endpoint="/orders/",
                              method="POST",
-                             body=self.__dict__,
+                             body=body,
                              authorization_token=Account().token
                              )
 
         if request.response['status'] == "ok":
+            self._is_placed=True
+
             self._status = request.response['results']['status']
             self._id = request.response['results']['id']
             self._regulatory_information = request.response['results']['regulatory_information']
             self._estimated_price = request.response['results']['estimated_price']
 
-            self._is_placed=True
 
             return f"Order with id: {self._id} created!"
-        return f"Order cant be created!"
+
+        raise Exception(f"Request cannot be created: \"{request.response['error_message']}\"")
         
         
     def activate(self, pin:str=None)->str:
@@ -169,21 +174,28 @@ class Order():
     # Available after placed
 
     @property
+    def id(self):
+        if self._is_placed:
+            return self._id
+        else:
+            raise Exception("Not available until placed") # TODO
+
+    @property
     def status(self):
         if self._is_placed:
             return self._expired_at
         else:
-            return "template"
+            return "draft"
 
     @property
-    def _regulatory_information(self):
+    def regulatory_information(self):
         if self._is_placed:
             return self._regulatory_information
         else:
             raise Exception("Not available until placed") # TODO
 
     @property
-    def _estimated_price(self):
+    def estimated_price(self):
         if self._is_placed:
             return self._estimated_price
         else:
