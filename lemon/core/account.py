@@ -9,35 +9,41 @@ from urllib.parse import urlencode
 from lemon.common.errors import *
 from lemon.common.helpers import Singleton
 from lemon.common.requests import ApiRequest
-from lemon.core.strategy import IStrategy
 
 @dataclass(init=True)
 class AccountState():
-    account_id: str = None
-    firstname: str = None
-    lastname: str = None
-    email: str = None
-    phone: str = None
-    address: str = None
-    billing_email: str = None
-    billing_address: str = None
-    billing_name: str = None
-    billing_vat: str = None
-    mode: str = None
-    deposit_id: str = None
-    client_id: str = None
-    account_number: str = None
-    iban_brokerage: str = None
-    iban_origin: str = None
-    bank_name_origin: str = None
-    balance: float = None
-    cash_to_invest: float = None
-    cash_to_withdraw: float = None
-    trading_plan: str = None
-    data_plan: str = None
-    tax_allowance: float = None
-    tax_allowance_start: str = None
-    tax_allowance_end: str = None
+    _created_at: datetime
+    _account_id: str
+    _firstname: str
+    _lastname: str
+    _email: str
+    _phone: str
+    _address: str
+    _billing_address: str
+    _billing_email: str
+    _billing_name: str
+    _billing_vat: str
+    _mode: str
+    _deposit_id: str
+    _client_id: str
+    _account_number: str
+    _iban_brokerage: str
+    _iban_origin: str
+    _bank_name_origin: str
+    _balance: int
+    _cash_to_invest: int
+    _cash_to_withdraw: int
+    _amount_bought_intraday: int
+    _amount_sold_intraday: int
+    _amount_open_orders: int
+    _amount_open_withdrawals: int
+    _amount_estimate_taxes: int
+    _approved_at: datetime
+    _trading_plan: str
+    _data_plan: str
+    _tax_allowance: int
+    _tax_allowance_start: datetime
+    _tax_allowance_end: datetime
 
     def __post_init__(self):
         try:
@@ -53,32 +59,135 @@ class AccountState():
                              )
 
         if request.response['status'] == "ok":
-            self.account_id = request.response['results']['account_id']
-            self.firstname = request.response['results']['firstname']
-            self.lastname = request.response['results']['lastname']
-            self.email = request.response['results']['email']
-            self.phone = request.response['results']['phone']
-            self.address = request.response['results']['address']
-            self.billing_email = request.response['results']['billing_email']
-            self.billing_address = request.response['results']['billing_address']
-            self.billing_name = request.response['results']['billing_name']
-            self.billing_vat = request.response['results']['billing_vat']
-            self.mode = request.response['results']['mode']
-            self.deposit_id = request.response['results']['deposit_id']
-            self.client_id = request.response['results']['client_id']
-            self.account_number = request.response['results']['account_number']
-            self.iban_brokerage = request.response['results']['iban_brokerage']
-            self.iban_origin = request.response['results']['iban_origin']
-            self.bank_name_origin = request.response['results']['bank_name_origin']
-            self.balance = float(request.response['results']['balance']/10000)
-            self.cash_to_invest = float(request.response['results']['cash_to_invest']/10000)
-            self.cash_to_withdraw = float(request.response['results']['cash_to_withdraw']/10000)
-            self.trading_plan = request.response['results']['trading_plan']
-            self.data_plan = request.response['results']['data_plan']
-            self.tax_allowance = float(request.response['results']['tax_allowance']/10000)
-            self.tax_allowance_start = request.response['results']['tax_allowance_start']
-            self.tax_allowance_end = request.response['results']['tax_allowance_end']
+            # Dynamically set Attributes
+            for k,v in request.response["results"].items():
+                setattr(self, f"_{k}", v)
 
+    @property
+    def created_at(self):
+        return self._created_at
+        
+    @property
+    def account_id(self):
+        return self._account_id
+        
+    @property
+    def firstname(self):
+        return self._firstname
+    @property
+    def lastname(self):
+        return self._lastname
+
+    @property
+    def email(self):
+        self._email
+
+    @property
+    def phone(self):
+        self._phone
+
+    @property
+    def address(self):
+        self._address
+
+    @property
+    def billing_address(self):
+        return self._billing_address
+
+    @property
+    def billing_email(self):
+        return self._billing_email
+
+    @property
+    def billing_name(self):
+        return self._billing_name
+
+    @property
+    def billing_vat(self):
+        return self._billing_vat
+
+    @property
+    def mode(self):
+        return self._mode
+
+    @property
+    def deposit_id(self):
+        return self._deposit_id
+
+    @property
+    def client_id(self):
+        return self._client_id
+
+    @property
+    def iban_brokerage(self):
+        return self._iban_brokerage
+
+    @property
+    def iban_origin(self):
+        return self._iban_origin
+
+    @property
+    def bank_name_origin(self):
+        return self._bank_name_origin
+
+    @property
+    def balance(self):
+        self.fetch_state()
+        return self._balance
+
+    @property
+    def cash_to_withdraw(self):
+        self.fetch_state()
+        return self._cash_to_withdraw
+
+    @property
+    def amount_bought_intraday(self):
+        self.fetch_state()
+        return self._amount_bought_intraday
+
+    @property
+    def amount_sold_intraday(self):
+        self.fetch_state()
+        return self._amount_sold_intraday
+
+    @property
+    def amount_open_orders(self):
+        self.fetch_state()
+        return self._amount_open_orders
+
+    @property
+    def amount_open_withdrawals(self):
+        self.fetch_state()
+        return self._amount_open_withdrawals
+
+    @property
+    def amount_estimate_taxes(self):
+        self.fetch_state()
+        return self._amount_estimate_taxes
+
+    @property
+    def approved_at(self):
+        return self._approved_at
+
+    @property
+    def trading_plan(self):
+        self.fetch_state()
+        return self._trading_plan
+
+    @property
+    def data_plan(self):
+        self.fetch_state()
+        return self._data_plan
+
+    @property
+    def tax_allowance(self):
+        self.fetch_state()
+        return self._tax_allowance
+
+    @property
+    def tax_allowance_end(self):
+        self.fetch_state()
+        return self._tax_allowance_end
 
 class Account(AccountState, metaclass=Singleton):
 
@@ -91,18 +200,17 @@ class Account(AccountState, metaclass=Singleton):
         return self._token
 
     def withdrawl(self, type: str, amount: int, pin: int, idempotency: str = None):
-        """ Withdraw money from your bank account to your lemon.markets account e.g. amount = 100.0 means 100€ and will be multiplyed by 10000 to get the int value the api handels. Take a look at: https://docs.lemon.markets/trading/overview#working-with-numbers-in-the-trading-api 
+        """ Withdraw money from your bank account to your lemon.markets account e.g. amount = 1000000 means 100€ (hundreths of a cent). Take a look at: https://docs.lemon.markets/trading/overview#working-with-numbers-in-the-trading-api 
 
         Args:
-            amount (float): amount of money that will be withdrawn, minimum is 100.0
+            amount (int): amount of money that will be withdrawn, minimum is 1000000 (100 €)
 
         Returns:
             str: 'ok' if if request was successful
         """
         if amount > 0:
-            value = amount * 10000
 
-            body = {"amount": int(value)}
+            body = {"amount": amount}
             request = ApiRequest(type="paper",
                                  endpoint="/account/withdrawals/",
                                  method="POST",
