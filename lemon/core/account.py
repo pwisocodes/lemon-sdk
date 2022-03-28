@@ -225,10 +225,11 @@ class Account(AccountState, metaclass=Singleton):
                                  authorization_token=self._token)
             if request.response['status'] == 'error':
                 raise ValueError(request.response['error_message'])
+            else:
+                return request.response['status']
         else:
             raise ValueError(f"Amount if {amount} is not a valid!")
 
-        return request.response['status']
 
     def documents(self) -> list:
         """ Get information about all documents linked with this account 
@@ -245,9 +246,9 @@ class Account(AccountState, metaclass=Singleton):
             if request.response['results'] != []:
                 return request.response['results']
             else:
-                return "No documents found!"
+                return None
         else:
-            return request.response['status']
+            raise Exception(f"{request.response['error_code']}: {request.response['error_message']}") # TODO
 
     def get_doc(self, doc_id: str) -> str:
         """ Download a specific doc by id
@@ -272,8 +273,12 @@ class Account(AccountState, metaclass=Singleton):
                              authorization_token=self._token)
 
         if request.response['status'] == "ok":
-            return request.response['results']
-        return request.response['error_message']
+            if request.response['results'] != []:
+                return request.response['results']
+            else:
+                return None
+        else:
+            raise Exception(f"{request.response['error_code']}: {request.response['error_message']}") # TODO
 
     def cancel_order(self, order_id: str) -> str:
         request = ApiRequest(type=self.mode,
@@ -298,9 +303,14 @@ class Account(AccountState, metaclass=Singleton):
                              endpoint="/account/withdrawals/",
                              method="GET",
                              authorization_token=self._token)
+
         if request.response['status'] == "ok":
-            return request.response['results']
-        return request.response['error_message']
+            if request.response['results'] != []:
+                return request.response['results']
+            else:
+                return None
+        else:
+            raise Exception(f"{request.response['error_code']}: {request.response['error_message']}") # TODO
 
     def positions(self, **kwargs):
         query = {name: kwargs[name]
@@ -311,6 +321,11 @@ class Account(AccountState, metaclass=Singleton):
                              endpoint="/positions/?{}".format(query),
                              method="GET",
                              authorization_token=self._token)
+
         if request.response['status'] == "ok":
-            return request.response['results']
-        return request.response['error_message']
+            if request.response['results'] != []:
+                return request.response['results']
+            else:
+                return None
+        else:
+            raise Exception(f"{request.response['error_code']}: {request.response['error_message']}") # TODO
