@@ -12,7 +12,7 @@ from lemon.common.requests import ApiRequest
 
 @dataclass(init=True)
 class AccountState():
-    _created_at: datetime = None
+
     _account_id: str = None
     _firstname: str = None
     _lastname: str = None
@@ -44,26 +44,6 @@ class AccountState():
     _tax_allowance: int = None
     _tax_allowance_start: datetime = None
     _tax_allowance_end: datetime = None
-
-    def __post_init__(self):
-        try:
-            self.fetch_state()
-        except:
-            logging.warning("Cant fetch account state")
-
-    def fetch_state(self):
-        request = ApiRequest(type="paper",
-                             endpoint="/account/",
-                             method="GET",
-                             authorization_token=self.token
-                             )
-
-        if request.response['status'] == "ok":
-            # Dynamically set Attributes
-            for k,v in request.response["results"].items():
-                setattr(self, f"_{k}", v)
-        else:
-            raise Exception(f"Couldn't fetch Account Data: {request.response['error_message']}")
 
     @property
     def created_at(self):
@@ -195,6 +175,26 @@ class AccountState():
     def mode(self, value):
         self._mode = value
 
+    def __post_init__(self):
+        try:
+            self.fetch_state()
+        except:
+            logging.warning("Cant fetch account state")
+
+    def fetch_state(self):
+        request = ApiRequest(type="paper",
+                             endpoint="/account/",
+                             method="GET",
+                             authorization_token=self.token
+                             )
+
+        if request.response['status'] == "ok":
+            # Dynamically set Attributes
+            for k,v in request.response["results"].items():
+                setattr(self, f"_{k}", v)
+        else:
+            raise Exception(f"Couldn't fetch Account Data: {request.response['error_message']}")
+
 
 class Account(AccountState, metaclass=Singleton):
 
@@ -266,7 +266,19 @@ class Account(AccountState, metaclass=Singleton):
 
         return request.response['status']
 
-    def orders(self):
+    def orders(self, isin: str = None, expires_at: str = None, side: str = None, quantity: str = None, venue: str = None):
+        """ Get a list of orders on your account.
+
+        Args:
+            isin (str): Filter for ISIN
+            expires_at (str): Filter for Orders that expire at this date
+            side (str): 'buy' or 'sell'
+            quantity (int): amount of shares
+            venue (str): MIC of Trading Venue
+
+        Returns:
+            list: orders
+        """
         request = ApiRequest(type=self.mode,
                              endpoint="/orders/",
                              method="GET",
@@ -280,25 +292,53 @@ class Account(AccountState, metaclass=Singleton):
         else:
             raise Exception(f"{request.response['error_code']}: {request.response['error_message']}") # TODO
 
-    def cancel_order(self, order_id: str) -> str:
-        request = ApiRequest(type=self.mode,
-                             endpoint="/orders/{}".format(order_id),
-                             method="DELETE",
-                             authorization_token=self._token)
-
-        return request.response['status']
-
     def get_order(self, order_id: str):
+        """ Retrieve information of a specific order.
+
+        Args:
+            order_id: ID of the order
+
+        Returns:
+            dict: order
+        
+        """
+        
         request = ApiRequest(type=self.mode,
                              endpoint="/orders/{}".format(order_id),
                              method="GET",
                              authorization_token=self._token)
 
         if request.response['status'] == "ok":
+            # TODO create Order object?
             return request.response['results']
-        return request.response['error_message']
+        else:
+            raise Exception(f"{request.response['error_code']}: {request.response['error_message']}") # TODO
+    
+    def cancel_order(self, order_id: str) -> str:
+        """ Cancel an order that is placed/inactive or activated (but not executed by the stock exchange)
 
-    def withdrawls(self):
+        Args:
+            order_id (str): ID of the order
+
+        Returns:
+            str: status
+        """
+
+        request = ApiRequest(type=self.mode,
+                             endpoint="/orders/{}".format(order_id),
+                             method="DELETE",
+                             authorization_token=self._token)
+
+        if request.response['status'] == "ok":
+            return request.response['status']
+        else:
+            raise Exception(f"{request.response['error_code']}: {request.response['error_message']}") # TODO
+
+
+    def withdrawals(self):
+        """ Get Withdrawals of the account.
+        """
+
         request = ApiRequest(type=self.mode,
                              endpoint="/account/withdrawals/",
                              method="GET",
@@ -312,13 +352,24 @@ class Account(AccountState, metaclass=Singleton):
         else:
             raise Exception(f"{request.response['error_code']}: {request.response['error_message']}") # TODO
 
-    def positions(self, **kwargs):
-        query = {name: kwargs[name]
-                 for name in kwargs if kwargs[name] is not None}
-        urlencode(query)
+    def positions(self, isin: str = None):
+        """ Get the positions of the account.
+
+        Args:
+            isin (str): Filter for position of a specific share
+
+        Returns:
+            list: positions
+            
+        
+        """
+        if isin is not None:
+            query = f"isin={isin}"
+        else:
+            query = ""
 
         request = ApiRequest(type=self.mode,
-                             endpoint="/positions/?{}".format(query),
+                             endpoint=f"/positions/?{query}",
                              method="GET",
                              authorization_token=self._token)
 
