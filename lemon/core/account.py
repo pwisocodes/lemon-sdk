@@ -12,6 +12,42 @@ from lemon.common.requests import ApiRequest
 
 @dataclass(init=True)
 class AccountState():
+    """Represents the State/Attributes of an Account.
+
+    Attributes:
+        account_id (str): ID of the Acount (read-only)
+        firstname (str): First Name of the Account Owner
+        lastname (str): Last Name of the Account Owner
+        email (str): Email Adress of the Account Owner
+        phone (str): Phone Number of the Account Owner
+        address (str): Address of the Account Owner
+        billing_address (str): Billing Address of the Account Owner
+        billing_email (str): Billing Email of the Account Owner
+        billing_name (str): Billing Name of the Account Owner
+        billing_vat (str): Value-added Tax (GER: MwSt) of the Account Owner
+        mode (str): Environment of the account. Either 'paper' or 'money'
+        deposit_id (str): Identification Number of your securities account
+        client_id (str): The internal client identification number related to the account
+        account_number (str): The account reference number
+        iban_brokerage (str): IBAN of the brokerage account at our partner bank. This is the IBAN you can transfer money from your referrence account to
+        iban_origin (str): IBAN of the reference account.
+        bank_name_origin (str): Bank name of your reference account.
+        balance (int): Your balance is the money you transferred to your account + the combined profits or losses from your orders. 1€ = 10000
+        cash_to_invest (int): How much cash you have left to invest. Your balance minus the sum of orders that were activated but not executed, yet.
+        cash_to_withdraw (int): How much cash you have in your account to withdraw to your reference account. Calculated through your last reported balance minus the current sum of buy orders.
+        amount_bought_intraday (int):
+        amount_sold_intraday (int):
+        amount_open_orders (int):
+        amount_open_withdrawals (int):
+        amount_estimate_taxes (int):
+        approved_at (datetime): Timestamp of live trading account approval
+        trading_plan (str): subscription plan for trading. Either 'free', 'basic' or 'pro'
+        data_plan (str): subscription plan for market data. Either 'free', 'basic' or 'pro'
+        tax_allowance (int): Your tax tax allowance - between 0 and 801 €, as specified in your onboarding process
+        tax_allowance_start (datetime): Relevant start date for your tax allowance (usually 01/01/ of respective year)
+        tax_allowance_end (datetime): Relevant end date for your tax allowance (usually 31/12/ of respective year)
+
+    """
 
     _account_id: str = None
     _firstname: str = None
@@ -182,6 +218,13 @@ class AccountState():
             logging.warning("Cant fetch account state")
 
     def fetch_state(self):
+        """ Refresh information about this Account.
+
+        Raises:
+            LemonMarketError: if lemon.markets returns an error
+
+        """
+
         request = ApiRequest(type="paper",
                              endpoint="/account/",
                              method="GET",
@@ -193,7 +236,7 @@ class AccountState():
             for k,v in request.response["results"].items():
                 setattr(self, f"_{k}", v)
         else:
-            raise Exception(f"Couldn't fetch Account Data: {request.response['error_message']}")
+            raise LemonMarketError(request.response['error_code'], request.response['error_message'])
 
 
 class Account(AccountState, metaclass=Singleton):
@@ -212,8 +255,9 @@ class Account(AccountState, metaclass=Singleton):
         Args:
             amount (int): amount of money that will be withdrawn, minimum is 1000000 (100 €)
 
-        Returns:
-            str: 'ok' if if request was successful
+        Raises:
+            LemonMarketError: if lemon.markets returns an error
+            ValueError: If the amount is not supported.
         """
         if amount > 0:
 
@@ -223,12 +267,14 @@ class Account(AccountState, metaclass=Singleton):
                                  method="POST",
                                  body=body,
                                  authorization_token=self._token)
-            if request.response['status'] == 'error':
-                raise ValueError(request.response['error_message'])
+            
+            if request.response['status'] == 'ok':
+                return
             else:
-                return request.response['status']
+                raise LemonMarketError(request.response['error_code'], request.response['error_message'])
+
         else:
-            raise ValueError(f"Amount if {amount} is not a valid!")
+            raise ValueError(f"Can't withdraw negative amount {amount}!")
 
 
     def documents(self) -> list:
@@ -236,6 +282,9 @@ class Account(AccountState, metaclass=Singleton):
 
         Returns:
             list: arraylist of dicts
+
+        Raises:
+            LemonMarketError: if lemon.markets returns an error
         """
         request = ApiRequest(type=self.mode,
                              endpoint="/account/documents/",
@@ -243,12 +292,9 @@ class Account(AccountState, metaclass=Singleton):
                              authorization_token=self._token)
 
         if request.response['status'] == "ok":
-            if request.response['results'] != []:
-                return request.response['results']
-            else:
-                return None
+            return request.response['results']
         else:
-            raise Exception(f"{request.response['error_code']}: {request.response['error_message']}") # TODO
+            raise LemonMarketError(request.response['error_code'], request.response['error_message'])
 
     def get_doc(self, doc_id: str) -> str:
         """ Download a specific doc by id
@@ -256,15 +302,20 @@ class Account(AccountState, metaclass=Singleton):
         Args:
             doc_id (str): ID of document
 
-        Returns:
-            str: status
+        Raises:
+            LemonMarketError: if lemon.markets returns an error
         """
         request = ApiRequest(type=self.mode,
                              endpoint="/account/documents/{}".format(doc_id),
                              method="GET",
                              authorization_token=self._token)
 
-        return request.response['status']
+        if request.response['status'] == "ok":
+            # TODO
+            return 
+        else:
+            raise LemonMarketError(request.response['error_code'], request.response['error_message'])
+
 
     def orders(self, isin: str = None, expires_at: str = None, side: str = None, quantity: str = None, venue: str = None):
         """ Get a list of orders on your account.
@@ -278,6 +329,9 @@ class Account(AccountState, metaclass=Singleton):
 
         Returns:
             list: orders
+
+        Raises:
+            LemonMarketError: if lemon.markets returns an error
         """
         request = ApiRequest(type=self.mode,
                              endpoint="/orders/",
@@ -285,12 +339,9 @@ class Account(AccountState, metaclass=Singleton):
                              authorization_token=self._token)
 
         if request.response['status'] == "ok":
-            if request.response['results'] != []:
-                return request.response['results']
-            else:
-                return None
+            return request.response['results']
         else:
-            raise Exception(f"{request.response['error_code']}: {request.response['error_message']}") # TODO
+            raise LemonMarketError(request.response['error_code'], request.response['error_message'])
 
     def get_order(self, order_id: str):
         """ Retrieve information of a specific order.
@@ -300,7 +351,9 @@ class Account(AccountState, metaclass=Singleton):
 
         Returns:
             dict: order
-        
+
+        Raises:
+            LemonMarketError: if lemon.markets returns an error
         """
         
         request = ApiRequest(type=self.mode,
@@ -309,10 +362,9 @@ class Account(AccountState, metaclass=Singleton):
                              authorization_token=self._token)
 
         if request.response['status'] == "ok":
-            # TODO create Order object?
             return request.response['results']
         else:
-            raise Exception(f"{request.response['error_code']}: {request.response['error_message']}") # TODO
+            raise LemonMarketError(request.response['error_code'], request.response['error_message'])
     
     def cancel_order(self, order_id: str) -> str:
         """ Cancel an order that is placed/inactive or activated (but not executed by the stock exchange)
@@ -320,8 +372,8 @@ class Account(AccountState, metaclass=Singleton):
         Args:
             order_id (str): ID of the order
 
-        Returns:
-            str: status
+        Raises:
+            LemonMarketError: if lemon.markets returns an error
         """
 
         request = ApiRequest(type=self.mode,
@@ -330,13 +382,20 @@ class Account(AccountState, metaclass=Singleton):
                              authorization_token=self._token)
 
         if request.response['status'] == "ok":
-            return request.response['status']
+            return
         else:
-            raise Exception(f"{request.response['error_code']}: {request.response['error_message']}") # TODO
+            raise LemonMarketError(request.response['error_code'], request.response['error_message'])
 
 
     def withdrawals(self):
         """ Get Withdrawals of the account.
+
+        Returns:
+            list: list of withdrawals
+
+        Raises:
+            LemonMarketError: if lemon.markets returns an error
+
         """
 
         request = ApiRequest(type=self.mode,
@@ -345,12 +404,9 @@ class Account(AccountState, metaclass=Singleton):
                              authorization_token=self._token)
 
         if request.response['status'] == "ok":
-            if request.response['results'] != []:
-                return request.response['results']
-            else:
-                return None
+            return request.response['results']
         else:
-            raise Exception(f"{request.response['error_code']}: {request.response['error_message']}") # TODO
+            raise LemonMarketError(request.response['error_code'], request.response['error_message'])
 
     def positions(self, isin: str = None):
         """ Get the positions of the account.
@@ -360,8 +416,9 @@ class Account(AccountState, metaclass=Singleton):
 
         Returns:
             list: positions
-            
         
+        Raises:
+            LemonMarketError: if lemon.markets returns an error
         """
         if isin is not None:
             query = f"isin={isin}"
@@ -374,9 +431,6 @@ class Account(AccountState, metaclass=Singleton):
                              authorization_token=self._token)
 
         if request.response['status'] == "ok":
-            if request.response['results'] != []:
-                return request.response['results']
-            else:
-                return None
+            return request.response['results']
         else:
-            raise Exception(f"{request.response['error_code']}: {request.response['error_message']}") # TODO
+            raise LemonMarketError(request.response['error_code'], request.response['error_message'])
