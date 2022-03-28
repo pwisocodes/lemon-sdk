@@ -37,18 +37,19 @@ class MarketData(object):
             query = ""
 
         request = ApiRequest(type="data",
-                             endpoint="/instruments/?{}".format(query),
+                             endpoint=f"/instruments/?{query}",
                              url_params=payload,
                              method="GET",
                              authorization_token=Account().token)
-        if "results" in request.response.keys():
+        if "results" in request.response:
             if request.response['results'] != []:
                 df = pd.DataFrame(request.response['results'])
                 return df
             else:
-                "No "
+                # Valid Request, but no instrument found
+                return None
         else:
-            return "No instrument found!"
+            raise Exception(f"No instrument found: {request.response['error_message']}") #TODO
 
     def trading_venues(self, **kwargs):
         """[summary]
@@ -65,15 +66,18 @@ class MarketData(object):
             payload = ""
 
         request = ApiRequest(type="data",
-                             endpoint="/venues/?{}".format(payload),
+                             endpoint=f"/venues/?{payload}",
                              method="GET",
                              authorization_token=Account().token)
 
-        if request.response['results'] != []:
-            df = pd.DataFrame(request.response['results'])
-            return df
+        if "results" in request.response:
+            if request.response['results'] != []:
+                df = pd.DataFrame(request.response['results'])
+                return df
+            else:
+                return None
         else:
-            return "No venues found"
+            raise Exception(f"No Trading Venue found: {request.response['error_message']}") #TODO
 
     def quotes(self, isin: str, mic: str = None, **kwargs):
         """[summary]
@@ -95,19 +99,23 @@ class MarketData(object):
                                  isin, mic),
                              method="GET",
                              authorization_token=Account().token)
-
-        if request.response['results'] != []:
-            df = pd.DataFrame(request.response['results'])
-            return df
+        if "results" in request.response:
+            if request.response['results'] != []:
+                df = pd.DataFrame(request.response['results'])
+                return df
+            else:
+                return None
         else:
-            return "No quotes found!"
+            raise Exception(f"No Quotes found: {request.response['error_message']}") #TODO
 
     def ohlc(self, isin: str, timespan: str = "d", start: str = None, end: str = None):
         """[summary]
 
         Args:
             isin (str): [description]
-            timespan (str, optional): [description]. Either 'd' (day), 'h' (hour), 'm' (minute). Defaults to "d". 
+            timespan (str, optional): [description] Either 'd' (day), 'h' (hour), 'm' (minute). Defaults to "d". 
+            start (str): [descriptin] ISO-Date or Epoch Timestamp.
+            end (str): [description] ISO-Date or Epoch Timestamp.
 
         Raises:
             ValueError: [description]
@@ -117,14 +125,6 @@ class MarketData(object):
         """
         if timespan not in ["m", "h", "d"]:
             raise ValueError(f"Parameter {type} is not a valid parameter!")
-
-        # payload = {name: kwargs[name]
-        #            for name in kwargs if kwargs[name] is not None}
-
-        # if payload:
-        #     payload = "&" + urlencode(payload, doseq=True)
-        # else:
-        #     payload = ""
 
         request = ApiRequest(type="data",
                              endpoint=f"/ohlc/{timespan}1/?isin={isin}&from={start}&to={end}",
@@ -136,15 +136,15 @@ class MarketData(object):
                 df = pd.DataFrame(request.response['results'])
                 return df
             else:
-                return "No quotes found!"
+                return None
         else:
-            raise Exception(f"No data found: {request.response['error_message']}") # TODO
+            raise Exception(f"No quotes found: {request.response['error_message']}") # TODO
 
     def trades(self, mic: str, isin: str, **kwargs):
         """[summary]
 
         Args:
-            mic (str): [description]
+            mic (str): [description] Market Identifier Code of the trading venue.
             isin (str): [description]
 
         Returns:
@@ -163,4 +163,11 @@ class MarketData(object):
                                  isin, payload),
                              method="GET",
                              authorization_token=self._token)
-        return request.response
+        if "results" in request.response:
+            if request.response['results'] != []:
+                df = pd.DataFrame(request.response['results'])
+                return df
+            else:
+                return None
+        else:
+            raise Exception(f"No Trades found: {request.response['error_message']}") # TODO

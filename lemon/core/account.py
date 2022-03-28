@@ -62,6 +62,8 @@ class AccountState():
             # Dynamically set Attributes
             for k,v in request.response["results"].items():
                 setattr(self, f"_{k}", v)
+        else:
+            raise Exception(f"Couldn't fetch Account Data: {request.response['error_message']}")
 
     @property
     def created_at(self):
