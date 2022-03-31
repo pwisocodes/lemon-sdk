@@ -86,12 +86,12 @@ class MarketData(object):
             raise LemonMarketError(
                 request.response['error_code'], request.response['error_message'])
 
-    def quotes(self, isin: str, mic: str = None):
+    def latest_quote(self, isin: str, mic: str = None):
         """Get the latest quote of an instrument.
 
         Args:
-            isin (str): [description]
-            mic (str): [description]
+            isin (str): The International Securities Identification Number of the instrument
+            mic (str): Market Identifier Code of the trading venue.
 
         Returns:
             dict: The latest Quote 
@@ -155,7 +155,7 @@ class MarketData(object):
         else:
             raise LemonMarketError(request.response['error_code'], request.response['error_message'])
 
-    def trades(self, mic: str, isin: str):
+    def latest_trade(self, mic: str, isin: str):
         """Latest trade of a specific instrument
 
         Args:
