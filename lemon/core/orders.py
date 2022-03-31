@@ -39,7 +39,7 @@ class Order():
     _regulatory_information: dict = None
     _estimated_price: int = None
 
-    def __init__(self, isin: str, expires_at, side: ORDERSIDE, quantity: int, venue: VENUE, trading_type: str, stop_price: int = None, limit_price: int = None, notes: str = None, __status="draft") -> None:
+    def __init__(self, isin: str, expires_at, side: ORDERSIDE, quantity: int, venue: VENUE, trading_type: str, stop_price: int = None, limit_price: int = None, notes: str = None, __status=ORDERSTATUS.DRAFT) -> None:
         self._trading_type = trading_type
         self._isin = isin
         self._side = side
