@@ -11,7 +11,7 @@ class Order():
 
     Attributes:
         isin: Internation Security Identification Number of the instrument you wish to buy or sell
-        expires_at: ISO String date (YYYY-MM-DD). Order expires at the end of the specified day. Maximum expiration date is 30 days in the future.
+        expires_at: Order expires at the end of the specified day. Maximum expiration date is 30 days in the future.
         side: With this you can define whether you want to buy ('buy') or sell ('sell') a specific instrument
         quantity: The amount of shares you want to buy. Limited to 25,000€ estimated order price per request.
         venue: Market Identifier Code of Stock exchange you want to address. Default value is 'XMUN'.
@@ -39,7 +39,7 @@ class Order():
     _regulatory_information: dict = None
     _estimated_price: int = None
 
-    def __init__(self, isin: str, expires_at, side: ORDERSIDE, quantity: int, venue: VENUE, trading_type: str, stop_price: int = None, limit_price: int = None, notes: str = None, __status=ORDERSTATUS.DRAFT) -> None:
+    def __init__(self, isin: str, expires_at: datetime, side: ORDERSIDE, quantity: int, venue: VENUE, trading_type: str, stop_price: int = None, limit_price: int = None, notes: str = None, __status=ORDERSTATUS.DRAFT) -> None:
         self._trading_type = trading_type
         self._isin = isin
         self._side = side

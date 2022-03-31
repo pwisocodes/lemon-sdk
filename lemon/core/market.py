@@ -1,3 +1,4 @@
+from datetime import datetime
 from urllib.parse import urlencode, quote
 
 import pandas as pd
@@ -98,13 +99,13 @@ class MarketData(object):
             raise LemonMarketError(
                 request.response['error_code'], request.response['error_message'])
 
-    def ohlc(self, isin: str, start: str, end: str, timespan: TIMESPAN, venue: VENUE = None, sorting: SORT = None):
+    def ohlc(self, isin: str, start: datetime, end: datetime, timespan: TIMESPAN, venue: VENUE = None, sorting: SORT = None):
         """OHLC data of a specific instrument.
 
         Args:
             isin: The International Securities Identification Number of the instrument
-            start: ISO-Date or Epoch Timestamp.
-            end: ISO-Date or Epoch Timestamp.
+            start: Specify an ISO date string (YYYY-MM-DD) to get data from a specific date on.
+            end: Specify an ISO date string (YYYY-MM-DD) to get only data until a specific date.
             timespan: Timespan of one OHLC Entry.
             venue:  Enter a venue or a Market Identifier Code (MIC) in there.
             sorting: Sort your API response, either ascending (asc) or descending (desc)
@@ -126,9 +127,16 @@ class MarketData(object):
                 mic: Market Identifier Code of Trading Venue the OHLC data occured at
 
         """
+        payload = {}
+
+        if start is not None:
+            payload["from"] = start.isoformat()
+        if end is not None:
+            payload["to"] = end.isoformat()
 
         request = ApiRequest(type="data",
-                             endpoint=f"/ohlc/{timespan}1/?isin={isin}&from={start}&to={end}&mic={venue}",
+                             endpoint=f"/ohlc/{timespan}1/?isin={isin}&mic={venue}&sorting={sorting}",
+                             params=payload,
                              method="GET",
                              authorization_token=Account().token)
 

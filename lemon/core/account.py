@@ -325,15 +325,15 @@ class Account(AccountState, metaclass=Singleton):
             raise LemonMarketError(
                 request.response['error_code'], request.response['error_message'])
 
-    def orders(self, isin: str = None, status: ORDERSTATUS = None, side: ORDERSIDE = None, start: str = None, end: str = None, type: ORDERTYPE = None, key_creation_id: str = None):
+    def orders(self, isin: str = None, status: ORDERSTATUS = None, side: ORDERSIDE = None, start: datetime = None, end: datetime = None, type: ORDERTYPE = None, key_creation_id: str = None):
         """Get a list of orders on your account.
 
         Args:
             isin: Filter for specific instrument
             status: Filter for status
             side: Filter for 'buy' or 'sell'
-            start: Specify an ISO date string (YYYY-MM-DD) to get only orders from a specific date on.
-            end: Specify an ISO date string (YYYY-MM-DD) to get only orders until a specific date.
+            start: Specify a datetime to get order from a specific date on.
+            end: Specify a datetime to get only orders until a specific date.
             type: Filter for different types of orders: market, stop, limit, stop_limit
             key_creation_id: Filter for a specific API you created orders with
 
@@ -357,8 +357,16 @@ class Account(AccountState, metaclass=Singleton):
         Raises:
             LemonMarketError: if lemon.markets returns an error
         """
+        payload = {}
+
+        if start is not None:
+            payload["from"] = start.isoformat()
+        if end is not None:
+            payload["to"] = end.isoformat()
+
         request = ApiRequest(type=self.mode,
-                             endpoint=f"/orders/?isin{isin}&status={status}&side={side}&from={start}&to={end}&type={type}&key_creation_id={key_creation_id}",
+                             endpoint=f"/orders/?isin{isin}&status={status}&side={side}&type={type}&key_creation_id={key_creation_id}",
+                             url_params=payload,
                              method="GET",
                              authorization_token=self._token)
 
