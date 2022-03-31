@@ -17,8 +17,7 @@ class Order():
         stop_price: Stop Market Order. Once the stop price is met, the order is converted into a market order. After that, the order is executed immediately at the next possible price. (Can be combined with limit_price)
         limit_price: Limit Order. The order is executed at the specified price or better (Buy Order: limit price or lower, Sell Order: limit price or higher). (Can be combined with stop_price)
         notes: Personal notes to the order
-
-        status: Status the Order is currently in: 'draft' (local only), 'inactive', 'activated', 'open' (Real Money only), 'in_progress', 'canceling','executed', 'canceled' or 'expired'
+        status: Status the Order is currently in ORDERSTATUS: INACTIVE, ACTIVATED, OPEN (Real Money only), IN_PROGRESS, CANCELING, EXECUTED, CANCELED or EXPIRED
         id: ID of the order
         regulatory_information: Regulatory information to the order 
         estimated_price: Estimation from our end for what price the Order will be executed
