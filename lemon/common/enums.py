@@ -1,6 +1,5 @@
 from enum import Enum
 
-
 class BaseEnum(Enum):
     """Enum that allows accessing the value without .value."""
 
@@ -41,7 +40,6 @@ class ORDERSTATUS(BaseEnum):
     EXPIRED = "expired"
     DRAFT = "draft"
 
-
 class ORDERSIDE(BaseEnum):
     """Indicates wether you want to buy or sell the instrument.
 
@@ -51,7 +49,6 @@ class ORDERSIDE(BaseEnum):
         """
     BUY = "buy"
     SELL = "sell"
-
 
 class ORDERTYPE(BaseEnum):
     """The type of an Order.
@@ -76,7 +73,6 @@ class ORDERTYPE(BaseEnum):
     STOP = "stop_price"
     LIMIT = "limit_price"
     STOP_LIMIT = "stop_limit"
-
 
 class INSTRUMENT_TYPE(BaseEnum):
     """The type of an instrument.
@@ -116,7 +112,6 @@ class TIMESPAN(BaseEnum):
 		HOUR: The data is aggregated on an hourly basis.
 		DAY: The data is aggregated on a daily basis.
 	"""
-	MINUTE="m"
-	HOUR="h"
-	DAY="d"
-
+	MINUTE = "m"
+	HOUR = "h"
+	DAY = "d"

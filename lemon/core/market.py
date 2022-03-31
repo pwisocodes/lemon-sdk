@@ -1,8 +1,5 @@
 from datetime import datetime
-from urllib.parse import urlencode, quote
-
 import pandas as pd
-import urllib3
 from lemon.common.enums import INSTRUMENT_TYPE, SORT, TIMESPAN, VENUE
 from lemon.common.errors import LemonMarketError
 from lemon.common.requests import ApiRequest
@@ -162,10 +159,6 @@ class MarketData(object):
                 mic: Market Identifier Code of Trading Venue the trade occured at
 
         """
-        if payload:
-            payload = "&" + urlencode(payload, doseq=True)
-        else:
-            payload = "&"
 
         request = ApiRequest(type="market",
                              endpoint=f"/trades/latest?decimals=false&isin={isin}&mic={venue}/",

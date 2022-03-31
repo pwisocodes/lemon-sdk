@@ -1,5 +1,4 @@
-import logging
-from typing import Dict, Union
+from typing import Union
 
 from lemon.common.settings import (BASE_MARKET_DATA_API_URL,
                                    BASE_PAPER_TRADING_API_URL,

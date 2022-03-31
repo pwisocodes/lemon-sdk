@@ -1,13 +1,9 @@
 
 import logging
-import threading
 import pandas as pd
 from dataclasses import dataclass
 from datetime import datetime
-from typing import List
-from urllib.parse import urlencode
 from lemon.common.enums import ORDERSIDE, ORDERSTATUS, ORDERTYPE
-
 from lemon.common.errors import *
 from lemon.common.helpers import Singleton
 from lemon.common.requests import ApiRequest

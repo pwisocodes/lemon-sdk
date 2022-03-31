@@ -1,6 +1,5 @@
 import datetime
 import json
-from multiprocessing.sharedctypes import Value
 from lemon.common.enums import VENUE
 from lemon.common.requests import ApiRequest
 from lemon.core.account import *
