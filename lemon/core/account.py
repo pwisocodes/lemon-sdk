@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import List
 from urllib.parse import urlencode
-from lemon.common.enums import ORDERSIDE, ORDERSTATUS
+from lemon.common.enums import ORDERSIDE, ORDERSTATUS, ORDERTYPE
 
 from lemon.common.errors import *
 from lemon.common.helpers import Singleton
@@ -325,7 +325,7 @@ class Account(AccountState, metaclass=Singleton):
             raise LemonMarketError(
                 request.response['error_code'], request.response['error_message'])
 
-    def orders(self, isin: str = None, status: ORDERSTATUS = None, side: ORDERSIDE = None, start: str = None, end: str = None, type: str = None, key_creation_id: str = None):
+    def orders(self, isin: str = None, status: ORDERSTATUS = None, side: ORDERSIDE = None, start: str = None, end: str = None, type: ORDERTYPE = None, key_creation_id: str = None):
         """Get a list of orders on your account.
 
         Args:

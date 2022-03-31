@@ -42,3 +42,27 @@ class ORDERSIDE(BaseEnum):
 	"""
     BUY = "buy"
     SELL = "sell"
+
+class ORDERTYPE(BaseEnum):
+	"""The type of an Order.
+	
+	Values:
+		MARKET: Market Order. 
+			The order is immediately executed at the next possible price. 
+			Neither stop_price nor limit_price set.
+		STOP: Stop Market Order. 
+			Once the stop price is met, the order is converted into a market order. After that, the order is executed immediately at the next possible price.
+			Only stop_price set
+		LIMIT: Limit Order. 
+			The order is executed at the specified price or better.
+			Buy Order: limit price or lower, Sell Order: limit price or higher.
+			Only limit_price set.
+		STOP_LIMIT: Stop Limit Order.
+			Once the stop price is met, the order is converted into a limit order. Then, the order is executed at the specified price or better
+			Buy Order: limit price or lower, Sell Order: limit price or higher
+			Both limit_price and stop_price set
+	"""
+	MARKET="market"
+	STOP="stop_price"
+	LIMIT="limit_price"
+	STOP_LIMIT="stop_limit"
