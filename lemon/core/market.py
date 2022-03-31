@@ -10,38 +10,25 @@ from lemon.core.account import Account
 class MarketData(object):
     """Client to fetch Market Data via the lemon.markets API.
     """
-    def search_instrument(self, search: str = None, **kwargs):
-        """ Searching for instruments on Lang+Schwarz 
+
+    def search_instrument(self, search: str = None, isin: str = None, type: str = None, mic: str = None, currency: str = None, tradable: bool = None):
+        """ Searching for instrument
 
         Args:
-            search (str): Could be a ISIN, WKN or stock name.
-            kwargs** (optional): optional keyword arguments
-
-        Keyword arguments:
+            search (str):           Use this query parameter to search for Name/Title, ISIN, WKN or symbol. You can also perform a partial search by only specifiying the first 4 symbols.
+            isin (str):          Specify the ISIN you are interested in. You can also specify multiple ISINs. Maximum 10 ISINs per Request.
+            type (str):             Use this query parameter to specify the type of instrument you want to filter for, e.g. "stock" or "etf"
             mic (string):           Enter a Market Identifier Code (MIC) in there. Default is XMUN.
-            isin (string):          Specify the ISIN you are interested in. You can also specify multiple ISINs. Maximum 10 ISINs per Request.
-            currency (string):      letter abbreviation, e.g. "EUR" or "USD"
-            tradeable (boolean):    true or false
-            type (str):             i.e. type="etf"
-            limit (integer):        Needed for pagination, default is 100.
-            offset (integer):       Needed for pagination, default is 0.
+            currency (str):      ISO currency code to see instruments traded in a specific currency
+            tradeable (bool):    Filter for tradable or non-tradable Instruments with true or false
 
         Raises:
             LemonMarketError: if lemon.markets returns an error
 
         """
 
-        payload = {name: kwargs[name]
-                   for name in kwargs if kwargs[name] is not None}
-
-        if search != None:
-            query = f"search={search}"
-        else:
-            query = ""
-
         request = ApiRequest(type="data",
-                             endpoint=f"/instruments/?{query}",
-                             url_params=payload,
+                             endpoint=f"/instruments/?search={search}&isin={isin}&type={type}&mic={mic}&currency={currency}&tradable={tradable}",
                              method="GET",
                              authorization_token=Account().token)
         if "results" in request.response:
