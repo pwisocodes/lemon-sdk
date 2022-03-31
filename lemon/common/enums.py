@@ -8,6 +8,15 @@ class BaseEnum(Enum):
         """Access the value with ENUM.X instead of ENUM.X.value."""
         return self.value
 
+class SORT(BaseEnum):
+	"""Determines how the list is sorted.
+	
+	Values:
+		ASCENDING: Ascending
+		DESCENDING: Descending
+	"""
+	ASCENDING = "asc"
+	DESCENDING = "desc"
 
 class ORDERSTATUS(BaseEnum):
     """Represents the status of an order.

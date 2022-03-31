@@ -2,7 +2,7 @@ from urllib.parse import urlencode, quote
 
 import pandas as pd
 import urllib3
-from lemon.common.enums import INSTRUMENT_TYPE, TIMESPAN, VENUE
+from lemon.common.enums import INSTRUMENT_TYPE, SORT, TIMESPAN, VENUE
 from lemon.common.errors import LemonMarketError
 from lemon.common.requests import ApiRequest
 from lemon.core.account import Account
@@ -98,7 +98,7 @@ class MarketData(object):
             raise LemonMarketError(
                 request.response['error_code'], request.response['error_message'])
 
-    def ohlc(self, isin: str, start: str, end: str, timespan: TIMESPAN, venue: VENUE = None, sorting=None):
+    def ohlc(self, isin: str, start: str, end: str, timespan: TIMESPAN, venue: VENUE = None, sorting: SORT = None):
         """OHLC data of a specific instrument.
 
         Args:
