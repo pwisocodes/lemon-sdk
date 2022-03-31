@@ -1,8 +1,8 @@
-
 import logging
 import pandas as pd
 from dataclasses import dataclass
 from datetime import datetime
+from typing import get_type_hints
 from lemon.common.enums import ORDERSIDE, ORDERSTATUS, ORDERTYPE
 from lemon.common.errors import *
 from lemon.common.helpers import Singleton
@@ -234,9 +234,15 @@ class AccountState():
                              )
 
         if request.response['status'] == "ok":
+            types = get_type_hints(AccountState)
             # Dynamically set Attributes
             for k, v in request.response["results"].items():
-                setattr(self, f"_{k}", v)
+                if f"_{k}" in types:
+                    # Parse ISO string response to datetime if attribute is as datetime annotated
+                    if types[f"_{k}"] == datetime:
+                        setattr(self, f"_{k}", datetime.fromisoformat(v))
+                    else:
+                        setattr(self, f"_{k}", v)
         else:
             raise LemonMarketError(
                 request.response['error_code'], request.response['error_message'])
