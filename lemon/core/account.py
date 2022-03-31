@@ -14,6 +14,7 @@ class AccountState():
     """Represents the State/Attributes of an Account.
 
     Attributes:
+        created_at: Date of your Account creation
         account_id: ID of the Acount (read-only)
         firstname: First Name of the Account Owner
         lastname: Last Name of the Account Owner
@@ -48,6 +49,7 @@ class AccountState():
 
     """
 
+    _created_at: datetime = None
     _account_id: str = None
     _firstname: str = None
     _lastname: str = None
