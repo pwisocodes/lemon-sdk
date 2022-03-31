@@ -32,3 +32,13 @@ class ORDERSTATUS(BaseEnum):
     EXPIRED = "expired"
     DRAFT = "draft"
 
+
+class ORDERSIDE(BaseEnum):
+    """Indicates wether you want to buy or sell the instrument.
+
+	Values:
+		BUY: Buy the instrument
+		SELL: Sell the instrument
+	"""
+    BUY = "buy"
+    SELL = "sell"
