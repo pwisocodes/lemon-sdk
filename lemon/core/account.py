@@ -1,6 +1,7 @@
 
 import logging
 import threading
+import pandas as pd
 from dataclasses import dataclass
 from datetime import datetime
 from typing import List
@@ -328,7 +329,21 @@ class Account(AccountState, metaclass=Singleton):
             venue (str): MIC of Trading Venue
 
         Returns:
-            list: orders
+            pandas.DataFrame: Dataframe containing all orders
+                created_at (str): This is the Timestamp for when the order was created.
+                id (str): This is the unique Order Identification Number, which you can later use to activate your order.
+                status (str):This is the status the Order is currently in: 'inactive', 'activated', 'open' (Real Money only), 'in_progress', 'canceling','executed', 'canceled' or 'expired'
+                isin (str): This is the International Securities Identification Number of the instrument specified in that order
+                expires_at (str): This is the Timestamp until when the order is valid
+                side (str): 'buy' or 'sell'
+                quantity (int): This is the amount of instruments specified in the order
+                stop_price (int): This is the Stop price for the order. "null" if not specified.
+                limit_price (int): This is the Limit price for the order. "null" if not specified.
+                venue (str): This is the Market Identifier Code of the trading venue the order was placed at (default is XMUN).
+                estimated_price (int): This is an estimation from our end for what price the order will be executed
+                charge (int): This is the charge for the placed order
+                
+                see https://docs.lemon.markets/trading/orders for more
 
         Raises:
             LemonMarketError: if lemon.markets returns an error
@@ -339,7 +354,7 @@ class Account(AccountState, metaclass=Singleton):
                              authorization_token=self._token)
 
         if request.response['status'] == "ok":
-            return request.response['results']
+            return pd.Dataframe(request.response['results'])
         else:
             raise LemonMarketError(request.response['error_code'], request.response['error_message'])
 
@@ -351,6 +366,20 @@ class Account(AccountState, metaclass=Singleton):
 
         Returns:
             dict: order
+                created_at (str): This is the Timestamp for when the order was created.
+                id (str): This is the unique Order Identification Number, which you can later use to activate your order.
+                status (str):This is the status the Order is currently in: 'inactive', 'activated', 'open' (Real Money only), 'in_progress', 'canceling','executed', 'canceled' or 'expired'
+                isin (str): This is the International Securities Identification Number of the instrument specified in that order
+                expires_at (str): This is the Timestamp until when the order is valid
+                side (str): 'buy' or 'sell'
+                quantity (int): This is the amount of instruments specified in the order
+                stop_price (int): This is the Stop price for the order. "null" if not specified.
+                limit_price (int): This is the Limit price for the order. "null" if not specified.
+                venue (str): This is the Market Identifier Code of the trading venue the order was placed at (default is XMUN).
+                estimated_price (int): This is an estimation from our end for what price the order will be executed
+                charge (int): This is the charge for the placed order
+                
+                see https://docs.lemon.markets/trading/orders for more
 
         Raises:
             LemonMarketError: if lemon.markets returns an error
@@ -391,7 +420,12 @@ class Account(AccountState, metaclass=Singleton):
         """ Get Withdrawals of the account.
 
         Returns:
-            list: list of withdrawals
+            pandas.DataFrame: Withdrawals
+                id (str): A unique Identification Number of your withdrawal
+                amount (int): The amount that you specified for your withdrawal
+                created_at (str): Timestamp at which you created the withdrawal
+                date (str): Timestamp at which the withdrawal was processed by our partner bank
+                idempotency (str): Your own unique idempotency key that you specified in your POST request to prevent duplicate withdrawals.
 
         Raises:
             LemonMarketError: if lemon.markets returns an error
@@ -404,7 +438,7 @@ class Account(AccountState, metaclass=Singleton):
                              authorization_token=self._token)
 
         if request.response['status'] == "ok":
-            return request.response['results']
+            return pd.DataFrame(request.response['results'])
         else:
             raise LemonMarketError(request.response['error_code'], request.response['error_message'])
 
@@ -415,8 +449,14 @@ class Account(AccountState, metaclass=Singleton):
             isin (str): Filter for position of a specific share
 
         Returns:
-            list: positions
-        
+            pandas.DataFrame: positions
+                isin (str): This is the International Securities Identification Number (ISIN) of the position
+                isin_title (str): This is the Title of the instrument
+                quantity (int): This is the number of positions you currently hold for the respective Instrument
+                buy_price_avg (int): This is the average buy-in price of the respective position. If you buy one share for 100€ and a second one for 110€, the average buy-in price would be 105€.
+                estimated_price_total (int): This is the current position valuation to the market trading price. So, if you own 3 shares of stock XYZ, and the current market trading price for XYZ is 100€, this attribute would return 300€
+                estimated_price (int): This is the current market trading price for the respective position.
+
         Raises:
             LemonMarketError: if lemon.markets returns an error
         """
@@ -431,6 +471,6 @@ class Account(AccountState, metaclass=Singleton):
                              authorization_token=self._token)
 
         if request.response['status'] == "ok":
-            return request.response['results']
+            return pd.DataFrame(request.response['results'])
         else:
             raise LemonMarketError(request.response['error_code'], request.response['error_message'])

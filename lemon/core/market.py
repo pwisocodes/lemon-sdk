@@ -45,12 +45,7 @@ class MarketData(object):
                              method="GET",
                              authorization_token=Account().token)
         if "results" in request.response:
-            if request.response['results'] != []:
-                df = pd.DataFrame(request.response['results'])
-                return df
-            else:
-                # Valid Request, but no instrument found
-                return None
+            return pd.DataFrame(request.response['results'])
         else:
             raise LemonMarketError(request.response['error_code'], request.response['error_message'])
 
@@ -77,11 +72,7 @@ class MarketData(object):
                              authorization_token=Account().token)
 
         if "results" in request.response:
-            if request.response['results'] != []:
-                df = pd.DataFrame(request.response['results'])
-                return df
-            else:
-                return None
+            return pd.DataFrame(request.response['results'])
         else:
             raise LemonMarketError(request.response['error_code'], request.response['error_message'])
 
@@ -93,7 +84,7 @@ class MarketData(object):
             mic (str): [description]
 
         Returns:
-            (dict): Dict containing the latest Quote 
+            dict: The latest Quote 
                 isin: ISIN
                 t: timestamp
                 mic: Market Identifier Code
@@ -111,11 +102,7 @@ class MarketData(object):
                              method="GET",
                              authorization_token=Account().token)
         if "results" in request.response:
-            if request.response['results'] != []:
-                df = pd.DataFrame(request.response['results'])
-                return df
-            else:
-                return None
+            return request.response['results']
         else:
             raise LemonMarketError(request.response['error_code'], request.response['error_message'])
 
@@ -132,9 +119,8 @@ class MarketData(object):
             ValueError: Invalid Parameter specified
             LemonMarketError: if lemon.markets returns an error
 
-
         Returns:
-            list: List of OHLC-Data dicts.
+            pandas.DataFrame: Dataframe containing OHLC-Data.
                 isin: The International Securities Identification Number of the instrument
                 o: Open Price in specific time period
                 h: Highest Price in specific time period
@@ -155,11 +141,7 @@ class MarketData(object):
                              authorization_token=Account().token)
 
         if "results" in request.response:
-            if request.response['results'] != []:
-                df = pd.DataFrame(request.response['results'])
-                return df
-            else:
-                return None
+            return pd.DataFrame(request.response['results'])
         else:
             raise LemonMarketError(request.response['error_code'], request.response['error_message'])
 
@@ -171,7 +153,7 @@ class MarketData(object):
             isin (str): The International Securities Identification Number of the instrument
 
         Returns:
-            pandas.Dataframe: Dataframe containing information about the trade.
+            dict: Information about the trade.
                 isin: The International Securities Identification Number of the instrument
                 p: Price the trade happened at
                 v: Volume for trade (quantity)
@@ -179,7 +161,6 @@ class MarketData(object):
                 mic: Market Identifier Code of Trading Venue the trade occured at
 
         """
-
         if payload:
             payload = "&" + urlencode(payload, doseq=True)
         else:
@@ -190,10 +171,6 @@ class MarketData(object):
                              method="GET",
                              authorization_token=self._token)
         if "results" in request.response:
-            if request.response['results'] != []:
-                df = pd.DataFrame(request.response['results'])
-                return df
-            else:
-                return None
+            return request.response['results']
         else:
             raise LemonMarketError(request.response['error_code'], request.response['error_message'])
