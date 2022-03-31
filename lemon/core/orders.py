@@ -3,6 +3,7 @@ import json
 from lemon.common.enums import VENUE
 from lemon.common.requests import ApiRequest
 from lemon.core.account import *
+from typing import get_type_hints
 
 
 class Order():
@@ -17,13 +18,47 @@ class Order():
         stop_price: Stop Market Order. Once the stop price is met, the order is converted into a market order. After that, the order is executed immediately at the next possible price. (Can be combined with limit_price)
         limit_price: Limit Order. The order is executed at the specified price or better (Buy Order: limit price or lower, Sell Order: limit price or higher). (Can be combined with stop_price)
         notes: Personal notes to the order
+        idempotency: This is a unique idempotency key that prevents duplicate operations. 
+            Subsequent requests with the same idempotency key will then not go through and throw an error message. This means you cannot place the same order twice.
+
+    Attributes set by API:
         status: Status the Order is currently in ORDERSTATUS: INACTIVE, ACTIVATED, OPEN (Real Money only), IN_PROGRESS, CANCELING, EXECUTED, CANCELED or EXPIRED
         id: ID of the order
         regulatory_information: Regulatory information to the order 
+            costs_entry: These are the costs for placing the Order
+            costs_entry_pct: These are the costs for placing the Order as percentage value
+            costs_running: These are the running costs for the order
+            costs_running_pct: These are the running costs for the order as percentage value
+            costs_product: These are the product costs for the order
+            costs_product_pct: These are the product costs for the order as percentage value
+            costs_exit: These are the exit costs for the order
+            costs_exit_pct: These are the exit costs for the order as percentage value
+            yield_reduction_year: This is the expected yield reduction in the first year
+            yield_reduction_year_following: This is the expected yield reduction in the following year
+            yield_reduction_year_exit: This is the expected yield reduction in the exit year
+            kiid: This is the Key Investors Information Document, only at ETFs
+            legal_disclaimer: This is a legal disclaimer for placing the Order
         estimated_price: Estimation from our end for what price the Order will be executed
+        estimated_price_total: This is the Estimated Price the Order will be executed at (only for Market Orders), multiplied by the Order quantity
+        created_at: The Date the Order was created at
+        charge: This is the Charge for placed order
+        chargeable_at: Timestamp at which the charge was generated
+        isin_title: This is the Title of the instrument bought or sold with this order
+        type: Type of the Order: market, stop, limit, stop_limit
+        executed_quantity: This is the amount of Instruments to be bought or sold, as specified in the Order
+        executed_price: This is the Price the Order was executed at
+        executed_price_total: This is the Price the Order was executed at, multiplied by the Order quantity
+        activated_at: The Date the Order was activated at
+        executed_at: The Date the Order was executed at
+        rejected_at: The Date the Order was rejected at
+        cancelled_at: The Date the Order was cancelled at
+        key_creation_id: This is the API Key the order was created with
+        key_activation_id: This is the API Key the order was activated with. 
+            When the Order was activated via mobile app, the API will return mobile here. 
+            When the Order was activated via Dashboard, the API will return dashboard here
 
     """
-
+    # Set by constructor / setters
     _isin: str
     _side: ORDERSIDE
     _quantity: int
@@ -32,13 +67,30 @@ class Order():
     _limit_price: int = None
     _notes: str = None
     _expires_at: datetime = None
+    _idempotency: str = None
 
+    # Returned by API
     _status: ORDERSTATUS = None
     _id: str = None
     _regulatory_information: dict = None
     _estimated_price: int = None
+    _estimated_price_total: int = None
+    _created_at: datetime = None
+    _charge: int = None
+    _chargeable_at: datetime = None
+    _isin_title: str = None
+    _type: str = None
+    _executed_quantity: int = None
+    _executed_price: int = None
+    _executed_price_total: int = None
+    _activated_at: datetime = None
+    _executed_at: datetime = None
+    _rejected_at: datetime = None
+    _cancelled_at: datetime = None
+    _key_creation_id: str = None
+    _key_activation_id: str = None
 
-    def __init__(self, isin: str, expires_at: datetime, side: ORDERSIDE, quantity: int, venue: VENUE, trading_type: str, stop_price: int = None, limit_price: int = None, notes: str = None, __status=ORDERSTATUS.DRAFT) -> None:
+    def __init__(self, isin: str, expires_at: datetime, side: ORDERSIDE, quantity: int, venue: VENUE, trading_type: str, stop_price: int = None, limit_price: int = None, notes: str = None, idempotency: str = None, __status=ORDERSTATUS.DRAFT) -> None:
         self._trading_type = trading_type
         self._isin = isin
         self._side = side
@@ -48,6 +100,7 @@ class Order():
         self._limit_price = limit_price
         self._notes = notes
         self._expires_at = expires_at
+        self._idempotency = idempotency
 
         self._status = __status
 
@@ -57,11 +110,9 @@ class Order():
         Raises:
             LemonMarketError: if lemon.markets returns an error
 
-        Returns:
-            str: OrderID 
         """
 
-        if self._status != ORDERSTATUS.INACTIVE:
+        if self._status != ORDERSTATUS.DRAFT:
             # raise OrderStatusError(f"Order {self._id} is already placed")
             return
 
@@ -76,14 +127,8 @@ class Order():
                              )
 
         if request.response['status'] == "ok":
-
-            self._status = request.response['results']['status']
-            # Should be "inactive" now
-            self._id = request.response['results']['id']
-            self._regulatory_information = request.response['results']['regulatory_information']
-            self._estimated_price = request.response['results']['estimated_price']
-
-            return self._id
+            self._attr_from_response(request.response['results'])
+            return
         else:
             raise LemonMarketError(
                 request.response['error_code'], request.response['error_message'])
@@ -135,6 +180,21 @@ class Order():
         else:
             # Do nothing as it's just a local object
             return
+
+    def reload(self):
+        """Fetches the order again and sets the attributes to the new values."""
+        res = Account().get_order(self._id)
+        self._attr_from_response(res)
+
+    def _attr_from_response(self, res: dict):
+        types = get_type_hints(Order)
+        for k, v in res.items():
+            if f"_{k}" in types:
+                # Parse ISO string response to datetime if attribute is annotated as datetime
+                if types[f"_{k}"] == datetime:
+                    setattr(self, f"_{k}", datetime.fromisoformat(v))
+                else:
+                    setattr(self, f"_{k}", v)
 
     @property
     def isin(self):
