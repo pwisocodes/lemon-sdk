@@ -9,19 +9,19 @@ class Order():
     """Represents an Order.
 
     Attributes:
-        isin (str): Internation Security Identification Number of the instrument you wish to buy or sell
-        expires_at (datetime): ISO String date (YYYY-MM-DD). Order expires at the end of the specified day. Maximum expiration date is 30 days in the future.
-        side (str): With this you can define whether you want to buy ('buy') or sell ('sell') a specific instrument
-        quantity (int): The amount of shares you want to buy. Limited to 25,000€ estimated order price per request.
-        venue (str): Market Identifier Code of Stock exchange you want to address. Default value is 'XMUN'.
-        stop_price (int): Stop Market Order. Once the stop price is met, the order is converted into a market order. After that, the order is executed immediately at the next possible price. (Can be combined with limit_price)
-        limit_price (int): Limit Order. The order is executed at the specified price or better (Buy Order: limit price or lower, Sell Order: limit price or higher). (Can be combined with stop_price)
-        notes (str): Personal notes to the order
+        isin: Internation Security Identification Number of the instrument you wish to buy or sell
+        expires_at: ISO String date (YYYY-MM-DD). Order expires at the end of the specified day. Maximum expiration date is 30 days in the future.
+        side: With this you can define whether you want to buy ('buy') or sell ('sell') a specific instrument
+        quantity: The amount of shares you want to buy. Limited to 25,000€ estimated order price per request.
+        venue: Market Identifier Code of Stock exchange you want to address. Default value is 'XMUN'.
+        stop_price: Stop Market Order. Once the stop price is met, the order is converted into a market order. After that, the order is executed immediately at the next possible price. (Can be combined with limit_price)
+        limit_price: Limit Order. The order is executed at the specified price or better (Buy Order: limit price or lower, Sell Order: limit price or higher). (Can be combined with stop_price)
+        notes: Personal notes to the order
 
-        status (str): Status the Order is currently in: 'draft' (local only), 'inactive', 'activated', 'open' (Real Money only), 'in_progress', 'canceling','executed', 'canceled' or 'expired'
-        id (str): ID of the order
-        regulatory_information (dict): Regulatory information to the order 
-        estimated_price (int): Estimation from our end for what price the Order will be executed
+        status: Status the Order is currently in: 'draft' (local only), 'inactive', 'activated', 'open' (Real Money only), 'in_progress', 'canceling','executed', 'canceled' or 'expired'
+        id: ID of the order
+        regulatory_information: Regulatory information to the order 
+        estimated_price: Estimation from our end for what price the Order will be executed
 
     """
 
@@ -93,7 +93,7 @@ class Order():
         """ Activate the Order. After you activated the order, it is routed to the trading venue.
 
         Arguments:
-            pin (str): PIN to activate a real-money order. Mandatory for real-money trading.
+            pin: PIN to activate a real-money order. Mandatory for real-money trading.
 
         Raises:
             ValueError: if PIN is missing for real money orders

@@ -15,12 +15,12 @@ class MarketData(object):
         """ Searching for instrument
 
         Args:
-            search (str):           Use this query parameter to search for Name/Title, ISIN, WKN or symbol. You can also perform a partial search by only specifiying the first 4 symbols.
-            isin (str):          Specify the ISIN you are interested in. You can also specify multiple ISINs. Maximum 10 ISINs per Request.
-            type (str):             Use this query parameter to specify the type of instrument you want to filter for, e.g. "stock" or "etf"
-            mic (string):           Enter a Market Identifier Code (MIC) in there. Default is XMUN.
-            currency (str):      ISO currency code to see instruments traded in a specific currency
-            tradeable (bool):    Filter for tradable or non-tradable Instruments with true or false
+            search: Use this query parameter to search for Name/Title, ISIN, WKN or symbol. You can also perform a partial search by only specifiying the first 4 symbols.
+            isin: Specify the ISIN you are interested in. You can also specify multiple ISINs. Maximum 10 ISINs per Request.
+            type: Use this query parameter to specify the type of instrument you want to filter for, e.g. "stock" or "etf"
+            mic: Enter a Market Identifier Code (MIC) in there. Default is XMUN.
+            currency: ISO currency code to see instruments traded in a specific currency
+            tradeable: Filter for tradable or non-tradable Instruments with true or false
 
         Raises:
             LemonMarketError: if lemon.markets returns an error
@@ -41,15 +41,15 @@ class MarketData(object):
         """List all available Trading Venues
 
         Args:
-            mic (str):  Enter a Market Identifier Code (MIC) in there.
+            mic:  Enter a Market Identifier Code (MIC) in there.
 
         Returns:
-            DataFrame:                  DataFrame of all trading venues
-                name (str):             This is the Full Name of the Trading Venue
-                title (str):            This is the Short Title of the Trading Venue
-                mic (str):              This is the Market Identifier Code (MIC) of the Trading Venue
-                is_open (boolean):      This indicates if the Trading Venue is currently open
-                opening_days (list):    list of days when Trading Venue is open
+            DataFrame: DataFrame of all trading venues
+                name: This is the Full Name of the Trading Venue
+                title: This is the Short Title of the Trading Venue
+                mic: This is the Market Identifier Code (MIC) of the Trading Venue
+                is_open: This indicates if the Trading Venue is currently open
+                opening_days: list of days when Trading Venue is open
 
 
         Raises:
@@ -71,8 +71,8 @@ class MarketData(object):
         """Get the latest quote of an instrument.
 
         Args:
-            isin (str): The International Securities Identification Number of the instrument
-            mic (str): Market Identifier Code of the trading venue.
+            isin: The International Securities Identification Number of the instrument
+            mic: Market Identifier Code of the trading venue.
 
         Returns:
             dict: The latest Quote 
@@ -102,12 +102,12 @@ class MarketData(object):
         """OHLC data of a specific instrument.
 
         Args:
-            isin (str): The International Securities Identification Number of the instrument
-            start (str): ISO-Date or Epoch Timestamp.
-            end (str): ISO-Date or Epoch Timestamp.
-            timespan (str): Either 'd' (day), 'h' (hour), 'm' (minute).
-            mic (str): Market Identifier Code of the trading venue.
-            sorting (str): Sort your API response, either ascending (asc) or descending (desc)
+            isin: The International Securities Identification Number of the instrument
+            start: ISO-Date or Epoch Timestamp.
+            end: ISO-Date or Epoch Timestamp.
+            timespan: Either 'd' (day), 'h' (hour), 'm' (minute).
+            mic: Market Identifier Code of the trading venue.
+            sorting: Sort your API response, either ascending (asc) or descending (desc)
 
         Raises:
             ValueError: Invalid Parameter specified
@@ -144,8 +144,8 @@ class MarketData(object):
         """Latest trade of a specific instrument
 
         Args:
-            mic (str): Market Identifier Code of the trading venue.
-            isin (str): The International Securities Identification Number of the instrument
+            mic: Market Identifier Code of the trading venue.
+            isin: The International Securities Identification Number of the instrument
 
         Returns:
             dict: Information about the trade.

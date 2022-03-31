@@ -17,37 +17,37 @@ class AccountState():
     """Represents the State/Attributes of an Account.
 
     Attributes:
-        account_id (str): ID of the Acount (read-only)
-        firstname (str): First Name of the Account Owner
-        lastname (str): Last Name of the Account Owner
-        email (str): Email Adress of the Account Owner
-        phone (str): Phone Number of the Account Owner
-        address (str): Address of the Account Owner
-        billing_address (str): Billing Address of the Account Owner
-        billing_email (str): Billing Email of the Account Owner
-        billing_name (str): Billing Name of the Account Owner
-        billing_vat (str): Value-added Tax (GER: MwSt) of the Account Owner
-        mode (str): Environment of the account. Either 'paper' or 'money'
-        deposit_id (str): Identification Number of your securities account
-        client_id (str): The internal client identification number related to the account
-        account_number (str): The account reference number
-        iban_brokerage (str): IBAN of the brokerage account at our partner bank. This is the IBAN you can transfer money from your referrence account to
-        iban_origin (str): IBAN of the reference account.
-        bank_name_origin (str): Bank name of your reference account.
-        balance (int): Your balance is the money you transferred to your account + the combined profits or losses from your orders. 1€ = 10000
-        cash_to_invest (int): How much cash you have left to invest. Your balance minus the sum of orders that were activated but not executed, yet.
-        cash_to_withdraw (int): How much cash you have in your account to withdraw to your reference account. Calculated through your last reported balance minus the current sum of buy orders.
-        amount_bought_intraday (int):
-        amount_sold_intraday (int):
-        amount_open_orders (int):
-        amount_open_withdrawals (int):
-        amount_estimate_taxes (int):
-        approved_at (datetime): Timestamp of live trading account approval
-        trading_plan (str): subscription plan for trading. Either 'free', 'basic' or 'pro'
-        data_plan (str): subscription plan for market data. Either 'free', 'basic' or 'pro'
-        tax_allowance (int): Your tax tax allowance - between 0 and 801 €, as specified in your onboarding process
-        tax_allowance_start (datetime): Relevant start date for your tax allowance (usually 01/01/ of respective year)
-        tax_allowance_end (datetime): Relevant end date for your tax allowance (usually 31/12/ of respective year)
+        account_id: ID of the Acount (read-only)
+        firstname: First Name of the Account Owner
+        lastname: Last Name of the Account Owner
+        email: Email Adress of the Account Owner
+        phone: Phone Number of the Account Owner
+        address: Address of the Account Owner
+        billing_address: Billing Address of the Account Owner
+        billing_email: Billing Email of the Account Owner
+        billing_name: Billing Name of the Account Owner
+        billing_vat: Value-added Tax (GER: MwSt) of the Account Owner
+        mode: Environment of the account. Either 'paper' or 'money'
+        deposit_id: Identification Number of your securities account
+        client_id: The internal client identification number related to the account
+        account_number: The account reference number
+        iban_brokerage: IBAN of the brokerage account at our partner bank. This is the IBAN you can transfer money from your referrence account to
+        iban_origin: IBAN of the reference account.
+        bank_name_origin: Bank name of your reference account.
+        balance: Your balance is the money you transferred to your account + the combined profits or losses from your orders. 1€ = 10000
+        cash_to_invest: How much cash you have left to invest. Your balance minus the sum of orders that were activated but not executed, yet.
+        cash_to_withdraw: How much cash you have in your account to withdraw to your reference account. Calculated through your last reported balance minus the current sum of buy orders.
+        amount_bought_intraday:
+        amount_sold_intraday:
+        amount_open_orders:
+        amount_open_withdrawals:
+        amount_estimate_taxes:
+        approved_at: Timestamp of live trading account approval
+        trading_plan: subscription plan for trading. Either 'free', 'basic' or 'pro'
+        data_plan: subscription plan for market data. Either 'free', 'basic' or 'pro'
+        tax_allowance: Your tax tax allowance - between 0 and 801 €, as specified in your onboarding process
+        tax_allowance_start: Relevant start date for your tax allowance (usually 01/01/ of respective year)
+        tax_allowance_end: Relevant end date for your tax allowance (usually 31/12/ of respective year)
 
     """
 
@@ -257,9 +257,9 @@ class Account(AccountState, metaclass=Singleton):
         """ Withdraw money from your bank account to your lemon.markets account e.g. amount = 1000000 means 100€ (hundreths of a cent). Take a look at: https://docs.lemon.markets/trading/overview#working-with-numbers-in-the-trading-api 
 
         Args:
-            amount (int): amount of money that will be withdrawn, minimum is 1000000 (100 €)
-            pin (int): his is the personal verification PIN you set during the onboarding. 
-            idempotency (str): ou can set your own unique idempotency key to prevent duplicate operations. Subsequent requests with the same idempotency key will then not go through and throw an error message. This means you cannot make the same withdrawal twice.
+            amount: amount of money that will be withdrawn, minimum is 1000000 (100 €)
+            pin: his is the personal verification PIN you set during the onboarding. 
+            idempotency: ou can set your own unique idempotency key to prevent duplicate operations. Subsequent requests with the same idempotency key will then not go through and throw an error message. This means you cannot make the same withdrawal twice.
 
         Raises:
             LemonMarketError: if lemon.markets returns an error
@@ -287,7 +287,7 @@ class Account(AccountState, metaclass=Singleton):
         """ Get information about all documents linked with this account 
 
         Returns:
-            list: arraylist of dicts
+            List of Documents as Dict
 
         Raises:
             LemonMarketError: if lemon.markets returns an error
@@ -307,7 +307,7 @@ class Account(AccountState, metaclass=Singleton):
         """ Download a specific doc by id
 
         Args:
-            doc_id (str): ID of document
+            doc_id: ID of document
 
         Raises:
             LemonMarketError: if lemon.markets returns an error
@@ -328,28 +328,28 @@ class Account(AccountState, metaclass=Singleton):
         """ Get a list of orders on your account.
 
         Args:
-            isin (str): Filter for specific instrument
-            status (str): Filter for status 'inactive', 'activated', 'open' (Real Money only), 'in_progress', 'canceling','executed', 'canceled' or 'expired'
-            side (str): Filter for 'buy' or 'sell'
-            start (str): Specify an ISO date string (YYYY-MM-DD) to get only orders from a specific date on.
-            end (str): Specify an ISO date string (YYYY-MM-DD) to get only orders until a specific date.
-            type (str): Filter for different types of orders: market, stop, limit, stop_limit
-            key_creation_id (str): Filter for a specific API you created orders with
+            isin: Filter for specific instrument
+            status: Filter for status 'inactive', 'activated', 'open' (Real Money only), 'in_progress', 'canceling','executed', 'canceled' or 'expired'
+            side: Filter for 'buy' or 'sell'
+            start: Specify an ISO date string (YYYY-MM-DD) to get only orders from a specific date on.
+            end: Specify an ISO date string (YYYY-MM-DD) to get only orders until a specific date.
+            type: Filter for different types of orders: market, stop, limit, stop_limit
+            key_creation_id: Filter for a specific API you created orders with
 
         Returns:
             pandas.DataFrame: Dataframe containing all orders
-                created_at (str): This is the Timestamp for when the order was created.
-                id (str): This is the unique Order Identification Number, which you can later use to activate your order.
-                status (str):This is the status the Order is currently in: 'inactive', 'activated', 'open' (Real Money only), 'in_progress', 'canceling','executed', 'canceled' or 'expired'
-                isin (str): This is the International Securities Identification Number of the instrument specified in that order
-                expires_at (str): This is the Timestamp until when the order is valid
-                side (str): 'buy' or 'sell'
-                quantity (int): This is the amount of instruments specified in the order
-                stop_price (int): This is the Stop price for the order. "null" if not specified.
-                limit_price (int): This is the Limit price for the order. "null" if not specified.
-                venue (str): This is the Market Identifier Code of the trading venue the order was placed at (default is XMUN).
-                estimated_price (int): This is an estimation from our end for what price the order will be executed
-                charge (int): This is the charge for the placed order
+                created_at: This is the Timestamp for when the order was created.
+                id: This is the unique Order Identification Number, which you can later use to activate your order.
+                status:This is the status the Order is currently in: 'inactive', 'activated', 'open' (Real Money only), 'in_progress', 'canceling','executed', 'canceled' or 'expired'
+                isin: This is the International Securities Identification Number of the instrument specified in that order
+                expires_at: This is the Timestamp until when the order is valid
+                side: 'buy' or 'sell'
+                quantity: This is the amount of instruments specified in the order
+                stop_price: This is the Stop price for the order. "null" if not specified.
+                limit_price: This is the Limit price for the order. "null" if not specified.
+                venue: This is the Market Identifier Code of the trading venue the order was placed at (default is XMUN).
+                estimated_price: This is an estimation from our end for what price the order will be executed
+                charge: This is the charge for the placed order
 
                 see https://docs.lemon.markets/trading/orders for more
 
@@ -375,18 +375,18 @@ class Account(AccountState, metaclass=Singleton):
 
         Returns:
             dict: order
-                created_at (str): This is the Timestamp for when the order was created.
-                id (str): This is the unique Order Identification Number, which you can later use to activate your order.
-                status (str):This is the status the Order is currently in: 'inactive', 'activated', 'open' (Real Money only), 'in_progress', 'canceling','executed', 'canceled' or 'expired'
-                isin (str): This is the International Securities Identification Number of the instrument specified in that order
-                expires_at (str): This is the Timestamp until when the order is valid
-                side (str): 'buy' or 'sell'
-                quantity (int): This is the amount of instruments specified in the order
-                stop_price (int): This is the Stop price for the order. "null" if not specified.
-                limit_price (int): This is the Limit price for the order. "null" if not specified.
-                venue (str): This is the Market Identifier Code of the trading venue the order was placed at (default is XMUN).
-                estimated_price (int): This is an estimation from our end for what price the order will be executed
-                charge (int): This is the charge for the placed order
+                created_at: This is the Timestamp for when the order was created.
+                id: This is the unique Order Identification Number, which you can later use to activate your order.
+                status:This is the status the Order is currently in: 'inactive', 'activated', 'open' (Real Money only), 'in_progress', 'canceling','executed', 'canceled' or 'expired'
+                isin: This is the International Securities Identification Number of the instrument specified in that order
+                expires_at: This is the Timestamp until when the order is valid
+                side: 'buy' or 'sell'
+                quantity: This is the amount of instruments specified in the order
+                stop_price: This is the Stop price for the order. "null" if not specified.
+                limit_price: This is the Limit price for the order. "null" if not specified.
+                venue: This is the Market Identifier Code of the trading venue the order was placed at (default is XMUN).
+                estimated_price: This is an estimation from our end for what price the order will be executed
+                charge: This is the charge for the placed order
 
                 see https://docs.lemon.markets/trading/orders for more
 
@@ -409,7 +409,7 @@ class Account(AccountState, metaclass=Singleton):
         """ Cancel an order that is placed/inactive or activated (but not executed by the stock exchange)
 
         Args:
-            order_id (str): ID of the order
+            order_id: ID of the order
 
         Raises:
             LemonMarketError: if lemon.markets returns an error
@@ -431,11 +431,11 @@ class Account(AccountState, metaclass=Singleton):
 
         Returns:
             pandas.DataFrame: Withdrawals
-                id (str): A unique Identification Number of your withdrawal
-                amount (int): The amount that you specified for your withdrawal
-                created_at (str): Timestamp at which you created the withdrawal
-                date (str): Timestamp at which the withdrawal was processed by our partner bank
-                idempotency (str): Your own unique idempotency key that you specified in your POST request to prevent duplicate withdrawals.
+                id: A unique Identification Number of your withdrawal
+                amount: The amount that you specified for your withdrawal
+                created_at: Timestamp at which you created the withdrawal
+                date: Timestamp at which the withdrawal was processed by our partner bank
+                idempotency: Your own unique idempotency key that you specified in your POST request to prevent duplicate withdrawals.
 
         Raises:
             LemonMarketError: if lemon.markets returns an error
@@ -457,16 +457,16 @@ class Account(AccountState, metaclass=Singleton):
         """ Get the positions of the account.
 
         Args:
-            isin (str): Filter for position of a specific share
+            isin: Filter for position of a specific share
 
         Returns:
             pandas.DataFrame: positions
-                isin (str): This is the International Securities Identification Number (ISIN) of the position
-                isin_title (str): This is the Title of the instrument
-                quantity (int): This is the number of positions you currently hold for the respective Instrument
-                buy_price_avg (int): This is the average buy-in price of the respective position. If you buy one share for 100€ and a second one for 110€, the average buy-in price would be 105€.
-                estimated_price_total (int): This is the current position valuation to the market trading price. So, if you own 3 shares of stock XYZ, and the current market trading price for XYZ is 100€, this attribute would return 300€
-                estimated_price (int): This is the current market trading price for the respective position.
+                isin: This is the International Securities Identification Number (ISIN) of the position
+                isin_title: This is the Title of the instrument
+                quantity: This is the number of positions you currently hold for the respective Instrument
+                buy_price_avg: This is the average buy-in price of the respective position. If you buy one share for 100€ and a second one for 110€, the average buy-in price would be 105€.
+                estimated_price_total: This is the current position valuation to the market trading price. So, if you own 3 shares of stock XYZ, and the current market trading price for XYZ is 100€, this attribute would return 300€
+                estimated_price: This is the current market trading price for the respective position.
 
         Raises:
             LemonMarketError: if lemon.markets returns an error
