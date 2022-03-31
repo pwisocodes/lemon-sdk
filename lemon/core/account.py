@@ -255,6 +255,8 @@ class Account(AccountState, metaclass=Singleton):
 
         Args:
             amount (int): amount of money that will be withdrawn, minimum is 1000000 (100 €)
+            pin (int): his is the personal verification PIN you set during the onboarding. 
+            idempotency (str): ou can set your own unique idempotency key to prevent duplicate operations. Subsequent requests with the same idempotency key will then not go through and throw an error message. This means you cannot make the same withdrawal twice.
 
         Raises:
             LemonMarketError: if lemon.markets returns an error
