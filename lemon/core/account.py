@@ -354,7 +354,7 @@ class Account(AccountState, metaclass=Singleton):
                              authorization_token=self._token)
 
         if request.response['status'] == "ok":
-            return pd.Dataframe(request.response['results'])
+            return pd.DataFrame(request.response['results'])
         else:
             raise LemonMarketError(request.response['error_code'], request.response['error_message'])
 
