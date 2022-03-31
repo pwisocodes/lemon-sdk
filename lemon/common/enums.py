@@ -99,3 +99,15 @@ class VENUE(BaseEnum):
 	ALLDAY = "allday"
 	LM_BEST_PERFORMANCE = "LMBPX"
 
+class TIMESPAN(BaseEnum):
+	"""Timespan of one OHLC Entry.
+	
+	Value:
+		MINUTE: The data is aggregated on a per-minute basis.
+		HOUR: The data is aggregated on an hourly basis.
+		DAY: The data is aggregated on a daily basis.
+	"""
+	MINUTE="m"
+	HOUR="h"
+	DAY="d"
+
