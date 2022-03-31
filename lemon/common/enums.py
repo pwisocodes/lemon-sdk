@@ -36,18 +36,19 @@ class ORDERSTATUS(BaseEnum):
 class ORDERSIDE(BaseEnum):
     """Indicates wether you want to buy or sell the instrument.
 
-	Values:
-		BUY: Buy the instrument
-		SELL: Sell the instrument
-	"""
+        Values:
+			BUY: Buy the instrument
+			SELL: Sell the instrument
+        """
     BUY = "buy"
     SELL = "sell"
 
+
 class ORDERTYPE(BaseEnum):
-	"""The type of an Order.
-	
-	Values:
-		MARKET: Market Order. 
+    """The type of an Order.
+
+    Values:
+        MARKET: Market Order. 
 			The order is immediately executed at the next possible price. 
 			Neither stop_price nor limit_price set.
 		STOP: Stop Market Order. 
@@ -62,7 +63,25 @@ class ORDERTYPE(BaseEnum):
 			Buy Order: limit price or lower, Sell Order: limit price or higher
 			Both limit_price and stop_price set
 	"""
-	MARKET="market"
-	STOP="stop_price"
-	LIMIT="limit_price"
-	STOP_LIMIT="stop_limit"
+    MARKET = "market"
+    STOP = "stop_price"
+    LIMIT = "limit_price"
+    STOP_LIMIT = "stop_limit"
+
+
+class INSTRUMENT_TYPE(BaseEnum):
+    """The type of an instrument.
+	
+	Values:
+		STOCK: Stock
+		BOND: Bond
+		WARRANT: Warrant
+		FUND: Fund
+		ETF: ETF
+
+    """
+    STOCK = "stock"
+    BOND = "bond"
+    WARRANT = "warrant"
+    FUND = "fund"
+    ETF = "etf"

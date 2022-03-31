@@ -2,6 +2,7 @@ from urllib.parse import urlencode, quote
 
 import pandas as pd
 import urllib3
+from lemon.common.enums import INSTRUMENT_TYPE
 from lemon.common.errors import LemonMarketError
 from lemon.common.requests import ApiRequest
 from lemon.core.account import Account
@@ -11,13 +12,13 @@ class MarketData(object):
     """Client to fetch Market Data via the lemon.markets API.
     """
 
-    def search_instrument(self, search: str = None, isin: str = None, type: str = None, mic: str = None, currency: str = None, tradable: bool = None):
+    def search_instrument(self, search: str = None, isin: str = None, type: INSTRUMENT_TYPE = None, mic: str = None, currency: str = None, tradable: bool = None):
         """ Searching for instrument
 
         Args:
             search: Use this query parameter to search for Name/Title, ISIN, WKN or symbol. You can also perform a partial search by only specifiying the first 4 symbols.
             isin: Specify the ISIN you are interested in. You can also specify multiple ISINs. Maximum 10 ISINs per Request.
-            type: Use this query parameter to specify the type of instrument you want to filter for, e.g. "stock" or "etf"
+            type: Use this query parameter to specify the type of instrument you want to filter for, e.g. ORDERTYPE.STOCK, ORDERTYP.ETF
             mic: Enter a Market Identifier Code (MIC) in there. Default is XMUN.
             currency: ISO currency code to see instruments traded in a specific currency
             tradeable: Filter for tradable or non-tradable Instruments with true or false
