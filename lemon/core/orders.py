@@ -1,6 +1,7 @@
 import datetime
 import json
 from multiprocessing.sharedctypes import Value
+from lemon.common.enums import VENUE
 from lemon.common.requests import ApiRequest
 from lemon.core.account import *
 
@@ -27,7 +28,7 @@ class Order():
     _isin: str
     _side: ORDERSIDE
     _quantity: int
-    _venue: str
+    _venue: VENUE
     _stop_price: int = None
     _limit_price: int = None
     _notes: str = None
@@ -38,7 +39,7 @@ class Order():
     _regulatory_information: dict = None
     _estimated_price: int = None
 
-    def __init__(self, isin: str, expires_at, side: ORDERSIDE, quantity: int, venue: str, trading_type: str, stop_price: int = None, limit_price: int = None, notes: str = None, __status="draft") -> None:
+    def __init__(self, isin: str, expires_at, side: ORDERSIDE, quantity: int, venue: VENUE, trading_type: str, stop_price: int = None, limit_price: int = None, notes: str = None, __status="draft") -> None:
         self._trading_type = trading_type
         self._isin = isin
         self._side = side

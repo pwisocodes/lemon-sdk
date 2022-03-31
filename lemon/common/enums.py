@@ -85,3 +85,17 @@ class INSTRUMENT_TYPE(BaseEnum):
     WARRANT = "warrant"
     FUND = "fund"
     ETF = "etf"
+
+class VENUE(BaseEnum):
+	"""The available Venues/Stock Exchanges.
+	
+	Values:
+		GETTEX: Börse München - Gettex
+		ALLDAY: ONLY PAPER-TRADING! Offers 24/7 order execution.
+		LM_BEST_PERFORMANCE: Börse München - LM Best Performance
+	"""
+
+	GETTEX = "XMUN"
+	ALLDAY = "allday"
+	LM_BEST_PERFORMANCE = "LMBPX"
+
