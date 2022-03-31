@@ -21,8 +21,10 @@ class RestApiError(BaseError):
 class StreamError(BaseError):
     pass
 
+
 class OrderStatusError(BaseError):
     pass
+
 
 class LemonMarketError(BaseError):
     error_code: str

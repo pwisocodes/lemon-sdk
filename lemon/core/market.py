@@ -34,9 +34,10 @@ class MarketData(object):
         if "results" in request.response:
             return pd.DataFrame(request.response['results'])
         else:
-            raise LemonMarketError(request.response['error_code'], request.response['error_message'])
+            raise LemonMarketError(
+                request.response['error_code'], request.response['error_message'])
 
-    def trading_venues(self, mic:str = None):
+    def trading_venues(self, mic: str = None):
         """List all available Trading Venues
 
         Args:
@@ -54,13 +55,6 @@ class MarketData(object):
         Raises:
             LemonMarketError: if lemon.markets returns an error
         """
-        payload = {name: kwargs[name]
-                   for name in kwargs if kwargs[name] is not None}
-
-        if payload:
-            payload = urlencode(payload, doseq=True)
-        else:
-            payload = ""
 
         request = ApiRequest(type="data",
                              endpoint=f"/venues/?mic={mic}",
@@ -89,10 +83,10 @@ class MarketData(object):
                 a: ask-price
                 b_v: bid volume
                 a_v: ask_volume
-        
+
         Raises:
             LemonMarketError: if lemon.markets returns an error
-                
+
         """
         request = ApiRequest(type="data",
                              endpoint=f"/quotes/latest?decimals=false&isin={isin}&mic={mic}",
@@ -101,16 +95,19 @@ class MarketData(object):
         if "results" in request.response:
             return request.response['results']
         else:
-            raise LemonMarketError(request.response['error_code'], request.response['error_message'])
+            raise LemonMarketError(
+                request.response['error_code'], request.response['error_message'])
 
-    def ohlc(self, isin: str, timespan: str = "d", start: str = None, end: str = None):
+    def ohlc(self, isin: str, start: str, end: str, timespan: str, mic: str = None, sorting=None):
         """OHLC data of a specific instrument.
 
         Args:
             isin (str): The International Securities Identification Number of the instrument
-            timespan (str, optional): Either 'd' (day), 'h' (hour), 'm' (minute). Defaults to "d". 
             start (str): ISO-Date or Epoch Timestamp.
             end (str): ISO-Date or Epoch Timestamp.
+            timespan (str): Either 'd' (day), 'h' (hour), 'm' (minute).
+            mic (str): Market Identifier Code of the trading venue.
+            sorting (str): Sort your API response, either ascending (asc) or descending (desc)
 
         Raises:
             ValueError: Invalid Parameter specified
@@ -133,14 +130,15 @@ class MarketData(object):
             raise ValueError(f"Parameter {type} is not a valid parameter!")
 
         request = ApiRequest(type="data",
-                             endpoint=f"/ohlc/{timespan}1/?isin={isin}&from={start}&to={end}",
+                             endpoint=f"/ohlc/{timespan}1/?isin={isin}&from={start}&to={end}&mic={mic}",
                              method="GET",
                              authorization_token=Account().token)
 
         if "results" in request.response:
             return pd.DataFrame(request.response['results'])
         else:
-            raise LemonMarketError(request.response['error_code'], request.response['error_message'])
+            raise LemonMarketError(
+                request.response['error_code'], request.response['error_message'])
 
     def latest_trade(self, mic: str, isin: str):
         """Latest trade of a specific instrument
@@ -170,4 +168,5 @@ class MarketData(object):
         if "results" in request.response:
             return request.response['results']
         else:
-            raise LemonMarketError(request.response['error_code'], request.response['error_message'])
+            raise LemonMarketError(
+                request.response['error_code'], request.response['error_message'])

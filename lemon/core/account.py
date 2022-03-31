@@ -11,6 +11,7 @@ from lemon.common.errors import *
 from lemon.common.helpers import Singleton
 from lemon.common.requests import ApiRequest
 
+
 @dataclass(init=True)
 class AccountState():
     """Represents the State/Attributes of an Account.
@@ -85,14 +86,15 @@ class AccountState():
     @property
     def created_at(self):
         return self._created_at
-        
+
     @property
     def account_id(self):
         return self._account_id
-        
+
     @property
     def firstname(self):
         return self._firstname
+
     @property
     def lastname(self):
         return self._lastname
@@ -207,7 +209,7 @@ class AccountState():
     @property
     def mode(self):
         return self._mode
-    
+
     @mode.setter
     def mode(self, value):
         self._mode = value
@@ -234,10 +236,11 @@ class AccountState():
 
         if request.response['status'] == "ok":
             # Dynamically set Attributes
-            for k,v in request.response["results"].items():
+            for k, v in request.response["results"].items():
                 setattr(self, f"_{k}", v)
         else:
-            raise LemonMarketError(request.response['error_code'], request.response['error_message'])
+            raise LemonMarketError(
+                request.response['error_code'], request.response['error_message'])
 
 
 class Account(AccountState, metaclass=Singleton):
@@ -270,15 +273,15 @@ class Account(AccountState, metaclass=Singleton):
                                  method="POST",
                                  body=body,
                                  authorization_token=self._token)
-            
+
             if request.response['status'] == 'ok':
                 return
             else:
-                raise LemonMarketError(request.response['error_code'], request.response['error_message'])
+                raise LemonMarketError(
+                    request.response['error_code'], request.response['error_message'])
 
         else:
             raise ValueError(f"Can't withdraw negative amount {amount}!")
-
 
     def documents(self) -> list:
         """ Get information about all documents linked with this account 
@@ -297,7 +300,8 @@ class Account(AccountState, metaclass=Singleton):
         if request.response['status'] == "ok":
             return request.response['results']
         else:
-            raise LemonMarketError(request.response['error_code'], request.response['error_message'])
+            raise LemonMarketError(
+                request.response['error_code'], request.response['error_message'])
 
     def get_doc(self, doc_id: str) -> str:
         """ Download a specific doc by id
@@ -315,12 +319,12 @@ class Account(AccountState, metaclass=Singleton):
 
         if request.response['status'] == "ok":
             # TODO
-            return 
+            return
         else:
-            raise LemonMarketError(request.response['error_code'], request.response['error_message'])
+            raise LemonMarketError(
+                request.response['error_code'], request.response['error_message'])
 
-
-    def orders(self, isin: str = None, status:str = None, side: str = None, start: str = None, end: str = None, type: str = None, key_creation_id: str = None):
+    def orders(self, isin: str = None, status: str = None, side: str = None, start: str = None, end: str = None, type: str = None, key_creation_id: str = None):
         """ Get a list of orders on your account.
 
         Args:
@@ -346,7 +350,7 @@ class Account(AccountState, metaclass=Singleton):
                 venue (str): This is the Market Identifier Code of the trading venue the order was placed at (default is XMUN).
                 estimated_price (int): This is an estimation from our end for what price the order will be executed
                 charge (int): This is the charge for the placed order
-                
+
                 see https://docs.lemon.markets/trading/orders for more
 
         Raises:
@@ -360,7 +364,8 @@ class Account(AccountState, metaclass=Singleton):
         if request.response['status'] == "ok":
             return pd.DataFrame(request.response['results'])
         else:
-            raise LemonMarketError(request.response['error_code'], request.response['error_message'])
+            raise LemonMarketError(
+                request.response['error_code'], request.response['error_message'])
 
     def get_order(self, order_id: str):
         """ Retrieve information of a specific order.
@@ -382,13 +387,13 @@ class Account(AccountState, metaclass=Singleton):
                 venue (str): This is the Market Identifier Code of the trading venue the order was placed at (default is XMUN).
                 estimated_price (int): This is an estimation from our end for what price the order will be executed
                 charge (int): This is the charge for the placed order
-                
+
                 see https://docs.lemon.markets/trading/orders for more
 
         Raises:
             LemonMarketError: if lemon.markets returns an error
         """
-        
+
         request = ApiRequest(type=self.mode,
                              endpoint="/orders/{}".format(order_id),
                              method="GET",
@@ -397,8 +402,9 @@ class Account(AccountState, metaclass=Singleton):
         if request.response['status'] == "ok":
             return request.response['results']
         else:
-            raise LemonMarketError(request.response['error_code'], request.response['error_message'])
-    
+            raise LemonMarketError(
+                request.response['error_code'], request.response['error_message'])
+
     def cancel_order(self, order_id: str) -> str:
         """ Cancel an order that is placed/inactive or activated (but not executed by the stock exchange)
 
@@ -417,8 +423,8 @@ class Account(AccountState, metaclass=Singleton):
         if request.response['status'] == "ok":
             return
         else:
-            raise LemonMarketError(request.response['error_code'], request.response['error_message'])
-
+            raise LemonMarketError(
+                request.response['error_code'], request.response['error_message'])
 
     def withdrawals(self):
         """ Get Withdrawals of the account.
@@ -444,7 +450,8 @@ class Account(AccountState, metaclass=Singleton):
         if request.response['status'] == "ok":
             return pd.DataFrame(request.response['results'])
         else:
-            raise LemonMarketError(request.response['error_code'], request.response['error_message'])
+            raise LemonMarketError(
+                request.response['error_code'], request.response['error_message'])
 
     def positions(self, isin: str = None):
         """ Get the positions of the account.
@@ -477,4 +484,5 @@ class Account(AccountState, metaclass=Singleton):
         if request.response['status'] == "ok":
             return pd.DataFrame(request.response['results'])
         else:
-            raise LemonMarketError(request.response['error_code'], request.response['error_message'])
+            raise LemonMarketError(
+                request.response['error_code'], request.response['error_message'])

@@ -4,6 +4,7 @@ from multiprocessing.sharedctypes import Value
 from lemon.common.requests import ApiRequest
 from lemon.core.account import *
 
+
 class Order():
     """Represents an Order.
 
@@ -21,24 +22,24 @@ class Order():
         id (str): ID of the order
         regulatory_information (dict): Regulatory information to the order 
         estimated_price (int): Estimation from our end for what price the Order will be executed
-    
+
     """
 
-    _isin:str
-    _side:str
-    _quantity:int
-    _venue:str
-    _stop_price:int = None
-    _limit_price:int = None
-    _notes:str = None
+    _isin: str
+    _side: str
+    _quantity: int
+    _venue: str
+    _stop_price: int = None
+    _limit_price: int = None
+    _notes: str = None
     _expires_at: datetime = None
 
-    _status:str= None
-    _id:str = None
-    _regulatory_information:dict = None
+    _status: str = None
+    _id: str = None
+    _regulatory_information: dict = None
     _estimated_price: int = None
 
-    def __init__(self, isin:str, expires_at, side:str, quantity:int, venue:str, trading_type:str, stop_price:int = None, limit_price:int = None, notes:str= None) -> None:
+    def __init__(self, isin: str, expires_at, side: str, quantity: int, venue: str, trading_type: str, stop_price: int = None, limit_price: int = None, notes: str = None, __status="draft") -> None:
         self._trading_type = trading_type
         self._isin = isin
         self._side = side
@@ -49,7 +50,7 @@ class Order():
         self._notes = notes
         self._expires_at = expires_at
 
-        self._status = "draft"
+        self._status = __status
 
     def place(self):
         """ Place the order. It still needs to be activated to get executed.
@@ -64,9 +65,9 @@ class Order():
         if self._status != "inactive":
             # raise OrderStatusError(f"Order {self._id} is already placed")
             return
-        
+
         # Remove _ from self.__dict__ to make names fit
-        body= {k[1:] : v for k,v in self.__dict__.items()}
+        body = {k[1:]: v for k, v in self.__dict__.items()}
 
         request = ApiRequest(type=self._trading_type,
                              endpoint="/orders/",
@@ -78,18 +79,19 @@ class Order():
         if request.response['status'] == "ok":
 
             self._status = request.response['results']['status']
-            self._id = request.response['results']['id'] # Should be "inactive" now
+            # Should be "inactive" now
+            self._id = request.response['results']['id']
             self._regulatory_information = request.response['results']['regulatory_information']
             self._estimated_price = request.response['results']['estimated_price']
 
-
             return self._id
         else:
-            raise LemonMarketError(request.response['error_code'], request.response['error_message'])        
-        
-    def activate(self, pin:str=None)->str:
+            raise LemonMarketError(
+                request.response['error_code'], request.response['error_message'])
+
+    def activate(self, pin: str = None) -> str:
         """ Activate the Order. After you activated the order, it is routed to the trading venue.
-        
+
         Arguments:
             pin (str): PIN to activate a real-money order. Mandatory for real-money trading.
 
@@ -107,26 +109,25 @@ class Order():
             raise ValueError("Pin must be passed for real money orders.")
 
         if self._trading_type == "paper":
-            type="paper"
+            type = "paper"
         else:
-            type="money"
+            type = "money"
             data = json.dumps({"pin": pin})
-
 
         request = ApiRequest(type=type,
                              endpoint=f"/orders/{self._id}/activate/",
                              method="POST",
-                             body=data if type=="money" else None,
+                             body=data if type == "money" else None,
                              authorization_token=Account().token
                              )
-        
+
         if request.response['status'] == "ok":
             return
         else:
-            raise LemonMarketError(request.response['error_code'], request.response['error_message'])        
+            raise LemonMarketError(
+                request.response['error_code'], request.response['error_message'])
 
-
-    def cancel(self)->str:
+    def cancel(self) -> str:
         """Cancel the Order. Available for inactive and active orders, as long as it isn't executed
         """
 
@@ -135,7 +136,6 @@ class Order():
         else:
             # Do nothing as it's just a local object
             return
-        
 
     @property
     def isin(self):
@@ -144,7 +144,8 @@ class Order():
     @isin.setter
     def isin(self, value):
         if self.status != "draft":
-            raise OrderStatusError("Can't modify attributes after Order is placed")
+            raise OrderStatusError(
+                "Can't modify attributes after Order is placed")
         else:
             self._isin = value
 
@@ -155,7 +156,8 @@ class Order():
     @side.setter
     def side(self, value):
         if self.status != "draft":
-            raise OrderStatusError("Can't modify attributes after Order is placed")
+            raise OrderStatusError(
+                "Can't modify attributes after Order is placed")
         else:
             self._side = value
 
@@ -166,7 +168,8 @@ class Order():
     @quantity.setter
     def quantity(self, value):
         if self.status != "draft":
-            raise OrderStatusError("Can't modify attributes after Order is placed")
+            raise OrderStatusError(
+                "Can't modify attributes after Order is placed")
         else:
             self._quantity = value
 
@@ -177,9 +180,10 @@ class Order():
     @venue.setter
     def venue(self, value):
         if self.status:
-            raise OrderStatusError("Can't modify attributes after Order is placed")
+            raise OrderStatusError(
+                "Can't modify attributes after Order is placed")
         else:
-            self._venue = value    
+            self._venue = value
 
     @property
     def stop_price(self):
@@ -188,7 +192,8 @@ class Order():
     @stop_price.setter
     def stop_price(self, value):
         if self.status != "draft":
-            raise OrderStatusError("Can't modify attributes after Order is placed")
+            raise OrderStatusError(
+                "Can't modify attributes after Order is placed")
         else:
             self._stop_price = value
 
@@ -199,7 +204,8 @@ class Order():
     @limit_price.setter
     def limit_price(self, value):
         if self.status != "draft":
-            raise OrderStatusError("Can't modify attributes after Order is placed")
+            raise OrderStatusError(
+                "Can't modify attributes after Order is placed")
         else:
             self._limit_price = value
 
@@ -210,7 +216,8 @@ class Order():
     @notes.setter
     def notes(self, value):
         if self.status != "draft":
-            raise OrderStatusError("Can't modify attributes after Order is placed")
+            raise OrderStatusError(
+                "Can't modify attributes after Order is placed")
         else:
             self._notes = value
 
@@ -221,7 +228,8 @@ class Order():
     @expires_at.setter
     def expires_at(self, value):
         if self.status != "draft":
-            raise OrderStatusError("Can't modify attributes after Order is placed")
+            raise OrderStatusError(
+                "Can't modify attributes after Order is placed")
         else:
             self._expires_at = value
 
@@ -237,6 +245,7 @@ class Order():
     @property
     def status(self):
         return self._status
+
     @property
     def regulatory_information(self):
         if self.status != "draft":
