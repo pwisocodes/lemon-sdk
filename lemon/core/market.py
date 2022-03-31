@@ -49,11 +49,20 @@ class MarketData(object):
         else:
             raise LemonMarketError(request.response['error_code'], request.response['error_message'])
 
-    def trading_venues(self, **kwargs):
+    def trading_venues(self, mic:str = None):
         """List all available Trading Venues
 
+        Args:
+            mic (str):  Enter a Market Identifier Code (MIC) in there.
+
         Returns:
-            list: Trading Venue Object
+            DataFrame:                  DataFrame of all trading venues
+                name (str):             This is the Full Name of the Trading Venue
+                title (str):            This is the Short Title of the Trading Venue
+                mic (str):              This is the Market Identifier Code (MIC) of the Trading Venue
+                is_open (boolean):      This indicates if the Trading Venue is currently open
+                opening_days (list):    list of days when Trading Venue is open
+
 
         Raises:
             LemonMarketError: if lemon.markets returns an error
@@ -67,14 +76,15 @@ class MarketData(object):
             payload = ""
 
         request = ApiRequest(type="data",
-                             endpoint=f"/venues/?{payload}",
+                             endpoint=f"/venues/?mic={mic}",
                              method="GET",
                              authorization_token=Account().token)
 
         if "results" in request.response:
             return pd.DataFrame(request.response['results'])
         else:
-            raise LemonMarketError(request.response['error_code'], request.response['error_message'])
+            raise LemonMarketError(
+                request.response['error_code'], request.response['error_message'])
 
     def quotes(self, isin: str, mic: str = None):
         """Get the latest quote of an instrument.
