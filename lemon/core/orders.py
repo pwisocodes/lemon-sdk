@@ -34,7 +34,7 @@ class Order():
     _notes: str = None
     _expires_at: datetime = None
 
-    _status: str = None
+    _status: ORDERSTATUS = None
     _id: str = None
     _regulatory_information: dict = None
     _estimated_price: int = None
@@ -62,7 +62,7 @@ class Order():
             str: OrderID 
         """
 
-        if self._status != "inactive":
+        if self._status != ORDERSTATUS.INACTIVE:
             # raise OrderStatusError(f"Order {self._id} is already placed")
             return
 
@@ -102,7 +102,7 @@ class Order():
 
         """
 
-        if self._status == "draft":
+        if self._status == ORDERSTATUS.DRAFT:
             raise OrderStatusError("Order must first be placed")
 
         if self._trading_type == "money":
@@ -131,7 +131,7 @@ class Order():
         """Cancel the Order. Available for inactive and active orders, as long as it isn't executed
         """
 
-        if self._status != "draft":
+        if self._status != ORDERSTATUS.DRAFT:
             return Account().cancel_order(self._id)
         else:
             # Do nothing as it's just a local object
@@ -143,7 +143,7 @@ class Order():
 
     @isin.setter
     def isin(self, value):
-        if self.status != "draft":
+        if self.status != ORDERSTATUS.DRAFT:
             raise OrderStatusError(
                 "Can't modify attributes after Order is placed")
         else:
@@ -155,7 +155,7 @@ class Order():
 
     @side.setter
     def side(self, value):
-        if self.status != "draft":
+        if self.status != ORDERSTATUS.DRAFT:
             raise OrderStatusError(
                 "Can't modify attributes after Order is placed")
         else:
@@ -167,7 +167,7 @@ class Order():
 
     @quantity.setter
     def quantity(self, value):
-        if self.status != "draft":
+        if self.status != ORDERSTATUS.DRAFT:
             raise OrderStatusError(
                 "Can't modify attributes after Order is placed")
         else:
@@ -179,7 +179,7 @@ class Order():
 
     @venue.setter
     def venue(self, value):
-        if self.status:
+        if self.status != ORDERSTATUS.DRAFT:
             raise OrderStatusError(
                 "Can't modify attributes after Order is placed")
         else:
@@ -191,7 +191,7 @@ class Order():
 
     @stop_price.setter
     def stop_price(self, value):
-        if self.status != "draft":
+        if self.status != ORDERSTATUS.DRAFT:
             raise OrderStatusError(
                 "Can't modify attributes after Order is placed")
         else:
@@ -203,7 +203,7 @@ class Order():
 
     @limit_price.setter
     def limit_price(self, value):
-        if self.status != "draft":
+        if self.status != ORDERSTATUS.DRAFT:
             raise OrderStatusError(
                 "Can't modify attributes after Order is placed")
         else:
@@ -215,7 +215,7 @@ class Order():
 
     @notes.setter
     def notes(self, value):
-        if self.status != "draft":
+        if self.status != ORDERSTATUS.DRAFT:
             raise OrderStatusError(
                 "Can't modify attributes after Order is placed")
         else:
@@ -227,7 +227,7 @@ class Order():
 
     @expires_at.setter
     def expires_at(self, value):
-        if self.status != "draft":
+        if self.status != ORDERSTATUS.DRAFT:
             raise OrderStatusError(
                 "Can't modify attributes after Order is placed")
         else:
@@ -237,7 +237,7 @@ class Order():
 
     @property
     def id(self):
-        if self.status != "draft":
+        if self.status != ORDERSTATUS.DRAFT:
             return self._id
         else:
             raise AttributeError("Not available until placed")
@@ -248,14 +248,14 @@ class Order():
 
     @property
     def regulatory_information(self):
-        if self.status != "draft":
+        if self.status != ORDERSTATUS.DRAFT:
             return self._regulatory_information
         else:
             raise AttributeError("Not available until placed")
 
     @property
     def estimated_price(self):
-        if self.status != "draft":
+        if self.status != ORDERSTATUS.DRAFT:
             return self._estimated_price
         else:
             raise AttributeError("Not available until placed")

@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import List
 from urllib.parse import urlencode
+from lemon.common.enums import ORDERSTATUS
 
 from lemon.common.errors import *
 from lemon.common.helpers import Singleton
@@ -324,12 +325,12 @@ class Account(AccountState, metaclass=Singleton):
             raise LemonMarketError(
                 request.response['error_code'], request.response['error_message'])
 
-    def orders(self, isin: str = None, status: str = None, side: str = None, start: str = None, end: str = None, type: str = None, key_creation_id: str = None):
-        """ Get a list of orders on your account.
+    def orders(self, isin: str = None, status: ORDERSTATUS = None, side: str = None, start: str = None, end: str = None, type: str = None, key_creation_id: str = None):
+        """Get a list of orders on your account.
 
         Args:
             isin: Filter for specific instrument
-            status: Filter for status 'inactive', 'activated', 'open' (Real Money only), 'in_progress', 'canceling','executed', 'canceled' or 'expired'
+            status: Filter for status
             side: Filter for 'buy' or 'sell'
             start: Specify an ISO date string (YYYY-MM-DD) to get only orders from a specific date on.
             end: Specify an ISO date string (YYYY-MM-DD) to get only orders until a specific date.
@@ -340,7 +341,7 @@ class Account(AccountState, metaclass=Singleton):
             pandas.DataFrame: Dataframe containing all orders
                 created_at: This is the Timestamp for when the order was created.
                 id: This is the unique Order Identification Number, which you can later use to activate your order.
-                status:This is the status the Order is currently in: 'inactive', 'activated', 'open' (Real Money only), 'in_progress', 'canceling','executed', 'canceled' or 'expired'
+                status: This is the status the Order is currently in.
                 isin: This is the International Securities Identification Number of the instrument specified in that order
                 expires_at: This is the Timestamp until when the order is valid
                 side: 'buy' or 'sell'
@@ -377,7 +378,14 @@ class Account(AccountState, metaclass=Singleton):
             dict: order
                 created_at: This is the Timestamp for when the order was created.
                 id: This is the unique Order Identification Number, which you can later use to activate your order.
-                status:This is the status the Order is currently in: 'inactive', 'activated', 'open' (Real Money only), 'in_progress', 'canceling','executed', 'canceled' or 'expired'
+                status: This is the status the Order is currently in:
+                    inactive: The order was placed, but has not been routed to the Stock Exchange, yet.
+                    activated: The order has been routed to the Stock Exchange.
+                    open: The stock exchange confirmed to have received the order (Real Money only)
+                    canceling: The request to cancel the order is being routed to the stock exchange
+                    canceled: The stock exchange successfully canceled the order
+                    executed: The order was successfully executed at the stock exchange
+                    expired: The order has expired
                 isin: This is the International Securities Identification Number of the instrument specified in that order
                 expires_at: This is the Timestamp until when the order is valid
                 side: 'buy' or 'sell'
