@@ -318,15 +318,17 @@ class Account(AccountState, metaclass=Singleton):
             raise LemonMarketError(request.response['error_code'], request.response['error_message'])
 
 
-    def orders(self, isin: str = None, expires_at: str = None, side: str = None, quantity: str = None, venue: str = None):
+    def orders(self, isin: str = None, status:str = None, side: str = None, start: str = None, end: str = None, type: str = None, key_creation_id: str = None):
         """ Get a list of orders on your account.
 
         Args:
-            isin (str): Filter for ISIN
-            expires_at (str): Filter for Orders that expire at this date
-            side (str): 'buy' or 'sell'
-            quantity (int): amount of shares
-            venue (str): MIC of Trading Venue
+            isin (str): Filter for specific instrument
+            status (str): Filter for status 'inactive', 'activated', 'open' (Real Money only), 'in_progress', 'canceling','executed', 'canceled' or 'expired'
+            side (str): Filter for 'buy' or 'sell'
+            start (str): Specify an ISO date string (YYYY-MM-DD) to get only orders from a specific date on.
+            end (str): Specify an ISO date string (YYYY-MM-DD) to get only orders until a specific date.
+            type (str): Filter for different types of orders: market, stop, limit, stop_limit
+            key_creation_id (str): Filter for a specific API you created orders with
 
         Returns:
             pandas.DataFrame: Dataframe containing all orders
@@ -349,7 +351,7 @@ class Account(AccountState, metaclass=Singleton):
             LemonMarketError: if lemon.markets returns an error
         """
         request = ApiRequest(type=self.mode,
-                             endpoint="/orders/",
+                             endpoint=f"/orders/?isin{isin}&status={status}&side={side}&from={start}&to={end}&type={type}&key_creation_id={key_creation_id}",
                              method="GET",
                              authorization_token=self._token)
 
