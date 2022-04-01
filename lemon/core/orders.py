@@ -104,6 +104,18 @@ class Order():
 
         self._status = __status
 
+    @staticmethod
+    def from_result(self, res: dict) -> Order:
+        """Creates an Order Object from an API Response.
+
+        Args:
+            res: The result of the lemon.markets API, i.e. request.response['results'] of get /orders/:id/
+
+        Returns
+            Order: Order Object built from the given dict. 
+        """
+        return Order(None, None, None, None, None, None)._attr_from_response(res)
+
     def place(self):
         """ Place the order. It still needs to be activated to get executed.
 
@@ -187,14 +199,23 @@ class Order():
         self._attr_from_response(res)
 
     def _attr_from_response(self, res: dict):
+        """Overrides the attributes of the object based on the specified dict.
+
+        Args:
+            dict: Dict with Attributes of the Order. Attribute keys must not start with _ 
+        """
         types = get_type_hints(Order)
-        for k, v in res.items():
-            if f"_{k}" in types:
-                # Parse ISO string response to datetime if attribute is annotated as datetime
-                if types[f"_{k}"] == datetime:
-                    setattr(self, f"_{k}", datetime.fromisoformat(v))
-                else:
-                    setattr(self, f"_{k}", v)
+
+        if all(atr in res for atr in ["isin", "expires_at", "datetime", "side", "quantity", "venue", "trading_type"]):
+            for k, v in res.items():
+                if f"_{k}" in types:
+                    # Parse ISO string response to datetime if attribute is annotated as datetime
+                    if types[f"_{k}"] == datetime:
+                        setattr(self, f"_{k}", datetime.fromisoformat(v))
+                    else:
+                        setattr(self, f"_{k}", v)
+        else:
+            raise ValueError("Not all mandatory attrributes passed.")
 
     @property
     def isin(self):

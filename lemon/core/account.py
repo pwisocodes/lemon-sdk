@@ -7,6 +7,7 @@ from lemon.common.enums import ORDERSIDE, ORDERSTATUS, ORDERTYPE
 from lemon.common.errors import *
 from lemon.common.helpers import Singleton
 from lemon.common.requests import ApiRequest
+from lemon.core.orders import Order
 
 
 @dataclass(init=True)
@@ -380,47 +381,25 @@ class Account(AccountState, metaclass=Singleton):
             raise LemonMarketError(
                 request.response['error_code'], request.response['error_message'])
 
-    def get_order(self, order_id: str):
+    def get_order(self, order_id: str) -> Order:
         """ Retrieve information of a specific order.
 
         Args:
             order_id: ID of the order
 
         Returns:
-            dict: order
-                created_at: This is the Timestamp for when the order was created.
-                id: This is the unique Order Identification Number, which you can later use to activate your order.
-                status: This is the status the Order is currently in:
-                    inactive: The order was placed, but has not been routed to the Stock Exchange, yet.
-                    activated: The order has been routed to the Stock Exchange.
-                    open: The stock exchange confirmed to have received the order (Real Money only)
-                    canceling: The request to cancel the order is being routed to the stock exchange
-                    canceled: The stock exchange successfully canceled the order
-                    executed: The order was successfully executed at the stock exchange
-                    expired: The order has expired
-                isin: This is the International Securities Identification Number of the instrument specified in that order
-                expires_at: This is the Timestamp until when the order is valid
-                side: 'buy' or 'sell'
-                quantity: This is the amount of instruments specified in the order
-                stop_price: This is the Stop price for the order. "null" if not specified.
-                limit_price: This is the Limit price for the order. "null" if not specified.
-                venue: This is the Market Identifier Code of the trading venue the order was placed at (default is XMUN).
-                estimated_price: This is an estimation from our end for what price the order will be executed
-                charge: This is the charge for the placed order
-
-                see https://docs.lemon.markets/trading/orders for more
+            Order: The order with the specified id
 
         Raises:
             LemonMarketError: if lemon.markets returns an error
         """
-
         request = ApiRequest(type=self.mode,
                              endpoint="/orders/{}".format(order_id),
                              method="GET",
                              authorization_token=self._token)
 
         if request.response['status'] == "ok":
-            return request.response['results']
+            return Order.from_result(request.response['results'])
         else:
             raise LemonMarketError(
                 request.response['error_code'], request.response['error_message'])
