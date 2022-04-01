@@ -43,10 +43,10 @@ class ORDERSTATUS(BaseEnum):
 class ORDERSIDE(BaseEnum):
     """Indicates wether you want to buy or sell the instrument.
 
-        Values:
-			BUY: Buy the instrument
-			SELL: Sell the instrument
-        """
+	Values:
+		BUY: Buy the instrument
+		SELL: Sell the instrument
+	"""
     BUY = "buy"
     SELL = "sell"
 
@@ -107,7 +107,7 @@ class VENUE(BaseEnum):
 class TIMESPAN(BaseEnum):
 	"""Timespan of one OHLC Entry.
 	
-	Value:
+	Values:
 		MINUTE: The data is aggregated on a per-minute basis.
 		HOUR: The data is aggregated on an hourly basis.
 		DAY: The data is aggregated on a daily basis.
@@ -115,3 +115,21 @@ class TIMESPAN(BaseEnum):
 	MINUTE = "m"
 	HOUR = "h"
 	DAY = "d"
+
+class BANKSTATEMENT_TYPE(BaseEnum):
+	"""Type of the Bankstatement.
+
+	Values:
+		PAY_IN: Statement related to new money entering your brokerage account
+		PAPY_OUT: Statement related to a withdrawal to your reference account
+		ORDER_BUY: Statement related to a buy order
+		ORDER_SELL: Statement related to a sell order
+		EOD_BALANCE: Your end-of-day balance
+		DIVIDEND: Statement related to a paid dividend for one of your positions
+	"""
+	PAY_IN = "pay_in"
+	PAY_OUT = "pay_out"
+	ORDER_BUY = "order_buy"
+	ORDER_SELL = "order_sell"
+	EOD_BALANCE = "eod_balance"
+	DIVIDEND = "dividend"

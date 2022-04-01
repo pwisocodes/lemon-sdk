@@ -3,7 +3,7 @@ import pandas as pd
 from dataclasses import dataclass
 from datetime import datetime
 from typing import get_type_hints
-from lemon.common.enums import ORDERSIDE, ORDERSTATUS, ORDERTYPE
+from lemon.common.enums import BANKSTATEMENT_TYPE, ORDERSIDE, ORDERSTATUS, ORDERTYPE, SORT
 from lemon.common.errors import *
 from lemon.common.helpers import Singleton
 from lemon.common.requests import ApiRequest
@@ -312,6 +312,48 @@ class Account(AccountState, metaclass=Singleton):
 
         if request.response['status'] == "ok":
             return pd.DataFrame(request.response['results'])
+        else:
+            raise LemonMarketError(
+                request.response['error_code'], request.response['error_message'])
+
+    def bankstatements(self, type: BANKSTATEMENT_TYPE = None, start: datetime = None, end: datetime = None, sorting: SORT = None) -> list:
+        """Get List of all Bankstatements in you Account.
+
+        Args:
+            type: Filter for different types of Bankstatements: PAY_IN, PAY_OUT, ORDER_BUY, ORDER-SELL, EOD_BALANCE, DIVIDEND
+            start: Filter for bank statements after a specific date.
+            end: Filter for bank statements until a specific date.
+            sorting: Sort either ASCENDING (oldest first) or DESCENDING (newest first)
+
+        Returns:
+            List of Bankstatement-Dicts
+                id: Unique Identification Number of your bank statement
+                account_id: Unique Identification Number of the account the bank statement is related to
+                type: Different types of Bankstatements: PAY_IN, PAY_OUT, ORDER_BUY, ORDER-SELL, EOD_BALANCE, DIVIDEND
+                date: The date that the bank statement relates to (YYYY-MM-DD)
+                amount: The amount associated with the bank statement
+                isin: The International Securities Identification Number (ISIN) related to your bank statement. Only for type order_buy and order_sell, otherwise null
+                isin_title: The title of the International Securities Identification Number (ISIN) related to your bank statement. Only for type order_buy and order_sell, otherwise null
+                created_at: The timestamp the bank statement was created internally. This can be different to the date, e.g., when there is a weekend in between.
+
+        Raises:
+            LemonMarketError: if lemon.markets returns an error
+        """
+
+        params = {
+            "type": type,
+            "from": start.isoformat() if start is not None else None,
+            "to": end.isoformat() if end is not None else None,
+            "sorting": sorting,
+        }
+        request = ApiRequest(type=self.mode,
+                             endpoint="/account/bankstatements/",
+                             url_params=params,
+                             method="GET",
+                             authorization_token=self._token)
+
+        if request.response['status'] == "ok":
+            return request.response['results']
         else:
             raise LemonMarketError(
                 request.response['error_code'], request.response['error_message'])
