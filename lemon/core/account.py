@@ -289,6 +289,33 @@ class Account(AccountState, metaclass=Singleton):
         else:
             raise ValueError(f"Can't withdraw negative amount {amount}!")
 
+    def withdrawals(self):
+        """ Get Withdrawals of the account.
+
+        Returns:
+            pandas.DataFrame: Withdrawals
+                id: A unique Identification Number of your withdrawal
+                amount: The amount that you specified for your withdrawal
+                created_at: Timestamp at which you created the withdrawal
+                date: Timestamp at which the withdrawal was processed by our partner bank
+                idempotency: Your own unique idempotency key that you specified in your POST request to prevent duplicate withdrawals.
+
+        Raises:
+            LemonMarketError: if lemon.markets returns an error
+
+        """
+
+        request = ApiRequest(type=self.mode,
+                             endpoint="/account/withdrawals/",
+                             method="GET",
+                             authorization_token=self._token)
+
+        if request.response['status'] == "ok":
+            return pd.DataFrame(request.response['results'])
+        else:
+            raise LemonMarketError(
+                request.response['error_code'], request.response['error_message'])
+
     def documents(self) -> list:
         """ Get information about all documents linked with this account 
 
@@ -326,6 +353,40 @@ class Account(AccountState, metaclass=Singleton):
         if request.response['status'] == "ok":
             # TODO
             return
+        else:
+            raise LemonMarketError(
+                request.response['error_code'], request.response['error_message'])
+
+    def positions(self, isin: str = None):
+        """ Get the positions of the account.
+
+        Args:
+            isin: Filter for position of a specific share
+
+        Returns:
+            pandas.DataFrame: positions
+                isin: This is the International Securities Identification Number (ISIN) of the position
+                isin_title: This is the Title of the instrument
+                quantity: This is the number of positions you currently hold for the respective Instrument
+                buy_price_avg: This is the average buy-in price of the respective position. If you buy one share for 100€ and a second one for 110€, the average buy-in price would be 105€.
+                estimated_price_total: This is the current position valuation to the market trading price. So, if you own 3 shares of stock XYZ, and the current market trading price for XYZ is 100€, this attribute would return 300€
+                estimated_price: This is the current market trading price for the respective position.
+
+        Raises:
+            LemonMarketError: if lemon.markets returns an error
+        """
+        if isin is not None:
+            query = f"isin={isin}"
+        else:
+            query = ""
+
+        request = ApiRequest(type=self.mode,
+                             endpoint=f"/positions/?{query}",
+                             method="GET",
+                             authorization_token=self._token)
+
+        if request.response['status'] == "ok":
+            return pd.DataFrame(request.response['results'])
         else:
             raise LemonMarketError(
                 request.response['error_code'], request.response['error_message'])
@@ -421,67 +482,6 @@ class Account(AccountState, metaclass=Singleton):
 
         if request.response['status'] == "ok":
             return
-        else:
-            raise LemonMarketError(
-                request.response['error_code'], request.response['error_message'])
-
-    def withdrawals(self):
-        """ Get Withdrawals of the account.
-
-        Returns:
-            pandas.DataFrame: Withdrawals
-                id: A unique Identification Number of your withdrawal
-                amount: The amount that you specified for your withdrawal
-                created_at: Timestamp at which you created the withdrawal
-                date: Timestamp at which the withdrawal was processed by our partner bank
-                idempotency: Your own unique idempotency key that you specified in your POST request to prevent duplicate withdrawals.
-
-        Raises:
-            LemonMarketError: if lemon.markets returns an error
-
-        """
-
-        request = ApiRequest(type=self.mode,
-                             endpoint="/account/withdrawals/",
-                             method="GET",
-                             authorization_token=self._token)
-
-        if request.response['status'] == "ok":
-            return pd.DataFrame(request.response['results'])
-        else:
-            raise LemonMarketError(
-                request.response['error_code'], request.response['error_message'])
-
-    def positions(self, isin: str = None):
-        """ Get the positions of the account.
-
-        Args:
-            isin: Filter for position of a specific share
-
-        Returns:
-            pandas.DataFrame: positions
-                isin: This is the International Securities Identification Number (ISIN) of the position
-                isin_title: This is the Title of the instrument
-                quantity: This is the number of positions you currently hold for the respective Instrument
-                buy_price_avg: This is the average buy-in price of the respective position. If you buy one share for 100€ and a second one for 110€, the average buy-in price would be 105€.
-                estimated_price_total: This is the current position valuation to the market trading price. So, if you own 3 shares of stock XYZ, and the current market trading price for XYZ is 100€, this attribute would return 300€
-                estimated_price: This is the current market trading price for the respective position.
-
-        Raises:
-            LemonMarketError: if lemon.markets returns an error
-        """
-        if isin is not None:
-            query = f"isin={isin}"
-        else:
-            query = ""
-
-        request = ApiRequest(type=self.mode,
-                             endpoint=f"/positions/?{query}",
-                             method="GET",
-                             authorization_token=self._token)
-
-        if request.response['status'] == "ok":
-            return pd.DataFrame(request.response['results'])
         else:
             raise LemonMarketError(
                 request.response['error_code'], request.response['error_message'])
