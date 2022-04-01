@@ -433,7 +433,7 @@ class Account(AccountState, metaclass=Singleton):
             raise LemonMarketError(
                 request.response['error_code'], request.response['error_message'])
 
-    def orders(self, isin: str = None, status: ORDERSTATUS = None, side: ORDERSIDE = None, start: datetime = None, end: datetime = None, type: ORDERTYPE = None, key_creation_id: str = None):
+    def orders(self, isin: str = None, status: ORDERSTATUS = None, side: ORDERSIDE = None, start: datetime = None, end: datetime = None, type: ORDERTYPE = None, key_creation_id: str = None) -> list[Order]:
         """Get a list of orders on your account.
 
         Args:
@@ -446,21 +446,7 @@ class Account(AccountState, metaclass=Singleton):
             key_creation_id: Filter for a specific API you created orders with
 
         Returns:
-            pandas.DataFrame: Dataframe containing all orders
-                created_at: This is the Timestamp for when the order was created.
-                id: This is the unique Order Identification Number, which you can later use to activate your order.
-                status: This is the status the Order is currently in.
-                isin: This is the International Securities Identification Number of the instrument specified in that order
-                expires_at: This is the Timestamp until when the order is valid
-                side: 'buy' or 'sell'
-                quantity: This is the amount of instruments specified in the order
-                stop_price: This is the Stop price for the order. "null" if not specified.
-                limit_price: This is the Limit price for the order. "null" if not specified.
-                venue: This is the Market Identifier Code of the trading venue the order was placed at (default is XMUN).
-                estimated_price: This is an estimation from our end for what price the order will be executed
-                charge: This is the charge for the placed order
-
-                see https://docs.lemon.markets/trading/orders for more
+            List of Orders
 
         Raises:
             LemonMarketError: if lemon.markets returns an error
@@ -479,7 +465,8 @@ class Account(AccountState, metaclass=Singleton):
                              authorization_token=self._token)
 
         if request.response['status'] == "ok":
-            return pd.DataFrame(request.response['results'])
+            # Parse result to list of Orders
+            return [Order.from_result(order) for order in request.response['results']]
         else:
             raise LemonMarketError(
                 request.response['error_code'], request.response['error_message'])
