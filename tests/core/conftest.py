@@ -3,7 +3,7 @@ from lemon.core.account import Account
 
 
 @pytest.fixture
-def status_ok_result():
+def status_ok_result() -> dict:
     """fixture with data of an activated order
     """
     return {
@@ -14,7 +14,7 @@ def status_ok_result():
 
 
 @pytest.fixture
-def acccount_result():
+def acccount_result() -> dict:
     return {
         "time": "2022-04-02T19:46:48.942+00:00",
         "mode": "paper",
@@ -57,7 +57,7 @@ def acccount_result():
 
 
 @pytest.fixture
-def account(mocker):
+def account(mocker) -> Account:
     def mock_fetch_state(self):
         return
     mocker.patch(
