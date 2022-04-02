@@ -7,6 +7,12 @@ class BaseEnum(Enum):
         """Access the value with ENUM.X instead of ENUM.X.value."""
         return self.value
 
+    def __eq__(self, other):
+        if self.__class__ is other.__class__:
+            return self.value == other.value
+        else:
+            return False
+
 class SORT(BaseEnum):
 	"""Determines how the list is sorted.
 	
