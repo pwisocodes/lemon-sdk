@@ -1,6 +1,6 @@
 from lemon.core.orders import Order
 from lemon.common.helpers import Singleton
-from lemon.common.enums import BANKSTATEMENT_TYPE, ORDERSIDE, ORDERSTATUS, ORDERTYPE, SORT
+from lemon.common.enums import BANKSTATEMENT_TYPE, ORDERSIDE, ORDERSTATUS, ORDERTYPE, SORT, TRADING_TYPE
 from lemon.common.errors import LemonMarketError
 from lemon.common.requests import ApiRequest
 import logging
@@ -251,8 +251,9 @@ class AccountState():
 
 class Account(AccountState, metaclass=Singleton):
 
-    def __init__(self, credentials: str) -> None:
+    def __init__(self, credentials: str, trading_type: TRADING_TYPE = TRADING_TYPE.PAPER) -> None:
         self._token = credentials
+        self._mode = trading_type
         super().__init__()
 
     @property
