@@ -214,13 +214,13 @@ class AccountState():
     def mode(self, value):
         self._mode = value
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         try:
             self.fetch_state()
         except:
             logging.warning("Cant fetch account state")
 
-    def fetch_state(self):
+    def fetch_state(self) -> None:
         """ Refresh information about this Account.
 
         Raises:
@@ -259,7 +259,7 @@ class Account(AccountState, metaclass=Singleton):
     def token(self) -> str:
         return self._token
 
-    def withdraw(self, amount: int, pin: int, idempotency: str = None):
+    def withdraw(self, amount: int, pin: int, idempotency: str = None) -> None:
         """ Withdraw money from your bank account to your lemon.markets account e.g. amount = 1000000 means 100€ (hundreths of a cent). Take a look at: https://docs.lemon.markets/trading/overview#working-with-numbers-in-the-trading-api 
 
         Args:
@@ -289,7 +289,7 @@ class Account(AccountState, metaclass=Singleton):
         else:
             raise ValueError(f"Can't withdraw negative amount {amount}!")
 
-    def withdrawals(self):
+    def withdrawals(self) -> list[dict]:
         """ Get Withdrawals of the account.
 
         Returns:
@@ -316,7 +316,7 @@ class Account(AccountState, metaclass=Singleton):
             raise LemonMarketError(
                 request.response['error_code'], request.response['error_message'])
 
-    def bankstatements(self, type: BANKSTATEMENT_TYPE = None, start: datetime = None, end: datetime = None, sorting: SORT = None) -> list:
+    def bankstatements(self, type: BANKSTATEMENT_TYPE = None, start: datetime = None, end: datetime = None, sorting: SORT = None) -> list[dict]:
         """Get List of all Bankstatements in you Account.
 
         Args:
@@ -358,7 +358,7 @@ class Account(AccountState, metaclass=Singleton):
             raise LemonMarketError(
                 request.response['error_code'], request.response['error_message'])
 
-    def documents(self) -> list:
+    def documents(self) -> list[dict]:
         """ Get information about all documents linked with this account 
 
         Returns:
@@ -378,7 +378,7 @@ class Account(AccountState, metaclass=Singleton):
             raise LemonMarketError(
                 request.response['error_code'], request.response['error_message'])
 
-    def get_doc(self, doc_id: str) -> str:
+    def get_doc(self, doc_id: str) -> dict:
         """ Download a specific doc by id
 
         Args:
@@ -394,12 +394,12 @@ class Account(AccountState, metaclass=Singleton):
 
         if request.response['status'] == "ok":
             # TODO
-            return
+            return request.response['results']
         else:
             raise LemonMarketError(
                 request.response['error_code'], request.response['error_message'])
 
-    def positions(self, isin: str = None):
+    def positions(self, isin: str = None) -> list[dict]:
         """ Get the positions of the account.
 
         Args:
@@ -494,7 +494,7 @@ class Account(AccountState, metaclass=Singleton):
             raise LemonMarketError(
                 request.response['error_code'], request.response['error_message'])
 
-    def cancel_order(self, order_id: str) -> str:
+    def cancel_order(self, order_id: str) -> None:
         """ Cancel an order that is placed/inactive or activated (but not executed by the stock exchange)
 
         Args:
