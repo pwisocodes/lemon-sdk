@@ -1,8 +1,9 @@
-import datetime
-import json
-from lemon.common.enums import VENUE
+import lemon.core.account as acc
+from lemon.common.enums import VENUE, ORDERSIDE, ORDERSTATUS, ORDERTYPE
+from lemon.common.errors import LemonMarketError, OrderStatusError
 from lemon.common.requests import ApiRequest
-from lemon.core.account import *
+from datetime import datetime
+import json
 from typing import get_type_hints
 
 
@@ -79,7 +80,7 @@ class Order():
     _charge: int = None
     _chargeable_at: datetime = None
     _isin_title: str = None
-    _type: str = None
+    _type: ORDERTYPE = None
     _executed_quantity: int = None
     _executed_price: int = None
     _executed_price_total: int = None
@@ -105,7 +106,7 @@ class Order():
         self._status = __status
 
     @staticmethod
-    def from_result(self, res: dict) -> Order:
+    def from_result(res: dict) -> "Order":
         """Creates an Order Object from an API Response.
 
         Args:
@@ -135,7 +136,7 @@ class Order():
                              endpoint="/orders/",
                              method="POST",
                              body=body,
-                             authorization_token=Account().token
+                             authorization_token=acc.Account().token
                              )
 
         if request.response['status'] == "ok":
@@ -174,7 +175,7 @@ class Order():
                              endpoint=f"/orders/{self._id}/activate/",
                              method="POST",
                              body=data if type == "money" else None,
-                             authorization_token=Account().token
+                             authorization_token=acc.Account().token
                              )
 
         if request.response['status'] == "ok":
@@ -183,19 +184,19 @@ class Order():
             raise LemonMarketError(
                 request.response['error_code'], request.response['error_message'])
 
-    def cancel(self) -> str:
+    def cancel(self):
         """Cancel the Order. Available for inactive and active orders, as long as it isn't executed
         """
 
         if self._status != ORDERSTATUS.DRAFT:
-            return Account().cancel_order(self._id)
+            return acc.Account().cancel_order(self._id)
         else:
             # Do nothing as it's just a local object
             return
 
     def reload(self):
         """Fetches the order again and sets the attributes to the new values."""
-        res = Account().get_order(self._id)
+        res = acc.Account().get_order(self._id)
         self._attr_from_response(res)
 
     def _attr_from_response(self, res: dict):

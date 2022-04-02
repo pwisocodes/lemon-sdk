@@ -1,7 +1,7 @@
 import pytest
 
-import lemon.core.orders
 import lemon.core.account
+import lemon.core.orders
 
 from lemon.common.enums import ORDERSIDE, ORDERSTATUS, ORDERTYPE, VENUE
 
