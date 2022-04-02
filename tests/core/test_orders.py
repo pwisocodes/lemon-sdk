@@ -179,3 +179,15 @@ def test_reload(mocker, placed_order_result, account):
     assert order.id == "ord_abcdefghijklmnopqrstuvwxyz12345678"
     assert order.isin == "US02079K3059"
     assert order.venue == VENUE.GETTEX.value
+
+
+def test_to_dict(account):
+    order = Order("US02079K3059", "2022-04-04", ORDERSIDE.BUY, 1, VENUE.GETTEX)
+
+    res = order.to_dict()
+
+    assert res["isin"] == "US02079K3059"
+    assert res["expires_at"] == "2022-04-04"
+    assert res["side"] == ORDERSIDE.BUY
+    assert res["quantity"] == 1
+    assert res["venue"] == VENUE.GETTEX
