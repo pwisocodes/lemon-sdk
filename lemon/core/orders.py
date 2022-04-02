@@ -119,7 +119,7 @@ class Order():
         order._attr_from_response(res)
         return order
 
-    def place(self):
+    def place(self) -> None:
         """ Place the order. It still needs to be activated to get executed.
 
         Raises:
@@ -148,7 +148,7 @@ class Order():
             raise LemonMarketError(
                 request.response['error_code'], request.response['error_message'])
 
-    def activate(self, pin: str = None) -> str:
+    def activate(self, pin: str = None) -> None:
         """ Activate the Order. After you activated the order, it is routed to the trading venue.
 
         Arguments:
@@ -186,21 +186,19 @@ class Order():
             raise LemonMarketError(
                 request.response['error_code'], request.response['error_message'])
 
-    def cancel(self):
+    def cancel(self) -> None:
         """Cancel the Order. Available for inactive and active orders, as long as it isn't executed
         """
 
         if self._status in [ORDERSTATUS.INACTIVE, ORDERSTATUS.ACTIVATED, ORDERSTATUS.OPEN]:
-            return acc.Account().cancel_order(self._id)
-        else:
-            return
+            acc.Account().cancel_order(self._id)
 
-    def reload(self):
+    def reload(self) -> None:
         """Fetches the order again and sets the attributes to the new values."""
         res = acc.Account().get_order(self._id)
         self._attr_from_response(res.to_dict())
 
-    def to_dict(self):
+    def to_dict(self) -> dict:
         res = {}
         for k, v in self.__dict__.items():
             # Remove _ from attribute name
@@ -208,7 +206,7 @@ class Order():
                 v, datetime) else v.isoformat()
         return res
 
-    def _attr_from_response(self, res: "Order"):
+    def _attr_from_response(self, res: "Order") -> None:
         """Overrides the attributes of the object based on the specified dict.
 
         Args:
@@ -228,7 +226,7 @@ class Order():
             raise ValueError("Not all mandatory attrributes passed.")
 
     @property
-    def isin(self):
+    def isin(self) -> str:
         return self._isin
 
     @isin.setter
@@ -240,11 +238,11 @@ class Order():
             self._isin = value
 
     @property
-    def side(self):
+    def side(self) -> ORDERSIDE:
         return self._side
 
     @side.setter
-    def side(self, value):
+    def side(self, value: ORDERSIDE):
         if self.status != ORDERSTATUS.DRAFT:
             raise OrderStatusError(
                 "Can't modify attributes after Order is placed")
@@ -252,11 +250,11 @@ class Order():
             self._side = value
 
     @property
-    def quantity(self):
+    def quantity(self) -> int:
         return self._quantity
 
     @quantity.setter
-    def quantity(self, value):
+    def quantity(self, value: int):
         if self.status != ORDERSTATUS.DRAFT:
             raise OrderStatusError(
                 "Can't modify attributes after Order is placed")
@@ -264,11 +262,11 @@ class Order():
             self._quantity = value
 
     @property
-    def venue(self):
+    def venue(self) -> VENUE:
         return self._venue
 
     @venue.setter
-    def venue(self, value):
+    def venue(self, value: VENUE):
         if self.status != ORDERSTATUS.DRAFT:
             raise OrderStatusError(
                 "Can't modify attributes after Order is placed")
@@ -276,11 +274,11 @@ class Order():
             self._venue = value
 
     @property
-    def stop_price(self):
+    def stop_price(self) -> int:
         return self._stop_price
 
     @stop_price.setter
-    def stop_price(self, value):
+    def stop_price(self, value: int):
         if self.status != ORDERSTATUS.DRAFT:
             raise OrderStatusError(
                 "Can't modify attributes after Order is placed")
@@ -288,11 +286,11 @@ class Order():
             self._stop_price = value
 
     @property
-    def limit_price(self):
+    def limit_price(self) -> int:
         return self._limit_price
 
     @limit_price.setter
-    def limit_price(self, value):
+    def limit_price(self, value: int):
         if self.status != ORDERSTATUS.DRAFT:
             raise OrderStatusError(
                 "Can't modify attributes after Order is placed")
@@ -300,11 +298,11 @@ class Order():
             self._limit_price = value
 
     @property
-    def notes(self):
+    def notes(self) -> str:
         return self._notes
 
     @notes.setter
-    def notes(self, value):
+    def notes(self, value: str):
         if self.status != ORDERSTATUS.DRAFT:
             raise OrderStatusError(
                 "Can't modify attributes after Order is placed")
@@ -312,11 +310,11 @@ class Order():
             self._notes = value
 
     @property
-    def expires_at(self):
+    def expires_at(self) -> datetime:
         return self._expires_at
 
     @expires_at.setter
-    def expires_at(self, value):
+    def expires_at(self, value: datetime):
         if self.status != ORDERSTATUS.DRAFT:
             raise OrderStatusError(
                 "Can't modify attributes after Order is placed")
@@ -326,25 +324,25 @@ class Order():
     # Available after placed
 
     @property
-    def id(self):
+    def id(self) -> str:
         if self.status != ORDERSTATUS.DRAFT:
             return self._id
         else:
             raise AttributeError("Not available until placed")
 
     @property
-    def status(self):
+    def status(self) -> ORDERSTATUS:
         return self._status
 
     @property
-    def regulatory_information(self):
+    def regulatory_information(self) -> dict:
         if self.status != ORDERSTATUS.DRAFT:
             return self._regulatory_information
         else:
             raise AttributeError("Not available until placed")
 
     @property
-    def estimated_price(self):
+    def estimated_price(self) -> int:
         if self.status != ORDERSTATUS.DRAFT:
             return self._estimated_price
         else:

@@ -84,134 +84,134 @@ class AccountState():
     _tax_allowance_end: datetime = None
 
     @property
-    def created_at(self):
+    def created_at(self) -> datetime:
         return self._created_at
 
     @property
-    def account_id(self):
+    def account_id(self) -> str:
         return self._account_id
 
     @property
-    def firstname(self):
+    def firstname(self) -> str:
         return self._firstname
 
     @property
-    def lastname(self):
+    def lastname(self) -> str:
         return self._lastname
 
     @property
-    def email(self):
+    def email(self) -> str:
         self._email
 
     @property
-    def phone(self):
+    def phone(self) -> str:
         self._phone
 
     @property
-    def address(self):
+    def address(self) -> str:
         self._address
 
     @property
-    def billing_address(self):
+    def billing_address(self) -> str:
         return self._billing_address
 
     @property
-    def billing_email(self):
+    def billing_email(self) -> str:
         return self._billing_email
 
     @property
-    def billing_name(self):
+    def billing_name(self) -> str:
         return self._billing_name
 
     @property
-    def billing_vat(self):
+    def billing_vat(self) -> str:
         return self._billing_vat
 
     @property
-    def deposit_id(self):
+    def deposit_id(self) -> str:
         return self._deposit_id
 
     @property
-    def client_id(self):
+    def client_id(self) -> str:
         return self._client_id
 
     @property
-    def iban_brokerage(self):
+    def iban_brokerage(self) -> str:
         return self._iban_brokerage
 
     @property
-    def iban_origin(self):
+    def iban_origin(self) -> str:
         return self._iban_origin
 
     @property
-    def bank_name_origin(self):
+    def bank_name_origin(self) -> str:
         return self._bank_name_origin
 
     @property
-    def balance(self):
+    def balance(self) -> int:
         self.fetch_state()
         return self._balance
 
     @property
-    def cash_to_withdraw(self):
+    def cash_to_withdraw(self) -> int:
         self.fetch_state()
         return self._cash_to_withdraw
 
     @property
-    def amount_bought_intraday(self):
+    def amount_bought_intraday(self) -> int:
         self.fetch_state()
         return self._amount_bought_intraday
 
     @property
-    def amount_sold_intraday(self):
+    def amount_sold_intraday(self) -> int:
         self.fetch_state()
         return self._amount_sold_intraday
 
     @property
-    def amount_open_orders(self):
+    def amount_open_orders(self) -> int:
         self.fetch_state()
         return self._amount_open_orders
 
     @property
-    def amount_open_withdrawals(self):
+    def amount_open_withdrawals(self) -> int:
         self.fetch_state()
         return self._amount_open_withdrawals
 
     @property
-    def amount_estimate_taxes(self):
+    def amount_estimate_taxes(self) -> int:
         self.fetch_state()
         return self._amount_estimate_taxes
 
     @property
-    def approved_at(self):
+    def approved_at(self) -> datetime:
         return self._approved_at
 
     @property
-    def trading_plan(self):
+    def trading_plan(self) -> str:
         self.fetch_state()
         return self._trading_plan
 
     @property
-    def data_plan(self):
+    def data_plan(self) -> str:
         self.fetch_state()
         return self._data_plan
 
     @property
-    def tax_allowance(self):
+    def tax_allowance(self) -> int:
         self.fetch_state()
         return self._tax_allowance
 
     @property
-    def tax_allowance_end(self):
+    def tax_allowance_end(self) -> datetime:
         self.fetch_state()
         return self._tax_allowance_end
 
     @property
-    def mode(self):
+    def mode(self) -> TRADING_TYPE:
         return self._mode
 
     @mode.setter
-    def mode(self, value):
+    def mode(self, value) -> None:
         self._mode = value
 
     def __post_init__(self) -> None:

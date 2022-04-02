@@ -10,7 +10,7 @@ class MarketData(object):
     """Client to fetch Market Data via the lemon.markets API.
     """
 
-    def search_instrument(self, search: str = None, isin: str = None, type: INSTRUMENT_TYPE = None, venue: VENUE = None, currency: str = None, tradable: bool = None):
+    def search_instrument(self, search: str = None, isin: str = None, type: INSTRUMENT_TYPE = None, venue: VENUE = None, currency: str = None, tradable: bool = None) -> pd.DataFrame:
         """ Searching for instrument
 
         Args:
@@ -36,7 +36,7 @@ class MarketData(object):
             raise LemonMarketError(
                 request.response['error_code'], request.response['error_message'])
 
-    def trading_venues(self, venue: VENUE = None):
+    def trading_venues(self, venue: VENUE = None) -> pd.DataFrame:
         """List all available Trading Venues
 
         Args:
@@ -65,7 +65,7 @@ class MarketData(object):
             raise LemonMarketError(
                 request.response['error_code'], request.response['error_message'])
 
-    def latest_quote(self, isin: str, venue: VENUE = None):
+    def latest_quote(self, isin: str, venue: VENUE = None) -> dict:
         """Get the latest quote of an instrument.
 
         Args:
@@ -96,7 +96,7 @@ class MarketData(object):
             raise LemonMarketError(
                 request.response['error_code'], request.response['error_message'])
 
-    def ohlc(self, isin: str, start: datetime, end: datetime, timespan: TIMESPAN, venue: VENUE = None, sorting: SORT = None):
+    def ohlc(self, isin: str, start: datetime, end: datetime, timespan: TIMESPAN, venue: VENUE = None, sorting: SORT = None) -> pd.DataFrame:
         """OHLC data of a specific instrument.
 
         Args:
@@ -143,7 +143,7 @@ class MarketData(object):
             raise LemonMarketError(
                 request.response['error_code'], request.response['error_message'])
 
-    def latest_trade(self, venue: VENUE, isin: str):
+    def latest_trade(self, venue: VENUE, isin: str) -> dict:
         """Latest trade of a specific instrument
 
         Args:
