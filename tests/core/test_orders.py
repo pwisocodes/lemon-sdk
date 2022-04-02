@@ -75,7 +75,7 @@ def placed_order_result():
         "status": "ok",
         "results": {
             "created_at": "2022-04-02T18:10:54.613+00:00",
-            "id": "ord_qyGDXNNGGKzJVTMBzbHhxVfkSn3BcSjfK7",
+            "id": "ord_abcdefghijklmnopqrstuvwxyz12345678",
             "status": "inactive",
             "regulatory_information": {
                 "costs_entry": 0,
@@ -162,3 +162,20 @@ def test_activate_draft(account):
 
     with pytest.raises(OrderStatusError):
         order.activate()
+
+
+def test_reload(mocker, placed_order_result, account):
+    order = Order("US02079K3059", "2022-04-04", ORDERSIDE.BUY, 1, VENUE.GETTEX)
+
+    def mock_perform_request(self):
+        self._response = placed_order_result
+    mocker.patch(
+        'lemon.core.orders.ApiRequest._perform_request',
+        mock_perform_request
+    )
+
+    order.reload()
+
+    assert order.id == "ord_abcdefghijklmnopqrstuvwxyz12345678"
+    assert order.isin == "US02079K3059"
+    assert order.venue == VENUE.GETTEX.value
