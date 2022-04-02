@@ -36,7 +36,7 @@ class ApiRequest:
     _kwargs: dict
     _response: ApiResponse
 
-    def __init__(self, type: TRADING_TYPE, endpoint: str, method: str = "GET", body: dict = None,
+    def __init__(self, type: str, endpoint: str, method: str = "GET", body: dict = None,
                  authorization_token: str = None, url_params: dict = None, **kwargs):
         if authorization_token:
             self.authorization_token = str(authorization_token)
