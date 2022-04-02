@@ -91,8 +91,8 @@ class Order():
     _key_creation_id: str = None
     _key_activation_id: str = None
 
-    def __init__(self, isin: str, expires_at: datetime, side: ORDERSIDE, quantity: int, venue: VENUE, trading_type: str, stop_price: int = None, limit_price: int = None, notes: str = None, idempotency: str = None, __status=ORDERSTATUS.DRAFT) -> None:
-        self._trading_type = trading_type
+    def __init__(self, isin: str, expires_at: datetime, side: ORDERSIDE, quantity: int, venue: VENUE, trading_type: str = None, stop_price: int = None, limit_price: int = None, notes: str = None, idempotency: str = None, __status=ORDERSTATUS.DRAFT) -> None:
+        self._trading_type = trading_type if trading_type is not None else acc.Account().mode
         self._isin = isin
         self._side = side
         self._quantity = quantity
@@ -115,7 +115,9 @@ class Order():
         Returns
             Order: Order Object built from the given dict. 
         """
-        return Order(None, None, None, None, None, None)._attr_from_response(res)
+        order = Order(None, None, None, None, None)
+        order._attr_from_response(res)
+        return order
 
     def place(self):
         """ Place the order. It still needs to be activated to get executed.
@@ -207,11 +209,11 @@ class Order():
         """
         types = get_type_hints(Order)
 
-        if all(atr in res for atr in ["isin", "expires_at", "datetime", "side", "quantity", "venue", "trading_type"]):
+        if all(atr in res for atr in ["isin", "expires_at", "side", "quantity", "venue"]):
             for k, v in res.items():
                 if f"_{k}" in types:
                     # Parse ISO string response to datetime if attribute is annotated as datetime
-                    if types[f"_{k}"] == datetime:
+                    if types[f"_{k}"] == datetime and v is not None:
                         setattr(self, f"_{k}", datetime.fromisoformat(v))
                     else:
                         setattr(self, f"_{k}", v)
