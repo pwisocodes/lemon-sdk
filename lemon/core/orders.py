@@ -198,9 +198,17 @@ class Order():
     def reload(self):
         """Fetches the order again and sets the attributes to the new values."""
         res = acc.Account().get_order(self._id)
-        self._attr_from_response(res)
+        self._attr_from_response(res.to_dict())
 
-    def _attr_from_response(self, res: dict):
+    def to_dict(self):
+        res = {}
+        for k, v in self.__dict__.items():
+            # Remove _ from attribute name
+            res[k[1:]] = v if not isinstance(
+                v, datetime) else v.isoformat()
+        return res
+
+    def _attr_from_response(self, res: "Order"):
         """Overrides the attributes of the object based on the specified dict.
 
         Args:
