@@ -190,7 +190,7 @@ class Order():
         """Cancel the Order. Available for inactive and active orders, as long as it isn't executed
         """
 
-        if self._status != ORDERSTATUS.DRAFT:
+        if self._status in [ORDERSTATUS.INACTIVE, ORDERSTATUS.ACTIVATED, ORDERSTATUS.OPEN]:
             return acc.Account().cancel_order(self._id)
         else:
             # Do nothing as it's just a local object
