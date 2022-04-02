@@ -4,6 +4,7 @@ from lemon.core.account import Account
 from lemon.core.orders import Order
 
 from lemon.common.enums import ORDERSIDE, ORDERSTATUS, ORDERTYPE, VENUE
+from tests.core.conftest import account, status_ok_result
 
 
 @pytest.fixture
@@ -113,22 +114,13 @@ def placed_order_result():
     }
 
 
-def test_from_result(executed_order_data):
-    acc = Account("123")
+def test_from_result(executed_order_data, account):
     result = Order.from_result(executed_order_data)
 
     assert isinstance(result, Order)
 
 
-def test_place_order(mocker, placed_order_result):
-    def mock_fetch_state(self):
-        return
-    mocker.patch(
-        'lemon.core.account.AccountState.fetch_state',
-        mock_fetch_state
-    )
-    acc = Account("123")  # TODO: Mock Account
-
+def test_place_order(mocker, placed_order_result, account):
     def mock_perform_request(self):
         self._response = placed_order_result
     mocker.patch(
@@ -139,6 +131,6 @@ def test_place_order(mocker, placed_order_result):
 
     order.place()
 
-    assert order.status != ORDERSTATUS.DRAFT
+    assert order.status == str(ORDERSTATUS.INACTIVE)
     assert order.isin == "US02079K3059"
     assert order.quantity == 1
