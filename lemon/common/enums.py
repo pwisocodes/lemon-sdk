@@ -17,6 +17,18 @@ class SORT(BaseEnum):
 	ASCENDING = "asc"
 	DESCENDING = "desc"
 
+class TRADING_TYPE(BaseEnum):
+	"""Represents the types of trading
+	
+	Values:
+		MONEY: Trade with real money
+		PAPER: Trade with fake money
+	
+	"""
+	MONEY = "money"
+	PAPER = "paper"
+
+
 class ORDERSTATUS(BaseEnum):
     """Represents the status of an order.
 
