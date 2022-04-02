@@ -253,8 +253,8 @@ class Account(AccountState, metaclass=Singleton):
 
     def __init__(self, credentials: str, trading_type: TRADING_TYPE = TRADING_TYPE.PAPER) -> None:
         self._token = credentials
-        self._mode = trading_type
         super().__init__()
+        self._mode = trading_type
 
     @property
     def token(self) -> str:
