@@ -1,5 +1,5 @@
 import lemon.core.account as acc
-from lemon.common.enums import VENUE, ORDERSIDE, ORDERSTATUS, ORDERTYPE
+from lemon.common.enums import TRADING_TYPE, VENUE, ORDERSIDE, ORDERSTATUS, ORDERTYPE
 from lemon.common.errors import LemonMarketError, OrderStatusError
 from lemon.common.requests import ApiRequest
 from datetime import datetime
@@ -164,19 +164,19 @@ class Order():
         if self._status == ORDERSTATUS.DRAFT:
             raise OrderStatusError("Order must first be placed")
 
-        if self._trading_type == "money":
-            raise ValueError("Pin must be passed for real money orders.")
-
-        if self._trading_type == "paper":
+        if self._trading_type == TRADING_TYPE.MONEY:
+            if pin is None:
+                raise ValueError("Pin must be passed for real money orders.")
+            else:
+                type = "money"
+                data = json.dumps({"pin": pin})
+        elif self._trading_type == TRADING_TYPE.PAPER:
             type = "paper"
-        else:
-            type = "money"
-            data = json.dumps({"pin": pin})
 
         request = ApiRequest(type=type,
                              endpoint=f"/orders/{self._id}/activate/",
                              method="POST",
-                             body=data if type == "money" else None,
+                             body=data if type == TRADING_TYPE.MONEY else None,
                              authorization_token=acc.Account().token
                              )
 
