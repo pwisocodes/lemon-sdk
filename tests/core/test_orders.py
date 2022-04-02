@@ -1,4 +1,6 @@
+from multiprocessing.sharedctypes import Value
 import pytest
+from lemon.common.errors import OrderStatusError
 
 from lemon.core.account import Account
 from lemon.core.orders import Order
@@ -131,6 +133,32 @@ def test_place_order(mocker, placed_order_result, account):
 
     order.place()
 
+    assert order.id is not None
     assert order.status == str(ORDERSTATUS.INACTIVE)
     assert order.isin == "US02079K3059"
     assert order.quantity == 1
+
+
+def test_activate_paper(mocker, status_ok_result, account):
+    def mock_perform_request(self):
+        self._response = status_ok_result
+    mocker.patch(
+        'lemon.core.orders.ApiRequest._perform_request',
+        mock_perform_request
+    )
+
+    order = Order("US02079K3059", "2022-04-04", ORDERSIDE.BUY, 1, VENUE.GETTEX)
+    order._id = "ord_qyGDXNNGGKzJVTMBzbHhxVfkSn3BcSjfK7"
+    order._status = ORDERSTATUS.INACTIVE
+
+    try:
+        order.activate()
+    except:
+        assert False
+
+
+def test_activate_draft(account):
+    order = Order("US02079K3059", "2022-04-04", ORDERSIDE.BUY, 1, VENUE.GETTEX)
+
+    with pytest.raises(OrderStatusError):
+        order.activate()
