@@ -1,10 +1,6 @@
-from multiprocessing.sharedctypes import Value
 import pytest
 from lemon.common.errors import OrderStatusError
-
-from lemon.core.account import Account
 from lemon.core.orders import Order
-
 from lemon.common.enums import ORDERSIDE, ORDERSTATUS, ORDERTYPE, VENUE
 from tests.core.conftest import account, status_ok_result
 
