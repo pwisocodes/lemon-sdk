@@ -3,7 +3,7 @@ from typing import Union
 from lemon.common.settings import (BASE_MARKET_DATA_API_URL,
                                    BASE_PAPER_TRADING_API_URL,
                                    BASE_REAL_MONEY_TRADING_API_URL)
-
+from lemon.common.enums import TRADING_TYPE
 import requests
 
 
@@ -36,7 +36,7 @@ class ApiRequest:
     _kwargs: dict
     _response: ApiResponse
 
-    def __init__(self, type: str, endpoint: str, method: str = "GET", body: dict = None,
+    def __init__(self, type: TRADING_TYPE, endpoint: str, method: str = "GET", body: dict = None,
                  authorization_token: str = None, url_params: dict = None, **kwargs):
         if authorization_token:
             self.authorization_token = str(authorization_token)
@@ -45,7 +45,7 @@ class ApiRequest:
         self._kwargs = kwargs
         self.method = method.lower()
         self.body = body
-        self._build_url(type.lower(), endpoint)
+        self._build_url(str(type).lower(), endpoint)
 
         self._perform_request()
 
