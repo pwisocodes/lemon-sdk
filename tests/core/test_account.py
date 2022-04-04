@@ -335,6 +335,7 @@ def test_orders(mocker, apple_orders_result, account):
     orders = account.orders(isin="US0378331005")
 
     assert isinstance(orders[0], Order)
+
     for o in orders:
         assert o.isin == "US0378331005"
 
