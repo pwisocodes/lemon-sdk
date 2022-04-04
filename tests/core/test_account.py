@@ -97,6 +97,40 @@ def bankstatements_result():
     }
 
 
+@pytest.fixture
+def positions_result():
+    """Sample withdrawal list
+    """
+    return {
+        "time": "2022-04-04T09:20:07.137+00:00",
+        "status": "ok",
+        "mode": "paper",
+        "results": [
+            {
+                "isin": "US88160R1014",
+                "isin_title": "TESLA INC.",
+                "quantity": 1,
+                "buy_price_avg": 9171000,
+                "estimated_price_total": 9935000,
+                "estimated_price": 9935000
+            },
+            {
+                "isin": "US02079K3059",
+                "isin_title": "ALPHABET INC.",
+                "quantity": 1,
+                "buy_price_avg": 25450000,
+                "estimated_price_total": 25485000,
+                "estimated_price": 25485000
+            }
+        ],
+        "previous": None,
+        "next": None,
+        "total": 2,
+        "page": 1,
+        "pages": 1
+    }
+
+
 def test_withdraw(mocker, status_ok_result, account):
     def mock_perform_request(self):
         self._response = status_ok_result
@@ -150,3 +184,24 @@ def test_bankstatements(mocker, bankstatements_result, account):
         assert BANKSTATEMENT_TYPE.has_value(bst["type"])
 
     assert bankstatements[1]["isin_title"] == "TESLA INC."
+
+# TODO: test_documents()
+
+# TODO: test_get_doc()
+
+
+def test_positions(mocker, positions_result, account):
+    def mock_perform_request(self):
+        self._response = positions_result
+    mocker.patch(
+        'lemon.core.orders.ApiRequest._perform_request',
+        mock_perform_request
+    )
+
+    positions = account.positions()
+
+    assert len(positions) == 2
+
+    assert positions.at[0, "isin"] == "US88160R1014"
+    assert positions.at[0, "estimated_price"] == 9935000
+    assert positions.at[1, "buy_price_avg"] == 25450000
