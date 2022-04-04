@@ -2,7 +2,10 @@ from enum import Enum
 
 
 class BaseEnum(Enum):
-    """Enum that allows accessing the value without .value."""
+    """Modified Enum. 
+    Allows accessing the value without .value.
+    Allows == comparison
+    Allows (x in BaseEnum)"""
 
     def __str__(self):
         """Access the value with ENUM.X instead of ENUM.X.value."""
@@ -13,6 +16,10 @@ class BaseEnum(Enum):
             return self.value == other.value
         else:
             return False
+
+    @classmethod
+    def has_value(cls, value):
+        return value in cls._value2member_map_
 
 
 class SORT(BaseEnum):
