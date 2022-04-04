@@ -1,8 +1,8 @@
 import pytest
-from tests.core.conftest import account, acccount_result, status_ok_result
+from tests.core.conftest import account, acccount_result, status_ok_result, placed_order_result
 from lemon.core.account import Account, AccountState
 from lemon.core.orders import Order
-from lemon.common.enums import BANKSTATEMENT_TYPE
+from lemon.common.enums import BANKSTATEMENT_TYPE, ORDERSIDE, ORDERTYPE, VENUE
 
 
 @pytest.fixture
@@ -341,3 +341,19 @@ def test_orders(mocker, apple_orders_result, account):
 
     assert orders[0].id == "ord_qyFnZddddy6WQJFxTY6YLS8dJ2RfRtSBFa"
     assert orders[0].estimated_price == 1582400
+
+
+def test_get_order(mocker, placed_order_result, account):
+    def mock_perform_request(self):
+        self._response = placed_order_result
+    mocker.patch(
+        'lemon.core.orders.ApiRequest._perform_request',
+        mock_perform_request
+    )
+
+    order = account.get_order("ord_abcdefghijklmnopqrstuvwxyz12345678")
+
+    assert isinstance(order, Order)
+    assert order.id == "ord_abcdefghijklmnopqrstuvwxyz12345678"
+    assert VENUE.has_value(order.venue)
+    assert ORDERSIDE.has_value(order.side)
