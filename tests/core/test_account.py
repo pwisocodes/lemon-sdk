@@ -1,6 +1,7 @@
 import pytest
 from tests.core.conftest import account, acccount_result, status_ok_result
 from lemon.core.account import Account, AccountState
+from lemon.core.orders import Order
 from lemon.common.enums import BANKSTATEMENT_TYPE
 
 
@@ -92,6 +93,122 @@ def bankstatements_result():
         "previous": None,
         "next": None,
         "total": 2,
+        "page": 1,
+        "pages": 1
+    }
+
+
+@pytest.fixture
+def apple_orders_result():
+    return {
+        "time": "2022-04-04T09:29:31.350+00:00",
+        "status": "ok",
+        "mode": "paper",
+        "results": [
+            {
+                "id": "ord_qyFnZddddy6WQJFxTY6YLS8dJ2RfRtSBFa",
+                "isin": "US0378331005",
+                "isin_title": "APPLE INC.",
+                "expires_at": "2022-04-01T21:59:00.000+00:00",
+                "created_at": "2022-03-31T20:23:22.635+00:00",
+                "side": "buy",
+                "quantity": 1,
+                "stop_price": None,
+                "limit_price": None,
+                "estimated_price": 1582400,
+                "estimated_price_total": 1582400,
+                "venue": "xmun",
+                "status": "expired",
+                "type": "market",
+                "executed_quantity": 0,
+                "executed_price": 0,
+                "executed_price_total": 0,
+                "activated_at": None,
+                "executed_at": None,
+                "rejected_at": None,
+                "cancelled_at": None,
+                "notes": "market",
+                "charge": 0,
+                "chargeable_at": None,
+                "key_creation_id": "ord_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "key_activation_id": None,
+                "regulatory_information": {
+                    "KIID": "text",
+                    "costs_exit": 20000,
+                    "costs_entry": 20000,
+                    "costs_product": 0.0,
+                    "costs_running": 0.0,
+                    "costs_exit_pct": "1.26%",
+                    "costs_entry_pct": "1.26%",
+                    "legal_disclaimer": "text",
+                    "costs_product_pct": "0.00%",
+                    "costs_running_pct": "0.00%",
+                    "yield_reduction_year": 20000,
+                    "yield_reduction_year_pct": "1.26%",
+                    "yield_reduction_year_exit": 20000,
+                    "yield_reduction_year_exit_pct": "1.26%",
+                    "yield_reduction_year_following": 0,
+                    "estimated_yield_reduction_total": 40000,
+                    "estimated_holding_duration_years": "5",
+                    "yield_reduction_year_following_pct": "0.00%",
+                    "estimated_yield_reduction_total_pct": "2.53%"
+                },
+                "idempotency": None
+            },
+            {
+                "id": "ord_qyFnZddLLpDK8YTtsN7nWx1HQyPbFqrS0b",
+                "isin": "US0378331005",
+                "isin_title": "APPLE INC.",
+                "expires_at": "2022-04-01T21:59:00.000+00:00",
+                "created_at": "2022-03-31T20:23:08.439+00:00",
+                "side": "buy",
+                "quantity": 1,
+                "stop_price": 1500000,
+                "limit_price": 1700000,
+                "estimated_price": 1700000,
+                "estimated_price_total": 1700000,
+                "venue": "xmun",
+                "status": "expired",
+                "type": "stop_limit",
+                "executed_quantity": 0,
+                "executed_price": 0,
+                "executed_price_total": 0,
+                "activated_at": None,
+                "executed_at": None,
+                "rejected_at": None,
+                "cancelled_at": None,
+                "notes": "limit",
+                "charge": 0,
+                "chargeable_at": None,
+                "key_creation_id": "ord_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "key_activation_id": None,
+                "regulatory_information": {
+                    "KIID": "text",
+                    "costs_exit": 20000,
+                    "costs_entry": 20000,
+                    "costs_product": 0.0,
+                    "costs_running": 0.0,
+                    "costs_exit_pct": "1.18%",
+                    "costs_entry_pct": "1.18%",
+                    "legal_disclaimer": "text",
+                    "costs_product_pct": "0.00%",
+                    "costs_running_pct": "0.00%",
+                    "yield_reduction_year": 20000,
+                    "yield_reduction_year_pct": "1.18%",
+                    "yield_reduction_year_exit": 20000,
+                    "yield_reduction_year_exit_pct": "1.18%",
+                    "yield_reduction_year_following": 0,
+                    "estimated_yield_reduction_total": 40000,
+                    "estimated_holding_duration_years": "5",
+                    "yield_reduction_year_following_pct": "0.00%",
+                    "estimated_yield_reduction_total_pct": "2.35%"
+                },
+                "idempotency": None
+            }
+        ],
+        "previous": None,
+        "next": None,
+        "total": 4,
         "page": 1,
         "pages": 1
     }
@@ -205,3 +322,21 @@ def test_positions(mocker, positions_result, account):
     assert positions.at[0, "isin"] == "US88160R1014"
     assert positions.at[0, "estimated_price"] == 9935000
     assert positions.at[1, "buy_price_avg"] == 25450000
+
+
+def test_orders(mocker, apple_orders_result, account):
+    def mock_perform_request(self):
+        self._response = apple_orders_result
+    mocker.patch(
+        'lemon.core.orders.ApiRequest._perform_request',
+        mock_perform_request
+    )
+
+    orders = account.orders(isin="US0378331005")
+
+    assert isinstance(orders[0], Order)
+    for o in orders:
+        assert o.isin == "US0378331005"
+
+    assert orders[0].id == "ord_qyFnZddddy6WQJFxTY6YLS8dJ2RfRtSBFa"
+    assert orders[0].estimated_price == 1582400
