@@ -1,6 +1,7 @@
 import pytest
 from tests.core.conftest import account, acccount_result, status_ok_result
 from lemon.core.account import Account, AccountState
+from lemon.common.enums import BANKSTATEMENT_TYPE
 
 
 @pytest.fixture
@@ -56,6 +57,46 @@ def withdrawals_result():
     }
 
 
+@pytest.fixture
+def bankstatements_result():
+    """Sample withdrawal list
+    """
+    return {
+        "time": "2022-04-04T08:59:14.805+00:00",
+        "status": "ok",
+        "mode": "paper",
+        "results": [
+            {
+                "id": "bst_qyFkCwwGGylytZwbkcBmWQtCH1Wqk9ZsXa",
+                "account_id": "ord_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "type": "eod_balance",
+                "date": "2022-03-27",
+                "amount": 986000000,
+                "isin": None,
+                "isin_title": None,
+                "created_at": "2022-03-28T01:37:04.271+00:00",
+                "quantity": None
+            },
+            {
+                "id": "bst_qyFkCwwGGNBCL1lBLnQbwVMNySmzWVZ86b",
+                "account_id": "ord_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "type": "order_buy",
+                "date": "2022-03-27",
+                "amount": 9171000,
+                "isin": "US88160R1014",
+                "isin_title": "TESLA INC.",
+                "created_at": "2022-03-28T01:37:04.271+00:00",
+                "quantity": None
+            }
+        ],
+        "previous": None,
+        "next": None,
+        "total": 2,
+        "page": 1,
+        "pages": 1
+    }
+
+
 def test_withdraw(mocker, status_ok_result, account):
     def mock_perform_request(self):
         self._response = status_ok_result
@@ -88,3 +129,24 @@ def test_withdrawals(mocker, withdrawals_result, account):
     assert withdrawals[0]["amount"] == 100000
 
     assert withdrawals[1]["id"] == "wtd_pyQhdXXDDHsr556LmHJcS4XPR8SDLSw9sb"
+
+
+def test_bankstatements(mocker, bankstatements_result, account):
+    def mock_perform_request(self):
+        self._response = bankstatements_result
+    mocker.patch(
+        'lemon.core.orders.ApiRequest._perform_request',
+        mock_perform_request
+    )
+
+    bankstatements = account.bankstatements()
+
+    assert len(bankstatements) == 2
+
+    assert bankstatements[0]["id"] == "bst_qyFkCwwGGylytZwbkcBmWQtCH1Wqk9ZsXa"
+    assert bankstatements[1]["account_id"] == "ord_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+
+    for bst in bankstatements:
+        assert BANKSTATEMENT_TYPE.has_value(bst["type"])
+
+    assert bankstatements[1]["isin_title"] == "TESLA INC."
