@@ -400,7 +400,7 @@ class Account(AccountState, metaclass=Singleton):
             raise LemonMarketError(
                 request.response['error_code'], request.response['error_message'])
 
-    def positions(self, isin: str = None) -> list[dict]:
+    def positions(self, isin: str = None) -> pd.DataFrame:
         """ Get the positions of the account.
 
         Args:
