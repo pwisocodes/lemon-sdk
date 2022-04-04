@@ -19,13 +19,13 @@ class Order():
         stop_price: Stop Market Order. Once the stop price is met, the order is converted into a market order. After that, the order is executed immediately at the next possible price. (Can be combined with limit_price)
         limit_price: Limit Order. The order is executed at the specified price or better (Buy Order: limit price or lower, Sell Order: limit price or higher). (Can be combined with stop_price)
         notes: Personal notes to the order
-        idempotency: This is a unique idempotency key that prevents duplicate operations. 
+        idempotency: This is a unique idempotency key that prevents duplicate operations.
             Subsequent requests with the same idempotency key will then not go through and throw an error message. This means you cannot place the same order twice.
 
     Attributes set by API:
         status: Status the Order is currently in ORDERSTATUS: INACTIVE, ACTIVATED, OPEN (Real Money only), IN_PROGRESS, CANCELING, EXECUTED, CANCELED or EXPIRED
         id: ID of the order
-        regulatory_information: Regulatory information to the order 
+        regulatory_information: Regulatory information to the order
             costs_entry: These are the costs for placing the Order
             costs_entry_pct: These are the costs for placing the Order as percentage value
             costs_running: These are the running costs for the order
@@ -54,8 +54,8 @@ class Order():
         rejected_at: The Date the Order was rejected at
         cancelled_at: The Date the Order was cancelled at
         key_creation_id: This is the API Key the order was created with
-        key_activation_id: This is the API Key the order was activated with. 
-            When the Order was activated via mobile app, the API will return mobile here. 
+        key_activation_id: This is the API Key the order was activated with.
+            When the Order was activated via mobile app, the API will return mobile here.
             When the Order was activated via Dashboard, the API will return dashboard here
 
     """
@@ -113,7 +113,7 @@ class Order():
             res: The result of the lemon.markets API, i.e. request.response['results'] of get /orders/:id/
 
         Returns
-            Order: Order Object built from the given dict. 
+            Order: Order Object built from the given dict.
         """
         order = Order(None, None, None, None, None)
         order._attr_from_response(res)
@@ -210,7 +210,7 @@ class Order():
         """Overrides the attributes of the object based on the specified dict.
 
         Args:
-            dict: Dict with Attributes of the Order. Attribute keys must not start with _ 
+            dict: Dict with Attributes of the Order. Attribute keys must not start with _
         """
         types = get_type_hints(Order)
 
@@ -345,5 +345,114 @@ class Order():
     def estimated_price(self) -> int:
         if self.status != ORDERSTATUS.DRAFT:
             return self._estimated_price
+        else:
+            raise AttributeError("Not available until placed")
+
+    @property
+    def status(self) -> str:
+        return self._status
+
+    @property
+    def estimated_price_total(self) -> int:
+        if self.status != ORDERSTATUS.DRAFT:
+            return self._estimated_price_total
+        else:
+            raise AttributeError("Not available until placed")
+
+    @property
+    def created_at(self) -> datetime:
+        if self.status != ORDERSTATUS.DRAFT:
+            return self._created_at
+        else:
+            raise AttributeError("Not available until placed")
+
+    @property
+    def charge(self) -> int:
+        if self.status != ORDERSTATUS.DRAFT:
+            return self._charge
+        else:
+            raise AttributeError("Not available until placed")
+
+    @property
+    def chargeable_at(self) -> datetime:
+        if self.status != ORDERSTATUS.DRAFT:
+            return self._chargeable_at
+        else:
+            raise AttributeError("Not available until placed")
+
+    @property
+    def isin_title(self) -> str:
+        if self.status != ORDERSTATUS.DRAFT:
+            return self._isin_title
+        else:
+            raise AttributeError("Not available until placed")
+
+    @property
+    def type(self) -> ORDERTYPE:
+        if self.status != ORDERSTATUS.DRAFT:
+            return self._type
+        else:
+            raise AttributeError("Not available until placed")
+
+    @property
+    def executed_quantity(self) -> int:
+        if self.status != ORDERSTATUS.DRAFT:
+            return self._executed_quantity
+        else:
+            raise AttributeError("Not available until placed")
+
+    @property
+    def executed_price(self) -> int:
+        if self.status != ORDERSTATUS.DRAFT:
+            return self._executed_price
+        else:
+            raise AttributeError("Not available until placed")
+
+    @property
+    def executed_price_total(self) -> int:
+        if self.status != ORDERSTATUS.DRAFT:
+            return self._executed_price_total
+        else:
+            raise AttributeError("Not available until placed")
+
+    @property
+    def activated_at(self) -> datetime:
+        if self.status != ORDERSTATUS.DRAFT:
+            return self._activated_at
+        else:
+            raise AttributeError("Not available until placed")
+
+    @property
+    def executed_at(self) -> datetime:
+        if self.status != ORDERSTATUS.DRAFT:
+            return self._executed_at
+        else:
+            raise AttributeError("Not available until placed")
+
+    @property
+    def rejected_at(self) -> datetime:
+        if self.status != ORDERSTATUS.DRAFT:
+            return self._rejected_at
+        else:
+            raise AttributeError("Not available until placed")
+
+    @property
+    def cancelled_at(self) -> datetime:
+        if self.status != ORDERSTATUS.DRAFT:
+            return self._cancelled_at
+        else:
+            raise AttributeError("Not available until placed")
+
+    @property
+    def key_creation_id(self) -> str:
+        if self.status != ORDERSTATUS.DRAFT:
+            return self._key_creation_id
+        else:
+            raise AttributeError("Not available until placed")
+
+    @property
+    def key_activation_id(self) -> str:
+        if self.status != ORDERSTATUS.DRAFT:
+            return self._key_activation_id
         else:
             raise AttributeError("Not available until placed")
