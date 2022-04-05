@@ -450,14 +450,12 @@ class Account(AccountState, metaclass=Singleton):
         Raises:
                 LemonMarketError: if lemon.markets returns an error
         """
-        if isin is not None:
-            query = f"isin={isin}"
-        else:
-            query = ""
+        params = { "isin" : isin}
 
         request = ApiRequest(
             type=self.mode,
-            endpoint=f"/positions/?{query}",
+            endpoint=f"/positions/",
+			url_params=params,
             method="GET",
             authorization_token=self._token,
         )
@@ -496,16 +494,19 @@ class Account(AccountState, metaclass=Singleton):
         Raises:
                 LemonMarketError: if lemon.markets returns an error
         """
-        payload = {}
-
-        if start is not None:
-            payload["from"] = start.isoformat()
-        if end is not None:
-            payload["to"] = end.isoformat()
+        payload = {
+			"from" : start.isoformat() if start is not None else None,
+			"to" : end.isoformat() if end is not None else None,
+			"isin" : isin,
+			"status" : str(status) if status is not None else None,
+			"side" : str(side) if status is not None else None,
+			"type" : str(type) if type is not None else None,
+			"key_creation_id" : key_creation_id
+		}
 
         request = ApiRequest(
             type=self.mode,
-            endpoint=f"/orders/?isin{isin}&status={status}&side={side}&type={type}&key_creation_id={key_creation_id}",
+            endpoint=f"/orders/",
             url_params=payload,
             method="GET",
             authorization_token=self._token,
@@ -533,7 +534,7 @@ class Account(AccountState, metaclass=Singleton):
         """
         request = ApiRequest(
             type=self.mode,
-            endpoint="/orders/{}".format(order_id),
+            endpoint=f"/orders/{order_id}",
             method="GET",
             authorization_token=self._token,
         )
