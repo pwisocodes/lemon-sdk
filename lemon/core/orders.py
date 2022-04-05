@@ -7,58 +7,59 @@ import json
 from typing import get_type_hints
 
 
-class Order():
+class Order:
     """Represents an Order.
 
     Attributes:
-        isin: Internation Security Identification Number of the instrument you wish to buy or sell
-        expires_at: Order expires at the end of the specified day. Maximum expiration date is 30 days in the future.
-        side: With this you can define whether you want to buy ('buy') or sell ('sell') a specific instrument
-        quantity: The amount of shares you want to buy. Limited to 25,000€ estimated order price per request.
-        venue: Market Identifier Code of Stock exchange you want to address. Default value is 'XMUN'.
-        stop_price: Stop Market Order. Once the stop price is met, the order is converted into a market order. After that, the order is executed immediately at the next possible price. (Can be combined with limit_price)
-        limit_price: Limit Order. The order is executed at the specified price or better (Buy Order: limit price or lower, Sell Order: limit price or higher). (Can be combined with stop_price)
-        notes: Personal notes to the order
-        idempotency: This is a unique idempotency key that prevents duplicate operations.
-            Subsequent requests with the same idempotency key will then not go through and throw an error message. This means you cannot place the same order twice.
+            isin: Internation Security Identification Number of the instrument you wish to buy or sell
+            expires_at: Order expires at the end of the specified day. Maximum expiration date is 30 days in the future.
+            side: With this you can define whether you want to buy ('buy') or sell ('sell') a specific instrument
+            quantity: The amount of shares you want to buy. Limited to 25,000€ estimated order price per request.
+            venue: Market Identifier Code of Stock exchange you want to address. Default value is 'XMUN'.
+            stop_price: Stop Market Order. Once the stop price is met, the order is converted into a market order. After that, the order is executed immediately at the next possible price. (Can be combined with limit_price)
+            limit_price: Limit Order. The order is executed at the specified price or better (Buy Order: limit price or lower, Sell Order: limit price or higher). (Can be combined with stop_price)
+            notes: Personal notes to the order
+            idempotency: This is a unique idempotency key that prevents duplicate operations.
+                    Subsequent requests with the same idempotency key will then not go through and throw an error message. This means you cannot place the same order twice.
 
     Attributes set by API:
-        status: Status the Order is currently in ORDERSTATUS: INACTIVE, ACTIVATED, OPEN (Real Money only), IN_PROGRESS, CANCELING, EXECUTED, CANCELED or EXPIRED
-        id: ID of the order
-        regulatory_information: Regulatory information to the order
-            costs_entry: These are the costs for placing the Order
-            costs_entry_pct: These are the costs for placing the Order as percentage value
-            costs_running: These are the running costs for the order
-            costs_running_pct: These are the running costs for the order as percentage value
-            costs_product: These are the product costs for the order
-            costs_product_pct: These are the product costs for the order as percentage value
-            costs_exit: These are the exit costs for the order
-            costs_exit_pct: These are the exit costs for the order as percentage value
-            yield_reduction_year: This is the expected yield reduction in the first year
-            yield_reduction_year_following: This is the expected yield reduction in the following year
-            yield_reduction_year_exit: This is the expected yield reduction in the exit year
-            kiid: This is the Key Investors Information Document, only at ETFs
-            legal_disclaimer: This is a legal disclaimer for placing the Order
-        estimated_price: Estimation from our end for what price the Order will be executed
-        estimated_price_total: This is the Estimated Price the Order will be executed at (only for Market Orders), multiplied by the Order quantity
-        created_at: The Date the Order was created at
-        charge: This is the Charge for placed order
-        chargeable_at: Timestamp at which the charge was generated
-        isin_title: This is the Title of the instrument bought or sold with this order
-        type: Type of the Order: market, stop, limit, stop_limit
-        executed_quantity: This is the amount of Instruments to be bought or sold, as specified in the Order
-        executed_price: This is the Price the Order was executed at
-        executed_price_total: This is the Price the Order was executed at, multiplied by the Order quantity
-        activated_at: The Date the Order was activated at
-        executed_at: The Date the Order was executed at
-        rejected_at: The Date the Order was rejected at
-        cancelled_at: The Date the Order was cancelled at
-        key_creation_id: This is the API Key the order was created with
-        key_activation_id: This is the API Key the order was activated with.
-            When the Order was activated via mobile app, the API will return mobile here.
-            When the Order was activated via Dashboard, the API will return dashboard here
+            status: Status the Order is currently in ORDERSTATUS: INACTIVE, ACTIVATED, OPEN (Real Money only), IN_PROGRESS, CANCELING, EXECUTED, CANCELED or EXPIRED
+            id: ID of the order
+            regulatory_information: Regulatory information to the order
+                    costs_entry: These are the costs for placing the Order
+                    costs_entry_pct: These are the costs for placing the Order as percentage value
+                    costs_running: These are the running costs for the order
+                    costs_running_pct: These are the running costs for the order as percentage value
+                    costs_product: These are the product costs for the order
+                    costs_product_pct: These are the product costs for the order as percentage value
+                    costs_exit: These are the exit costs for the order
+                    costs_exit_pct: These are the exit costs for the order as percentage value
+                    yield_reduction_year: This is the expected yield reduction in the first year
+                    yield_reduction_year_following: This is the expected yield reduction in the following year
+                    yield_reduction_year_exit: This is the expected yield reduction in the exit year
+                    kiid: This is the Key Investors Information Document, only at ETFs
+                    legal_disclaimer: This is a legal disclaimer for placing the Order
+            estimated_price: Estimation from our end for what price the Order will be executed
+            estimated_price_total: This is the Estimated Price the Order will be executed at (only for Market Orders), multiplied by the Order quantity
+            created_at: The Date the Order was created at
+            charge: This is the Charge for placed order
+            chargeable_at: Timestamp at which the charge was generated
+            isin_title: This is the Title of the instrument bought or sold with this order
+            type: Type of the Order: market, stop, limit, stop_limit
+            executed_quantity: This is the amount of Instruments to be bought or sold, as specified in the Order
+            executed_price: This is the Price the Order was executed at
+            executed_price_total: This is the Price the Order was executed at, multiplied by the Order quantity
+            activated_at: The Date the Order was activated at
+            executed_at: The Date the Order was executed at
+            rejected_at: The Date the Order was rejected at
+            cancelled_at: The Date the Order was cancelled at
+            key_creation_id: This is the API Key the order was created with
+            key_activation_id: This is the API Key the order was activated with.
+                    When the Order was activated via mobile app, the API will return mobile here.
+                    When the Order was activated via Dashboard, the API will return dashboard here
 
     """
+
     # Set by constructor / setters
     _isin: str
     _side: ORDERSIDE
@@ -91,8 +92,23 @@ class Order():
     _key_creation_id: str = None
     _key_activation_id: str = None
 
-    def __init__(self, isin: str, expires_at: datetime, side: ORDERSIDE, quantity: int, venue: VENUE, trading_type: str = None, stop_price: int = None, limit_price: int = None, notes: str = None, idempotency: str = None, __status=ORDERSTATUS.DRAFT) -> None:
-        self._trading_type = trading_type if trading_type is not None else acc.Account().mode
+    def __init__(
+        self,
+        isin: str,
+        expires_at: datetime,
+        side: ORDERSIDE,
+        quantity: int,
+        venue: VENUE,
+        trading_type: str = None,
+        stop_price: int = None,
+        limit_price: int = None,
+        notes: str = None,
+        idempotency: str = None,
+        __status=ORDERSTATUS.DRAFT,
+    ) -> None:
+        self._trading_type = (
+            trading_type if trading_type is not None else acc.Account().mode
+        )
         self._isin = isin
         self._side = side
         self._quantity = quantity
@@ -110,20 +126,20 @@ class Order():
         """Creates an Order Object from an API Response.
 
         Args:
-            res: The result of the lemon.markets API, i.e. request.response['results'] of get /orders/:id/
+                res: The result of the lemon.markets API, i.e. request.response['results'] of get /orders/:id/
 
         Returns
-            Order: Order Object built from the given dict.
+                Order: Order Object built from the given dict.
         """
         order = Order(None, None, None, None, None)
         order._attr_from_response(res)
         return order
 
     def place(self) -> None:
-        """ Place the order. It still needs to be activated to get executed.
+        """Place the order. It still needs to be activated to get executed.
 
         Raises:
-            LemonMarketError: if lemon.markets returns an error
+                LemonMarketError: if lemon.markets returns an error
 
         """
 
@@ -134,30 +150,32 @@ class Order():
         # Remove _ from self.__dict__ to make names fit
         body = {k[1:]: v for k, v in self.__dict__.items()}
 
-        request = ApiRequest(type=self._trading_type,
-                             endpoint="/orders/",
-                             method="POST",
-                             body=body,
-                             authorization_token=acc.Account().token
-                             )
+        request = ApiRequest(
+            type=self._trading_type,
+            endpoint="/orders/",
+            method="POST",
+            body=body,
+            authorization_token=acc.Account().token,
+        )
 
-        if request.response['status'] == "ok":
-            self._attr_from_response(request.response['results'])
+        if request.response["status"] == "ok":
+            self._attr_from_response(request.response["results"])
             return
         else:
             raise LemonMarketError(
-                request.response['error_code'], request.response['error_message'])
+                request.response["error_code"], request.response["error_message"]
+            )
 
     def activate(self, pin: str = None) -> None:
-        """ Activate the Order. After you activated the order, it is routed to the trading venue.
+        """Activate the Order. After you activated the order, it is routed to the trading venue.
 
         Arguments:
-            pin: PIN to activate a real-money order. Mandatory for real-money trading.
+                pin: PIN to activate a real-money order. Mandatory for real-money trading.
 
         Raises:
-            ValueError: if PIN is missing for real money orders
-            OrderStatusError: if called on a order that is not yet activated
-            LemonMarketError: if lemon.markets returns an error
+                ValueError: if PIN is missing for real money orders
+                OrderStatusError: if called on a order that is not yet activated
+                LemonMarketError: if lemon.markets returns an error
 
         """
 
@@ -168,29 +186,31 @@ class Order():
             if pin is None:
                 raise ValueError("Pin must be passed for real money orders.")
             else:
-                type = "money"
                 data = json.dumps({"pin": pin})
-        elif self._trading_type == TRADING_TYPE.PAPER:
-            type = "paper"
 
-        request = ApiRequest(type=type,
-                             endpoint=f"/orders/{self._id}/activate/",
-                             method="POST",
-                             body=data if type == TRADING_TYPE.MONEY else None,
-                             authorization_token=acc.Account().token
-                             )
+        request = ApiRequest(
+            type=self._trading_type,
+            endpoint=f"/orders/{self._id}/activate/",
+            method="POST",
+            body=data if self._trading_type == TRADING_TYPE.MONEY else None,
+            authorization_token=acc.Account().token,
+        )
 
-        if request.response['status'] == "ok":
+        if request.response["status"] == "ok":
             return
         else:
             raise LemonMarketError(
-                request.response['error_code'], request.response['error_message'])
+                request.response["error_code"], request.response["error_message"]
+            )
 
     def cancel(self) -> None:
-        """Cancel the Order. Available for inactive and active orders, as long as it isn't executed
-        """
+        """Cancel the Order. Available for inactive and active orders, as long as it isn't executed"""
 
-        if self._status in [ORDERSTATUS.INACTIVE, ORDERSTATUS.ACTIVATED, ORDERSTATUS.OPEN]:
+        if self._status in [
+            ORDERSTATUS.INACTIVE,
+            ORDERSTATUS.ACTIVATED,
+            ORDERSTATUS.OPEN,
+        ]:
             acc.Account().cancel_order(self._id)
 
     def reload(self) -> None:
@@ -202,19 +222,20 @@ class Order():
         res = {}
         for k, v in self.__dict__.items():
             # Remove _ from attribute name
-            res[k[1:]] = v if not isinstance(
-                v, datetime) else v.isoformat()
+            res[k[1:]] = v if not isinstance(v, datetime) else v.isoformat()
         return res
 
     def _attr_from_response(self, res: "Order") -> None:
         """Overrides the attributes of the object based on the specified dict.
 
         Args:
-            dict: Dict with Attributes of the Order. Attribute keys must not start with _
+                dict: Dict with Attributes of the Order. Attribute keys must not start with _
         """
         types = get_type_hints(Order)
 
-        if all(atr in res for atr in ["isin", "expires_at", "side", "quantity", "venue"]):
+        if all(
+            atr in res for atr in ["isin", "expires_at", "side", "quantity", "venue"]
+        ):
             for k, v in res.items():
                 if f"_{k}" in types:
                     # Parse ISO string response to datetime if attribute is annotated as datetime
@@ -232,8 +253,7 @@ class Order():
     @isin.setter
     def isin(self, value):
         if self.status != ORDERSTATUS.DRAFT:
-            raise OrderStatusError(
-                "Can't modify attributes after Order is placed")
+            raise OrderStatusError("Can't modify attributes after Order is placed")
         else:
             self._isin = value
 
@@ -244,8 +264,7 @@ class Order():
     @side.setter
     def side(self, value: ORDERSIDE):
         if self.status != ORDERSTATUS.DRAFT:
-            raise OrderStatusError(
-                "Can't modify attributes after Order is placed")
+            raise OrderStatusError("Can't modify attributes after Order is placed")
         else:
             self._side = value
 
@@ -256,8 +275,7 @@ class Order():
     @quantity.setter
     def quantity(self, value: int):
         if self.status != ORDERSTATUS.DRAFT:
-            raise OrderStatusError(
-                "Can't modify attributes after Order is placed")
+            raise OrderStatusError("Can't modify attributes after Order is placed")
         else:
             self._quantity = value
 
@@ -268,8 +286,7 @@ class Order():
     @venue.setter
     def venue(self, value: VENUE):
         if self.status != ORDERSTATUS.DRAFT:
-            raise OrderStatusError(
-                "Can't modify attributes after Order is placed")
+            raise OrderStatusError("Can't modify attributes after Order is placed")
         else:
             self._venue = value
 
@@ -280,8 +297,7 @@ class Order():
     @stop_price.setter
     def stop_price(self, value: int):
         if self.status != ORDERSTATUS.DRAFT:
-            raise OrderStatusError(
-                "Can't modify attributes after Order is placed")
+            raise OrderStatusError("Can't modify attributes after Order is placed")
         else:
             self._stop_price = value
 
@@ -292,8 +308,7 @@ class Order():
     @limit_price.setter
     def limit_price(self, value: int):
         if self.status != ORDERSTATUS.DRAFT:
-            raise OrderStatusError(
-                "Can't modify attributes after Order is placed")
+            raise OrderStatusError("Can't modify attributes after Order is placed")
         else:
             self._limit_price = value
 
@@ -304,8 +319,7 @@ class Order():
     @notes.setter
     def notes(self, value: str):
         if self.status != ORDERSTATUS.DRAFT:
-            raise OrderStatusError(
-                "Can't modify attributes after Order is placed")
+            raise OrderStatusError("Can't modify attributes after Order is placed")
         else:
             self._notes = value
 
@@ -316,8 +330,7 @@ class Order():
     @expires_at.setter
     def expires_at(self, value: datetime):
         if self.status != ORDERSTATUS.DRAFT:
-            raise OrderStatusError(
-                "Can't modify attributes after Order is placed")
+            raise OrderStatusError("Can't modify attributes after Order is placed")
         else:
             self._expires_at = value
 
