@@ -2,7 +2,8 @@ import pandas as pd
 import pytest
 from lemon.core.market import MarketData
 from tests.core.conftest import account
-from lemon.common.enums import INSTRUMENT_TYPE, VENUE
+from lemon.common.enums import INSTRUMENT_TYPE, VENUE, TIMESPAN
+from datetime import datetime
 
 
 @pytest.fixture
@@ -558,6 +559,32 @@ def latest_trade_result():
     }
 
 
+@pytest.fixture
+def ohlc_result():
+    # TODO: Shouldn't be only one entry
+    return {
+        "time": "2022-04-05T14:59:00.559+00:00",
+        "results": [
+            {
+                "isin": "IE00B3RBWM25",
+                "o": 1078000,
+                "h": 1079000,
+                "l": 1071400,
+                "c": 1075400,
+                "v": 3799,
+                "pbv": 4089026399,
+                "t": "2022-04-05T00:00:00.000+00:00",
+                "mic": "XMUN"
+            }
+        ],
+        "previous": None,
+        "next": None,
+        "total": 1,
+        "page": 1,
+        "pages": 1
+    }
+
+
 def test_search_instrument(account, mocker, search_instrument_result):
     def mock_perform_request(self):
         self._response = search_instrument_result
@@ -624,3 +651,20 @@ def test_latest_trade(account, mocker, latest_trade_result):
     assert trade["mic"] == str(VENUE.GETTEX)
     assert trade["p"] == 291100
     assert trade["v"] == 11
+
+
+def test_ohlc(account, mocker, ohlc_result):
+    def mock_perform_request(self):
+        self._response = ohlc_result
+    mocker.patch(
+        'lemon.core.market.ApiRequest._perform_request',
+        mock_perform_request
+    )
+    m = MarketData()
+    ohlc = m.ohlc(timespan=TIMESPAN.DAY, start=datetime.fromisoformat("2022-04-05"), end=datetime.fromisoformat("2022-04-05"),
+                  isin="IE00B3RBWM25", venue=VENUE.GETTEX)
+
+    assert isinstance(ohlc, pd.DataFrame)
+    assert ohlc.at[0, "o"] == 1078000
+    assert ohlc.at[0, "v"] == 3799
+    assert ohlc.at[0, "mic"] == str(VENUE.GETTEX)
