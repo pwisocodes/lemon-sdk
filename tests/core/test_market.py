@@ -513,6 +513,29 @@ def trading_venues_result():
     }
 
 
+@pytest.fixture
+def latest_quote_result():
+    return {
+        "time": "2022-04-05T14:28:21.241+00:00",
+        "results": [
+            {
+                "isin": "US30303M1027",
+                "b_v": 298,
+                "a_v": 298,
+                "b": 2121000,
+                "a": 2121500,
+                "t": "2022-04-05T14:28:20.325+00:00",
+                "mic": "XMUN"
+            }
+        ],
+        "previous": None,
+        "next": None,
+        "total": 1,
+        "page": 1,
+        "pages": 1
+    }
+
+
 def test_search_instrument(account, mocker, search_instrument_result):
     def mock_perform_request(self):
         self._response = search_instrument_result
@@ -546,3 +569,19 @@ def test_trading_venues(account, mocker, trading_venues_result):
     assert len(venues) == 2
     assert venues.at[0, "title"] == "Gettex"
     assert venues.at[1, "mic"].lower() == str(VENUE.LM_BEST_PERFORMANCE)
+
+
+def test_latest_quote(account, mocker, latest_quote_result):
+    def mock_perform_request(self):
+        self._response = latest_quote_result
+    mocker.patch(
+        'lemon.core.market.ApiRequest._perform_request',
+        mock_perform_request
+    )
+
+    m = MarketData()
+    quote = m.latest_quote(isin="US30303M1027", venue=VENUE.GETTEX)
+
+    assert quote["isin"] == "US30303M1027"
+    assert quote["b"] == 2121000
+    assert quote["mic"].lower() == str(VENUE.GETTEX)
