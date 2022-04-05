@@ -57,7 +57,7 @@ $ acc = Account(credentials=cred)
 ```python
 # 
 $ m = MarketData()
-$ m.search_instrument("MSCI")
+$ m.search_instrument(search="MSCI")
 Collecting 504 results....
              isin     wkn                       name  \
 0    LU1291100664  A2ADBR   BNPPE-MSCI EXUKXCW UECEO   
@@ -92,7 +92,7 @@ show more (open the raw output data in a text editor) ...
 503  [{'name': 'Börse München - Gettex', 'title': '...  
 
 
-$ m.ohlc(isin="DE0005933931",timespan="h", start="2021-11-01",end="2021-11-26")
+$ m.ohlc(isin="DE0005933931",timespan=TIMESPAN.HOUR, start=datetime.fromisoformat("2021-11-01"),end=datetime.fromisoformat("2021-11-26"))
          isin       o       h       l       c  \
 0   DE0005933931  133.60  133.66  133.46  133.60   
 1   DE0005933931  133.84  134.30  133.80  134.26   
@@ -105,7 +105,7 @@ $ m.ohlc(isin="DE0005933931",timespan="h", start="2021-11-01",end="2021-11-26")
 8   DE0005933931  134.12  134.16  134.08  134.16  
 ...
 
-$ m.quotes(isin="DE0005933931",mic="XMUN")
+$ m.quotes(isin="DE0005933931",venue=VENUE.GETTEX)
   isin	        b_v	a_v	  b	      a	              t	                mic
 	DE0005933931	160	160	130.04	130.1	2021-11-29T17:20:55.000+00:00	XMUN
 ```
