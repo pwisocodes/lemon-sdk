@@ -14,7 +14,7 @@ def status_ok_result() -> dict:
 
 
 @pytest.fixture
-def acccount_result() -> dict:
+def account_result() -> dict:
     return {
         "time": "2022-04-02T19:46:48.942+00:00",
         "mode": "paper",
@@ -110,7 +110,7 @@ def placed_order_result():
 @pytest.fixture
 def account(mocker) -> Account:
     def mock_fetch_state(self):
-        return
+        return account_result
     mocker.patch(
         'lemon.core.account.AccountState.fetch_state',
         mock_fetch_state

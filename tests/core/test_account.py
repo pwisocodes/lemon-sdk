@@ -1,5 +1,5 @@
 import pytest
-from tests.core.conftest import account, acccount_result, status_ok_result, placed_order_result
+from tests.core.conftest import account, account_result, status_ok_result, placed_order_result
 from lemon.core.account import Account, AccountState
 from lemon.core.orders import Order
 from lemon.common.enums import BANKSTATEMENT_TYPE, ORDERSIDE, ORDERTYPE, VENUE
