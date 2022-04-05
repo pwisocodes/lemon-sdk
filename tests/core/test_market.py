@@ -551,7 +551,7 @@ def test_search_instrument(account, mocker, search_instrument_result):
     assert len(res) == 4
     assert res.at[0, "isin"] == "IE000YDZG487"
     assert res.at[3, "type"] == str(INSTRUMENT_TYPE.ETF)
-    assert res.at[3, "venues"][0]["mic"].lower() == str(VENUE.GETTEX)
+    assert res.at[3, "venues"][0]["mic"] == str(VENUE.GETTEX)
 
 
 def test_trading_venues(account, mocker, trading_venues_result):
@@ -568,7 +568,7 @@ def test_trading_venues(account, mocker, trading_venues_result):
     assert isinstance(venues, pd.DataFrame)
     assert len(venues) == 2
     assert venues.at[0, "title"] == "Gettex"
-    assert venues.at[1, "mic"].lower() == str(VENUE.LM_BEST_PERFORMANCE)
+    assert venues.at[1, "mic"] == str(VENUE.LM_BEST_PERFORMANCE)
 
 
 def test_latest_quote(account, mocker, latest_quote_result):
@@ -584,4 +584,4 @@ def test_latest_quote(account, mocker, latest_quote_result):
 
     assert quote["isin"] == "US30303M1027"
     assert quote["b"] == 2121000
-    assert quote["mic"].lower() == str(VENUE.GETTEX)
+    assert quote["mic"] == str(VENUE.GETTEX)

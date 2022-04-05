@@ -132,9 +132,9 @@ class VENUE(BaseEnum):
             LM_BEST_PERFORMANCE: Börse München - LM Best Performance
     """
 
-    GETTEX = "xmun"
-    ALLDAY = "allday"
-    LM_BEST_PERFORMANCE = "lmbpx"
+    GETTEX = "XMUN"
+    ALLDAY = "ALLDAY"
+    LM_BEST_PERFORMANCE = "LMBPX"
 
 
 class TIMESPAN(BaseEnum):

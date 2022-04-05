@@ -355,5 +355,5 @@ def test_get_order(mocker, placed_order_result, account):
 
     assert isinstance(order, Order)
     assert order.id == "ord_abcdefghijklmnopqrstuvwxyz12345678"
-    assert VENUE.has_value(order.venue)
+    assert VENUE.has_value(str(order.venue).upper())
     assert ORDERSIDE.has_value(order.side)
