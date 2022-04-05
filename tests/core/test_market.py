@@ -536,6 +536,28 @@ def latest_quote_result():
     }
 
 
+@pytest.fixture
+def latest_trade_result():
+    return {
+        "time": "2022-04-05T14:37:36.983+00:00",
+        "results": [
+            {
+                "isin": "DE0006231004",
+                "p": 291100,
+                "pbv": 3202100,
+                "v": 11,
+                "t": "2022-04-05T14:37:13.766+00:00",
+                "mic": "XMUN"
+            }
+        ],
+        "previous": None,
+        "next": None,
+        "total": 1,
+        "page": 1,
+        "pages": 1
+    }
+
+
 def test_search_instrument(account, mocker, search_instrument_result):
     def mock_perform_request(self):
         self._response = search_instrument_result
@@ -585,3 +607,20 @@ def test_latest_quote(account, mocker, latest_quote_result):
     assert quote["isin"] == "US30303M1027"
     assert quote["b"] == 2121000
     assert quote["mic"] == str(VENUE.GETTEX)
+
+
+def test_latest_trade(account, mocker, latest_trade_result):
+    def mock_perform_request(self):
+        self._response = latest_trade_result
+    mocker.patch(
+        'lemon.core.market.ApiRequest._perform_request',
+        mock_perform_request
+    )
+
+    m = MarketData()
+    trade = m.latest_trade(isin="DE0006231004", venue=VENUE.GETTEX)
+
+    assert trade["isin"] == "DE0006231004"
+    assert trade["mic"] == str(VENUE.GETTEX)
+    assert trade["p"] == 291100
+    assert trade["v"] == 11
