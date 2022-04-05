@@ -116,7 +116,7 @@ class MarketData(object):
         request = ApiRequest(type="market",
                              endpoint=f"/trades/latest?decimals=false&isin={isin}&mic={venue}/",
                              method="GET",
-                             authorization_token=self._token)
+                             authorization_token=Account().token)
         if "results" in request.response:
             return request.response['results'][0]
         else:
