@@ -96,6 +96,33 @@ class MarketData(object):
             raise LemonMarketError(
                 request.response['error_code'], request.response['error_message'])
 
+    def latest_trade(self, venue: VENUE, isin: str) -> dict:
+        """Latest trade of a specific instrument
+
+        Args:
+            venue:  Enter a venue or a Market Identifier Code (MIC) in there.
+            isin: The International Securities Identification Number of the instrument
+
+        Returns:
+            dict: Information about the trade.
+                isin: The International Securities Identification Number of the instrument
+                p: Price the trade happened at
+                v: Volume for trade (quantity)
+                t: Timestamp of time period the trade occured at
+                mic: Market Identifier Code of Trading Venue the trade occured at
+
+        """
+
+        request = ApiRequest(type="market",
+                             endpoint=f"/trades/latest?decimals=false&isin={isin}&mic={venue}/",
+                             method="GET",
+                             authorization_token=self._token)
+        if "results" in request.response:
+            return request.response['results']
+        else:
+            raise LemonMarketError(
+                request.response['error_code'], request.response['error_message'])
+
     def ohlc(self, isin: str, start: datetime, end: datetime, timespan: TIMESPAN, venue: VENUE = None, sorting: SORT = None) -> pd.DataFrame:
         """OHLC data of a specific instrument.
 
@@ -139,33 +166,6 @@ class MarketData(object):
 
         if "results" in request.response:
             return pd.DataFrame(request.response['results'])
-        else:
-            raise LemonMarketError(
-                request.response['error_code'], request.response['error_message'])
-
-    def latest_trade(self, venue: VENUE, isin: str) -> dict:
-        """Latest trade of a specific instrument
-
-        Args:
-            venue:  Enter a venue or a Market Identifier Code (MIC) in there.
-            isin: The International Securities Identification Number of the instrument
-
-        Returns:
-            dict: Information about the trade.
-                isin: The International Securities Identification Number of the instrument
-                p: Price the trade happened at
-                v: Volume for trade (quantity)
-                t: Timestamp of time period the trade occured at
-                mic: Market Identifier Code of Trading Venue the trade occured at
-
-        """
-
-        request = ApiRequest(type="market",
-                             endpoint=f"/trades/latest?decimals=false&isin={isin}&mic={venue}/",
-                             method="GET",
-                             authorization_token=self._token)
-        if "results" in request.response:
-            return request.response['results']
         else:
             raise LemonMarketError(
                 request.response['error_code'], request.response['error_message'])
