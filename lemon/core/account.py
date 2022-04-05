@@ -1,6 +1,13 @@
 from lemon.core.orders import Order
 from lemon.common.helpers import Singleton
-from lemon.common.enums import BANKSTATEMENT_TYPE, ORDERSIDE, ORDERSTATUS, ORDERTYPE, SORT, TRADING_TYPE
+from lemon.common.enums import (
+    BANKSTATEMENT_TYPE,
+    ORDERSIDE,
+    ORDERSTATUS,
+    ORDERTYPE,
+    SORT,
+    TRADING_TYPE,
+)
 from lemon.common.errors import LemonMarketError
 from lemon.common.requests import ApiRequest
 import logging
@@ -11,42 +18,42 @@ from typing import get_type_hints
 
 
 @dataclass(init=True)
-class AccountState():
+class AccountState:
     """Represents the State/Attributes of an Account.
 
     Attributes:
-        created_at: Date of your Account creation
-        account_id: ID of the Acount (read-only)
-        firstname: First Name of the Account Owner
-        lastname: Last Name of the Account Owner
-        email: Email Adress of the Account Owner
-        phone: Phone Number of the Account Owner
-        address: Address of the Account Owner
-        billing_address: Billing Address of the Account Owner
-        billing_email: Billing Email of the Account Owner
-        billing_name: Billing Name of the Account Owner
-        billing_vat: Value-added Tax (GER: MwSt) of the Account Owner
-        mode: Environment of the account. Either 'paper' or 'money'
-        deposit_id: Identification Number of your securities account
-        client_id: The internal client identification number related to the account
-        account_number: The account reference number
-        iban_brokerage: IBAN of the brokerage account at our partner bank. This is the IBAN you can transfer money from your referrence account to
-        iban_origin: IBAN of the reference account.
-        bank_name_origin: Bank name of your reference account.
-        balance: Your balance is the money you transferred to your account + the combined profits or losses from your orders. 1€ = 10000
-        cash_to_invest: How much cash you have left to invest. Your balance minus the sum of orders that were activated but not executed, yet.
-        cash_to_withdraw: How much cash you have in your account to withdraw to your reference account. Calculated through your last reported balance minus the current sum of buy orders.
-        amount_bought_intraday:
-        amount_sold_intraday:
-        amount_open_orders:
-        amount_open_withdrawals:
-        amount_estimate_taxes:
-        approved_at: Timestamp of live trading account approval
-        trading_plan: subscription plan for trading. Either 'free', 'basic' or 'pro'
-        data_plan: subscription plan for market data. Either 'free', 'basic' or 'pro'
-        tax_allowance: Your tax tax allowance - between 0 and 801 €, as specified in your onboarding process
-        tax_allowance_start: Relevant start date for your tax allowance (usually 01/01/ of respective year)
-        tax_allowance_end: Relevant end date for your tax allowance (usually 31/12/ of respective year)
+            created_at: Date of your Account creation
+            account_id: ID of the Acount (read-only)
+            firstname: First Name of the Account Owner
+            lastname: Last Name of the Account Owner
+            email: Email Adress of the Account Owner
+            phone: Phone Number of the Account Owner
+            address: Address of the Account Owner
+            billing_address: Billing Address of the Account Owner
+            billing_email: Billing Email of the Account Owner
+            billing_name: Billing Name of the Account Owner
+            billing_vat: Value-added Tax (GER: MwSt) of the Account Owner
+            mode: Environment of the account. Either 'paper' or 'money'
+            deposit_id: Identification Number of your securities account
+            client_id: The internal client identification number related to the account
+            account_number: The account reference number
+            iban_brokerage: IBAN of the brokerage account at our partner bank. This is the IBAN you can transfer money from your referrence account to
+            iban_origin: IBAN of the reference account.
+            bank_name_origin: Bank name of your reference account.
+            balance: Your balance is the money you transferred to your account + the combined profits or losses from your orders. 1€ = 10000
+            cash_to_invest: How much cash you have left to invest. Your balance minus the sum of orders that were activated but not executed, yet.
+            cash_to_withdraw: How much cash you have in your account to withdraw to your reference account. Calculated through your last reported balance minus the current sum of buy orders.
+            amount_bought_intraday:
+            amount_sold_intraday:
+            amount_open_orders:
+            amount_open_withdrawals:
+            amount_estimate_taxes:
+            approved_at: Timestamp of live trading account approval
+            trading_plan: subscription plan for trading. Either 'free', 'basic' or 'pro'
+            data_plan: subscription plan for market data. Either 'free', 'basic' or 'pro'
+            tax_allowance: Your tax tax allowance - between 0 and 801 €, as specified in your onboarding process
+            tax_allowance_start: Relevant start date for your tax allowance (usually 01/01/ of respective year)
+            tax_allowance_end: Relevant end date for your tax allowance (usually 31/12/ of respective year)
 
     """
 
@@ -221,37 +228,41 @@ class AccountState():
             logging.warning("Cant fetch account state")
 
     def fetch_state(self) -> None:
-        """ Refresh information about this Account.
+        """Refresh information about this Account.
 
         Raises:
-            LemonMarketError: if lemon.markets returns an error
+                LemonMarketError: if lemon.markets returns an error
 
         """
 
-        request = ApiRequest(type="paper",
-                             endpoint="/account/",
-                             method="GET",
-                             authorization_token=self.token
-                             )
+        request = ApiRequest(
+            type="paper",
+            endpoint="/account/",
+            method="GET",
+            authorization_token=self.token,
+        )
 
-        if request.response['status'] == "ok":
+        if request.response["status"] == "ok":
             types = get_type_hints(AccountState)
             # Dynamically set Attributes
             for k, v in request.response["results"].items():
-                if f"_{k}" in types:
-                    # Parse ISO string response to datetime if attribute is as datetime annotated
-                    if types[f"_{k}"] == datetime:
-                        setattr(self, f"_{k}", datetime.fromisoformat(v))
-                    else:
-                        setattr(self, f"_{k}", v)
+                if v is not None:
+                    if f"_{k}" in types:
+                        # Parse ISO string response to datetime if attribute is as datetime annotated
+                        if types[f"_{k}"] == datetime:
+                            setattr(self, f"_{k}", datetime.fromisoformat(str(v)))
+                        else:
+                            setattr(self, f"_{k}", v)
         else:
             raise LemonMarketError(
-                request.response['error_code'], request.response['error_message'])
+                request.response["error_code"], request.response["error_message"]
+            )
 
 
 class Account(AccountState, metaclass=Singleton):
-
-    def __init__(self, credentials: str, trading_type: TRADING_TYPE = TRADING_TYPE.PAPER) -> None:
+    def __init__(
+        self, credentials: str, trading_type: TRADING_TYPE = TRADING_TYPE.PAPER
+    ) -> None:
         self._token = credentials
         super().__init__()
         self._mode = trading_type
@@ -261,84 +272,96 @@ class Account(AccountState, metaclass=Singleton):
         return self._token
 
     def withdraw(self, amount: int, pin: int, idempotency: str = None) -> None:
-        """ Withdraw money from your bank account to your lemon.markets account e.g. amount = 1000000 means 100€ (hundreths of a cent). Take a look at: https://docs.lemon.markets/trading/overview#working-with-numbers-in-the-trading-api 
+        """Withdraw money from your bank account to your lemon.markets account e.g. amount = 1000000 means 100€ (hundreths of a cent). Take a look at: https://docs.lemon.markets/trading/overview#working-with-numbers-in-the-trading-api
 
         Args:
-            amount: amount of money that will be withdrawn, minimum is 1000000 (100 €)
-            pin: his is the personal verification PIN you set during the onboarding. 
-            idempotency: ou can set your own unique idempotency key to prevent duplicate operations. Subsequent requests with the same idempotency key will then not go through and throw an error message. This means you cannot make the same withdrawal twice.
+                amount: amount of money that will be withdrawn, minimum is 1000000 (100 €)
+                pin: his is the personal verification PIN you set during the onboarding.
+                idempotency: ou can set your own unique idempotency key to prevent duplicate operations. Subsequent requests with the same idempotency key will then not go through and throw an error message. This means you cannot make the same withdrawal twice.
 
         Raises:
-            LemonMarketError: if lemon.markets returns an error
-            ValueError: If the amount is not supported.
+                LemonMarketError: if lemon.markets returns an error
+                ValueError: If the amount is not supported.
         """
         if amount > 0:
 
             body = {"amount": amount}
-            request = ApiRequest(type=self.mode,
-                                 endpoint="/account/withdrawals/",
-                                 method="POST",
-                                 body=body,
-                                 authorization_token=self._token)
+            request = ApiRequest(
+                type=self.mode,
+                endpoint="/account/withdrawals/",
+                method="POST",
+                body=body,
+                authorization_token=self._token,
+            )
 
-            if request.response['status'] == 'ok':
+            if request.response["status"] == "ok":
                 return
             else:
                 raise LemonMarketError(
-                    request.response['error_code'], request.response['error_message'])
+                    request.response["error_code"], request.response["error_message"]
+                )
 
         else:
             raise ValueError(f"Can't withdraw negative amount {amount}!")
 
     def withdrawals(self) -> list[dict]:
-        """ Get Withdrawals of the account.
+        """Get Withdrawals of the account.
 
         Returns:
-            pandas.DataFrame: Withdrawals
-                id: A unique Identification Number of your withdrawal
-                amount: The amount that you specified for your withdrawal
-                created_at: Timestamp at which you created the withdrawal
-                date: Timestamp at which the withdrawal was processed by our partner bank
-                idempotency: Your own unique idempotency key that you specified in your POST request to prevent duplicate withdrawals.
+                pandas.DataFrame: Withdrawals
+                        id: A unique Identification Number of your withdrawal
+                        amount: The amount that you specified for your withdrawal
+                        created_at: Timestamp at which you created the withdrawal
+                        date: Timestamp at which the withdrawal was processed by our partner bank
+                        idempotency: Your own unique idempotency key that you specified in your POST request to prevent duplicate withdrawals.
 
         Raises:
-            LemonMarketError: if lemon.markets returns an error
+                LemonMarketError: if lemon.markets returns an error
 
         """
 
-        request = ApiRequest(type=self.mode,
-                             endpoint="/account/withdrawals/",
-                             method="GET",
-                             authorization_token=self._token)
+        request = ApiRequest(
+            type=self.mode,
+            endpoint="/account/withdrawals/",
+            method="GET",
+            authorization_token=self._token,
+        )
 
-        if request.response['status'] == "ok":
-            return request.response['results']
+        if request.response["status"] == "ok":
+            return request.response["results"]
         else:
             raise LemonMarketError(
-                request.response['error_code'], request.response['error_message'])
+                request.response["error_code"], request.response["error_message"]
+            )
 
-    def bankstatements(self, type: BANKSTATEMENT_TYPE = None, start: datetime = None, end: datetime = None, sorting: SORT = None) -> list[dict]:
+    def bankstatements(
+        self,
+        type: BANKSTATEMENT_TYPE = None,
+        start: datetime = None,
+        end: datetime = None,
+        sorting: SORT = None,
+    ) -> list[dict]:
         """Get List of all Bankstatements in you Account.
 
         Args:
-            type: Filter for different types of Bankstatements: PAY_IN, PAY_OUT, ORDER_BUY, ORDER-SELL, EOD_BALANCE, DIVIDEND
-            start: Filter for bank statements after a specific date.
-            end: Filter for bank statements until a specific date.
-            sorting: Sort either ASCENDING (oldest first) or DESCENDING (newest first)
+                type: Filter for different types of Bankstatements: PAY_IN, PAY_OUT, ORDER_BUY, ORDER-SELL, EOD_BALANCE, DIVIDEND
+                start: Filter for bank statements after a specific date.
+                end: Filter for bank statements until a specific date.
+                sorting: Sort either ASCENDING (oldest first) or DESCENDING (newest first)
 
         Returns:
-            List of Bankstatement-Dicts
-                id: Unique Identification Number of your bank statement
-                account_id: Unique Identification Number of the account the bank statement is related to
-                type: Different types of Bankstatements: PAY_IN, PAY_OUT, ORDER_BUY, ORDER-SELL, EOD_BALANCE, DIVIDEND
-                date: The date that the bank statement relates to (YYYY-MM-DD)
-                amount: The amount associated with the bank statement
-                isin: The International Securities Identification Number (ISIN) related to your bank statement. Only for type order_buy and order_sell, otherwise null
-                isin_title: The title of the International Securities Identification Number (ISIN) related to your bank statement. Only for type order_buy and order_sell, otherwise null
-                created_at: The timestamp the bank statement was created internally. This can be different to the date, e.g., when there is a weekend in between.
+                List of Bankstatement-Dicts
+                        id: Unique Identification Number of your bank statement
+                        account_id: Unique Identification Number of the account the bank statement is related to
+                        type: Different types of Bankstatements: PAY_IN, PAY_OUT, ORDER_BUY, ORDER-SELL, EOD_BALANCE, DIVIDEND
+                        date: The date that the bank statement relates to (YYYY-MM-DD)
+                        amount: The amount associated with the bank statement
+                        isin: The International Securities Identification Number (ISIN) related to your bank statement. Only for type order_buy and order_sell, otherwise null
+                        isin_title: The title of the International Securities Identification Number (ISIN) related to your bank statement. Only for type order_buy and order_sell, otherwise null
+                        created_at: The timestamp the bank statement was created internally. This can be different to the date, e.g., when there is a weekend in between.
 
         Raises:
-            LemonMarketError: if lemon.markets returns an error
+                LemonMarketError: if lemon.markets returns an error
         """
 
         params = {
@@ -347,110 +370,131 @@ class Account(AccountState, metaclass=Singleton):
             "to": end.isoformat() if end is not None else None,
             "sorting": sorting,
         }
-        request = ApiRequest(type=self.mode,
-                             endpoint="/account/bankstatements/",
-                             url_params=params,
-                             method="GET",
-                             authorization_token=self._token)
+        request = ApiRequest(
+            type=self.mode,
+            endpoint="/account/bankstatements/",
+            url_params=params,
+            method="GET",
+            authorization_token=self._token,
+        )
 
-        if request.response['status'] == "ok":
-            return request.response['results']
+        if request.response["status"] == "ok":
+            return request.response["results"]
         else:
             raise LemonMarketError(
-                request.response['error_code'], request.response['error_message'])
+                request.response["error_code"], request.response["error_message"]
+            )
 
     def documents(self) -> list[dict]:
-        """ Get information about all documents linked with this account 
+        """Get information about all documents linked with this account
 
         Returns:
-            List of Documents as Dict
+                List of Documents as Dict
 
         Raises:
-            LemonMarketError: if lemon.markets returns an error
+                LemonMarketError: if lemon.markets returns an error
         """
-        request = ApiRequest(type=self.mode,
-                             endpoint="/account/documents/",
-                             method="GET",
-                             authorization_token=self._token)
+        request = ApiRequest(
+            type=self.mode,
+            endpoint="/account/documents/",
+            method="GET",
+            authorization_token=self._token,
+        )
 
-        if request.response['status'] == "ok":
-            return request.response['results']
+        if request.response["status"] == "ok":
+            return request.response["results"]
         else:
             raise LemonMarketError(
-                request.response['error_code'], request.response['error_message'])
+                request.response["error_code"], request.response["error_message"]
+            )
 
     def get_doc(self, doc_id: str) -> dict:
-        """ Download a specific doc by id
+        """Download a specific doc by id
 
         Args:
-            doc_id: ID of document
+                doc_id: ID of document
 
         Raises:
-            LemonMarketError: if lemon.markets returns an error
+                LemonMarketError: if lemon.markets returns an error
         """
-        request = ApiRequest(type=self.mode,
-                             endpoint="/account/documents/{}".format(doc_id),
-                             method="GET",
-                             authorization_token=self._token)
+        request = ApiRequest(
+            type=self.mode,
+            endpoint="/account/documents/{}".format(doc_id),
+            method="GET",
+            authorization_token=self._token,
+        )
 
-        if request.response['status'] == "ok":
+        if request.response["status"] == "ok":
             # TODO
-            return request.response['results']
+            return request.response["results"]
         else:
             raise LemonMarketError(
-                request.response['error_code'], request.response['error_message'])
+                request.response["error_code"], request.response["error_message"]
+            )
 
     def positions(self, isin: str = None) -> pd.DataFrame:
-        """ Get the positions of the account.
+        """Get the positions of the account.
 
         Args:
-            isin: Filter for position of a specific share
+                isin: Filter for position of a specific share
 
         Returns:
-            pandas.DataFrame: positions
-                isin: This is the International Securities Identification Number (ISIN) of the position
-                isin_title: This is the Title of the instrument
-                quantity: This is the number of positions you currently hold for the respective Instrument
-                buy_price_avg: This is the average buy-in price of the respective position. If you buy one share for 100€ and a second one for 110€, the average buy-in price would be 105€.
-                estimated_price_total: This is the current position valuation to the market trading price. So, if you own 3 shares of stock XYZ, and the current market trading price for XYZ is 100€, this attribute would return 300€
-                estimated_price: This is the current market trading price for the respective position.
+                pandas.DataFrame: positions
+                        isin: This is the International Securities Identification Number (ISIN) of the position
+                        isin_title: This is the Title of the instrument
+                        quantity: This is the number of positions you currently hold for the respective Instrument
+                        buy_price_avg: This is the average buy-in price of the respective position. If you buy one share for 100€ and a second one for 110€, the average buy-in price would be 105€.
+                        estimated_price_total: This is the current position valuation to the market trading price. So, if you own 3 shares of stock XYZ, and the current market trading price for XYZ is 100€, this attribute would return 300€
+                        estimated_price: This is the current market trading price for the respective position.
 
         Raises:
-            LemonMarketError: if lemon.markets returns an error
+                LemonMarketError: if lemon.markets returns an error
         """
         if isin is not None:
             query = f"isin={isin}"
         else:
             query = ""
 
-        request = ApiRequest(type=self.mode,
-                             endpoint=f"/positions/?{query}",
-                             method="GET",
-                             authorization_token=self._token)
+        request = ApiRequest(
+            type=self.mode,
+            endpoint=f"/positions/?{query}",
+            method="GET",
+            authorization_token=self._token,
+        )
 
-        if request.response['status'] == "ok":
-            return pd.DataFrame(request.response['results'])
+        if request.response["status"] == "ok":
+            return pd.DataFrame(request.response["results"])
         else:
             raise LemonMarketError(
-                request.response['error_code'], request.response['error_message'])
+                request.response["error_code"], request.response["error_message"]
+            )
 
-    def orders(self, isin: str = None, status: ORDERSTATUS = None, side: ORDERSIDE = None, start: datetime = None, end: datetime = None, type: ORDERTYPE = None, key_creation_id: str = None) -> list[Order]:
+    def orders(
+        self,
+        isin: str = None,
+        status: ORDERSTATUS = None,
+        side: ORDERSIDE = None,
+        start: datetime = None,
+        end: datetime = None,
+        type: ORDERTYPE = None,
+        key_creation_id: str = None,
+    ) -> list[Order]:
         """Get a list of orders on your account.
 
         Args:
-            isin: Filter for specific instrument
-            status: Filter for status
-            side: Filter for 'buy' or 'sell'
-            start: Specify a datetime to get order from a specific date on.
-            end: Specify a datetime to get only orders until a specific date.
-            type: Filter for different types of orders: market, stop, limit, stop_limit
-            key_creation_id: Filter for a specific API you created orders with
+                isin: Filter for specific instrument
+                status: Filter for status
+                side: Filter for 'buy' or 'sell'
+                start: Specify a datetime to get order from a specific date on.
+                end: Specify a datetime to get only orders until a specific date.
+                type: Filter for different types of orders: market, stop, limit, stop_limit
+                key_creation_id: Filter for a specific API you created orders with
 
         Returns:
-            List of Orders
+                List of Orders
 
         Raises:
-            LemonMarketError: if lemon.markets returns an error
+                LemonMarketError: if lemon.markets returns an error
         """
         payload = {}
 
@@ -459,59 +503,68 @@ class Account(AccountState, metaclass=Singleton):
         if end is not None:
             payload["to"] = end.isoformat()
 
-        request = ApiRequest(type=self.mode,
-                             endpoint=f"/orders/?isin{isin}&status={status}&side={side}&type={type}&key_creation_id={key_creation_id}",
-                             url_params=payload,
-                             method="GET",
-                             authorization_token=self._token)
+        request = ApiRequest(
+            type=self.mode,
+            endpoint=f"/orders/?isin{isin}&status={status}&side={side}&type={type}&key_creation_id={key_creation_id}",
+            url_params=payload,
+            method="GET",
+            authorization_token=self._token,
+        )
 
-        if request.response['status'] == "ok":
+        if request.response["status"] == "ok":
             # Parse result to list of Orders
-            return [Order.from_result(order) for order in request.response['results']]
+            return [Order.from_result(order) for order in request.response["results"]]
         else:
             raise LemonMarketError(
-                request.response['error_code'], request.response['error_message'])
+                request.response["error_code"], request.response["error_message"]
+            )
 
     def get_order(self, order_id: str) -> Order:
-        """ Retrieve information of a specific order.
+        """Retrieve information of a specific order.
 
         Args:
-            order_id: ID of the order
+                order_id: ID of the order
 
         Returns:
-            Order: The order with the specified id
+                Order: The order with the specified id
 
         Raises:
-            LemonMarketError: if lemon.markets returns an error
+                LemonMarketError: if lemon.markets returns an error
         """
-        request = ApiRequest(type=self.mode,
-                             endpoint="/orders/{}".format(order_id),
-                             method="GET",
-                             authorization_token=self._token)
+        request = ApiRequest(
+            type=self.mode,
+            endpoint="/orders/{}".format(order_id),
+            method="GET",
+            authorization_token=self._token,
+        )
 
-        if request.response['status'] == "ok":
-            return Order.from_result(request.response['results'])
+        if request.response["status"] == "ok":
+            return Order.from_result(request.response["results"])
         else:
             raise LemonMarketError(
-                request.response['error_code'], request.response['error_message'])
+                request.response["error_code"], request.response["error_message"]
+            )
 
     def cancel_order(self, order_id: str) -> None:
-        """ Cancel an order that is placed/inactive or activated (but not executed by the stock exchange)
+        """Cancel an order that is placed/inactive or activated (but not executed by the stock exchange)
 
         Args:
-            order_id: ID of the order
+                order_id: ID of the order
 
         Raises:
-            LemonMarketError: if lemon.markets returns an error
+                LemonMarketError: if lemon.markets returns an error
         """
 
-        request = ApiRequest(type=self.mode,
-                             endpoint="/orders/{}".format(order_id),
-                             method="DELETE",
-                             authorization_token=self._token)
+        request = ApiRequest(
+            type=self.mode,
+            endpoint="/orders/{}".format(order_id),
+            method="DELETE",
+            authorization_token=self._token,
+        )
 
-        if request.response['status'] == "ok":
+        if request.response["status"] == "ok":
             return
         else:
             raise LemonMarketError(
-                request.response['error_code'], request.response['error_message'])
+                request.response["error_code"], request.response["error_message"]
+            )
