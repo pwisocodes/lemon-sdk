@@ -118,7 +118,7 @@ class MarketData(object):
                              method="GET",
                              authorization_token=self._token)
         if "results" in request.response:
-            return request.response['results']
+            return request.response['results'][0]
         else:
             raise LemonMarketError(
                 request.response['error_code'], request.response['error_message'])
