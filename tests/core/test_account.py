@@ -252,7 +252,7 @@ def test_withdraw(mocker, status_ok_result, account):
     def mock_perform_request(self):
         self._response = status_ok_result
     mocker.patch(
-        'lemon.core.orders.ApiRequest._perform_request',
+        'lemon.core.account.ApiRequest._perform_request',
         mock_perform_request
     )
 
@@ -269,7 +269,7 @@ def test_withdrawals(mocker, withdrawals_result, account):
     def mock_perform_request(self):
         self._response = withdrawals_result
     mocker.patch(
-        'lemon.core.orders.ApiRequest._perform_request',
+        'lemon.core.account.ApiRequest._perform_request',
         mock_perform_request
     )
 
@@ -286,7 +286,7 @@ def test_bankstatements(mocker, bankstatements_result, account):
     def mock_perform_request(self):
         self._response = bankstatements_result
     mocker.patch(
-        'lemon.core.orders.ApiRequest._perform_request',
+        'lemon.core.account.ApiRequest._perform_request',
         mock_perform_request
     )
 
@@ -311,7 +311,7 @@ def test_positions(mocker, positions_result, account):
     def mock_perform_request(self):
         self._response = positions_result
     mocker.patch(
-        'lemon.core.orders.ApiRequest._perform_request',
+        'lemon.core.account.ApiRequest._perform_request',
         mock_perform_request
     )
 
@@ -328,7 +328,7 @@ def test_orders(mocker, apple_orders_result, account):
     def mock_perform_request(self):
         self._response = apple_orders_result
     mocker.patch(
-        'lemon.core.orders.ApiRequest._perform_request',
+        'lemon.core.account.ApiRequest._perform_request',
         mock_perform_request
     )
 
@@ -347,7 +347,7 @@ def test_get_order(mocker, placed_order_result, account):
     def mock_perform_request(self):
         self._response = placed_order_result
     mocker.patch(
-        'lemon.core.orders.ApiRequest._perform_request',
+        'lemon.core.account.ApiRequest._perform_request',
         mock_perform_request
     )
 
