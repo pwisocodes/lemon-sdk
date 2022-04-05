@@ -545,4 +545,4 @@ def test_trading_venues(account, mocker, trading_venues_result):
     assert isinstance(venues, pd.DataFrame)
     assert len(venues) == 2
     assert venues.at[0, "title"] == "Gettex"
-    assert venues.at[1, "mic"] == "LMBPX"
+    assert venues.at[1, "mic"].lower() == str(VENUE.LM_BEST_PERFORMANCE)
