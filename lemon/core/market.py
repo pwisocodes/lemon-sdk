@@ -113,7 +113,7 @@ class MarketData(object):
 
         """
 
-        request = ApiRequest(type="market",
+        request = ApiRequest(type="data",
                              endpoint=f"/trades/latest?decimals=false&isin={isin}&mic={venue}/",
                              method="GET",
                              authorization_token=Account().token)
