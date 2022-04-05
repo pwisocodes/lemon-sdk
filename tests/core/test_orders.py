@@ -7,13 +7,12 @@ from tests.core.conftest import account, status_ok_result, placed_order_result
 
 @pytest.fixture
 def executed_order_data():
-    """fixture with Data of an executed order
-    """
+    """fixture with Data of an executed order"""
     return {
         "isin": "US0378331005",
         "side": ORDERSIDE.BUY,
         "quantity": 5,
-        "venue":  VENUE.GETTEX,
+        "venue": VENUE.GETTEX,
         "stop_price": None,
         "limit_price": 1700000,
         "notes": "Test Order",
@@ -40,7 +39,7 @@ def executed_order_data():
             "estimated_yield_reduction_total": 40000,
             "estimated_holding_duration_years": "5",
             "yield_reduction_year_following_pct": "0.00%",
-            "estimated_yield_reduction_total_pct": "2.35%"
+            "estimated_yield_reduction_total_pct": "2.35%",
         },
         "estimated_price": 1650000,
         "estimated_price_total": 8000000,
@@ -57,7 +56,7 @@ def executed_order_data():
         "rejected_at": None,
         "cancelled_at": None,
         "key_creation_id": "apk_keykeykeykeykeykeykeykeykeykeykeyk",
-        "key_activation_id": "apk_keykeykeykeykeykeykeykeykeykeykeyk"
+        "key_activation_id": "apk_keykeykeykeykeykeykeykeykeykeykeyk",
     }
 
 
@@ -70,10 +69,8 @@ def test_from_result(executed_order_data, account):
 def test_place_order(mocker, placed_order_result, account):
     def mock_perform_request(self):
         self._response = placed_order_result
-    mocker.patch(
-        'lemon.core.orders.ApiRequest._perform_request',
-        mock_perform_request
-    )
+
+    mocker.patch("lemon.core.orders.ApiRequest._perform_request", mock_perform_request)
     order = Order("US02079K3059", "2022-04-04", ORDERSIDE.BUY, 1, VENUE.GETTEX)
 
     order.place()
@@ -87,10 +84,8 @@ def test_place_order(mocker, placed_order_result, account):
 def test_activate_paper(mocker, status_ok_result, account):
     def mock_perform_request(self):
         self._response = status_ok_result
-    mocker.patch(
-        'lemon.core.orders.ApiRequest._perform_request',
-        mock_perform_request
-    )
+
+    mocker.patch("lemon.core.orders.ApiRequest._perform_request", mock_perform_request)
 
     order = Order("US02079K3059", "2022-04-04", ORDERSIDE.BUY, 1, VENUE.GETTEX)
     order._id = "ord_qyGDXNNGGKzJVTMBzbHhxVfkSn3BcSjfK7"
@@ -114,16 +109,14 @@ def test_reload(mocker, placed_order_result, account):
 
     def mock_perform_request(self):
         self._response = placed_order_result
-    mocker.patch(
-        'lemon.core.orders.ApiRequest._perform_request',
-        mock_perform_request
-    )
+
+    mocker.patch("lemon.core.orders.ApiRequest._perform_request", mock_perform_request)
 
     order.reload()
 
     assert order.id == "ord_abcdefghijklmnopqrstuvwxyz12345678"
     assert order.isin == "US02079K3059"
-    assert order.venue == VENUE.GETTEX.value
+    assert order.venue.upper() == VENUE.GETTEX.value
 
 
 def test_to_dict(account):
