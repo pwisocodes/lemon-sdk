@@ -21,18 +21,14 @@ jobs:
           poetry-version: ${{ matrix.poetry-version }}
     - name: Load cached venv
       id: cached-poetry-dependencies
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
           path: .venv
           key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
-    - name: Set Poetry config
-      run: |
-        poetry config settings.virtualenvs.in-project false
-        poetry config settings.virtualenvs.path ~/.virtualenv
+    - name: View poetry --help
+      run: poetry --help
     - name: Install dependencies
       if: steps.cache.outputs.cache-hit != 'true'
       run: poetry install
     - name: pytest
       run: poetry run pytest
-    - name: View poetry --help
-      run: poetry --help
