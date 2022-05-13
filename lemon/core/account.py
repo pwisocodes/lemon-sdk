@@ -1,431 +1,571 @@
-
+from lemon.core.orders import Order
+from lemon.common.helpers import Singleton
+from lemon.common.enums import (
+    BANKSTATEMENT_TYPE,
+    ORDERSIDE,
+    ORDERSTATUS,
+    ORDERTYPE,
+    SORT,
+    TRADING_TYPE,
+)
+from lemon.common.errors import LemonMarketError
+from lemon.common.requests import ApiRequest
 import logging
-import threading
+import pandas as pd
 from dataclasses import dataclass
 from datetime import datetime
-from typing import List
-from urllib.parse import urlencode
-
-from lemon.common.errors import *
-from lemon.common.helpers import Singleton
-from lemon.common.requests import ApiRequest
-from lemon.core.strategy import IStrategy
-
-
-class Space():
-    """Every Account has multiple spaces which will run themsselfs a specific trading strategy. 
-    So each Space has his own balance and cash_to_invest.
-    """
-
-    def __init__(self, init_values: dict = None, name: str = None, type: str = None, risk_limit: str = None, trading_type: str = "paper", s: IStrategy = None) -> None:
-        self._strategy = s
-        self.name = name
-        self.type = type
-        self.risk_limit = risk_limit
-        self.trading_type = trading_type
-
-        if init_values != None:
-            self.name = init_values['name']
-            self.description = init_values['description']
-            self._uuid = init_values['id']
-            self.risk_limit = float(init_values['risk_limit'])
-            self.buying_power = float(init_values['buying_power'])
-            self.earnings = float(init_values['earnings'])
-            self.backfire = float(init_values['backfire'])
-            self.created_at = init_values['created_at']
-            if trading_type == "money":
-                self.linked = init_values['linked']
-
-    def __repr__(self):
-        return f'Space(Name: {self.name}, Buying_power: {self.buying_power}, Risk_limit: {self.risk_limit}, Trading_type: {self.trading_type}'
-
-    def __hash__(self):
-        return hash(self.name)
-
-    def fetch_space_state(self):
-        request = ApiRequest(type="paper",
-                             endpoint="/spaces/{}/".format(self._uuid),
-                             method="GET",
-                             authorization_token=Account().token)
-        logging.info(request.keys())
-        if request.response['status'] == "ok":
-            self.risk_limit = float(request.response['results']['risk_limit'])
-            self.buying_power = float(
-                request.response['results']['buying_power'])
-            self.earnings = float(request.response['results']['earnings'])
-            self.backfire = float(request.response['results']['backfire'])
-        else:
-            raise Exception(request.response['status'])
-
-    @property
-    def strategy(self) -> IStrategy:
-        """
-        The Context maintains a reference to one of the Strategy objects. The
-        Context does not know the concrete class of a strategy. It should work
-        with all strategies via the Strategy interface.
-        """
-        return self._strategy if self._strategy != None else None
-
-    @strategy.setter
-    def strategy(self, strategy: IStrategy) -> None:
-        """Replace Strategie wihle running 
-
-        Args:
-            strategy (Strategy): [description]
-        """
-        self._strategy = strategy
-
-    def run(self) -> None:
-        """
-        The Context delegates some work to the Strategy object instead of
-        implementing multiple versions of the algorithm on its own.
-        """
-        if self.strategy is not None:
-            t1 = threading.Thread(
-                target=self.strategy.do_algorithm, name=self.name)
-            t1.start()
-            logging.debug(f"Strategy from {self.name} started!")
-        else:
-            logging.warning(
-                f"Space {self.name} has no actual strategy! Nothing to start here!")
-
-    def backtest(self):
-        pass
+from typing import get_type_hints
 
 
 @dataclass(init=True)
-class AccountState():
-    account_id: str = None
-    firstname: str = None
-    lastname: str = None
-    email: str = None
-    phone: str = None
-    address: str = None
-    billing_email: str = None
-    billing_address: str = None
-    billing_name: str = None
-    billing_vat: str = None
-    mode: str = None
-    deposit_id: str = None
-    client_id: str = None
-    account_number: str = None
-    iban_brokerage: str = None
-    iban_origin: str = None
-    bank_name_origin: str = None
-    balance: float = None
-    cash_to_invest: float = None
-    cash_to_withdraw: float = None
-    trading_plan: str = None
-    data_plan: str = None
-    tax_allowance: float = None
-    tax_allowance_start: str = None
-    tax_allowance_end: str = None
+class AccountState:
+    """Represents the State/Attributes of an Account.
 
-    def __post_init__(self):
+    Attributes:
+            created_at: Date of your Account creation
+            account_id: ID of the Acount (read-only)
+            firstname: First Name of the Account Owner
+            lastname: Last Name of the Account Owner
+            email: Email Adress of the Account Owner
+            phone: Phone Number of the Account Owner
+            address: Address of the Account Owner
+            billing_address: Billing Address of the Account Owner
+            billing_email: Billing Email of the Account Owner
+            billing_name: Billing Name of the Account Owner
+            billing_vat: Value-added Tax (GER: MwSt) of the Account Owner
+            mode: Environment of the account. Either 'paper' or 'money'
+            deposit_id: Identification Number of your securities account
+            client_id: The internal client identification number related to the account
+            account_number: The account reference number
+            iban_brokerage: IBAN of the brokerage account at our partner bank. This is the IBAN you can transfer money from your referrence account to
+            iban_origin: IBAN of the reference account.
+            bank_name_origin: Bank name of your reference account.
+            balance: Your balance is the money you transferred to your account + the combined profits or losses from your orders. 1€ = 10000
+            cash_to_invest: How much cash you have left to invest. Your balance minus the sum of orders that were activated but not executed, yet.
+            cash_to_withdraw: How much cash you have in your account to withdraw to your reference account. Calculated through your last reported balance minus the current sum of buy orders.
+            amount_bought_intraday:
+            amount_sold_intraday:
+            amount_open_orders:
+            amount_open_withdrawals:
+            amount_estimate_taxes:
+            approved_at: Timestamp of live trading account approval
+            trading_plan: subscription plan for trading. Either 'free', 'basic' or 'pro'
+            data_plan: subscription plan for market data. Either 'free', 'basic' or 'pro'
+            tax_allowance: Your tax tax allowance - between 0 and 801 €, as specified in your onboarding process
+            tax_allowance_start: Relevant start date for your tax allowance (usually 01/01/ of respective year)
+            tax_allowance_end: Relevant end date for your tax allowance (usually 31/12/ of respective year)
+
+    """
+
+    _created_at: datetime = None
+    _account_id: str = None
+    _firstname: str = None
+    _lastname: str = None
+    _email: str = None
+    _phone: str = None
+    _address: str = None
+    _billing_address: str = None
+    _billing_email: str = None
+    _billing_name: str = None
+    _billing_vat: str = None
+    _mode: str = None
+    _deposit_id: str = None
+    _client_id: str = None
+    _account_number: str = None
+    _iban_brokerage: str = None
+    _iban_origin: str = None
+    _bank_name_origin: str = None
+    _balance: int = None
+    _cash_to_invest: int = None
+    _cash_to_withdraw: int = None
+    _amount_bought_intraday: int = None
+    _amount_sold_intraday: int = None
+    _amount_open_orders: int = None
+    _amount_open_withdrawals: int = None
+    _amount_estimate_taxes: int = None
+    _approved_at: datetime = None
+    _trading_plan: str = None
+    _data_plan: str = None
+    _tax_allowance: int = None
+    _tax_allowance_start: datetime = None
+    _tax_allowance_end: datetime = None
+
+    @property
+    def created_at(self) -> datetime:
+        return self._created_at
+
+    @property
+    def account_id(self) -> str:
+        return self._account_id
+
+    @property
+    def firstname(self) -> str:
+        return self._firstname
+
+    @property
+    def lastname(self) -> str:
+        return self._lastname
+
+    @property
+    def email(self) -> str:
+        self._email
+
+    @property
+    def phone(self) -> str:
+        self._phone
+
+    @property
+    def address(self) -> str:
+        self._address
+
+    @property
+    def billing_address(self) -> str:
+        return self._billing_address
+
+    @property
+    def billing_email(self) -> str:
+        return self._billing_email
+
+    @property
+    def billing_name(self) -> str:
+        return self._billing_name
+
+    @property
+    def billing_vat(self) -> str:
+        return self._billing_vat
+
+    @property
+    def deposit_id(self) -> str:
+        return self._deposit_id
+
+    @property
+    def client_id(self) -> str:
+        return self._client_id
+
+    @property
+    def iban_brokerage(self) -> str:
+        return self._iban_brokerage
+
+    @property
+    def iban_origin(self) -> str:
+        return self._iban_origin
+
+    @property
+    def bank_name_origin(self) -> str:
+        return self._bank_name_origin
+
+    @property
+    def balance(self) -> int:
+        self.fetch_state()
+        return self._balance
+
+    @property
+    def cash_to_withdraw(self) -> int:
+        self.fetch_state()
+        return self._cash_to_withdraw
+
+    @property
+    def amount_bought_intraday(self) -> int:
+        self.fetch_state()
+        return self._amount_bought_intraday
+
+    @property
+    def amount_sold_intraday(self) -> int:
+        self.fetch_state()
+        return self._amount_sold_intraday
+
+    @property
+    def amount_open_orders(self) -> int:
+        self.fetch_state()
+        return self._amount_open_orders
+
+    @property
+    def amount_open_withdrawals(self) -> int:
+        self.fetch_state()
+        return self._amount_open_withdrawals
+
+    @property
+    def amount_estimate_taxes(self) -> int:
+        self.fetch_state()
+        return self._amount_estimate_taxes
+
+    @property
+    def approved_at(self) -> datetime:
+        return self._approved_at
+
+    @property
+    def trading_plan(self) -> str:
+        self.fetch_state()
+        return self._trading_plan
+
+    @property
+    def data_plan(self) -> str:
+        self.fetch_state()
+        return self._data_plan
+
+    @property
+    def tax_allowance(self) -> int:
+        self.fetch_state()
+        return self._tax_allowance
+
+    @property
+    def tax_allowance_end(self) -> datetime:
+        self.fetch_state()
+        return self._tax_allowance_end
+
+    @property
+    def mode(self) -> TRADING_TYPE:
+        return self._mode
+
+    @mode.setter
+    def mode(self, value) -> None:
+        self._mode = value
+
+    def __post_init__(self) -> None:
         try:
             self.fetch_state()
         except:
             logging.warning("Cant fetch account state")
 
-    def fetch_state(self):
-        request = ApiRequest(type="paper",
-                             endpoint="/account/",
-                             method="GET",
-                             authorization_token=self.token
-                             )
+    def fetch_state(self) -> None:
+        """Refresh information about this Account.
 
-        if request.response['status'] == "ok":
-            self.account_id = request.response['results']['account_id']
-            self.firstname = request.response['results']['firstname']
-            self.lastname = request.response['results']['lastname']
-            self.email = request.response['results']['email']
-            self.phone = request.response['results']['phone']
-            self.address = request.response['results']['address']
-            self.billing_email = request.response['results']['billing_email']
-            self.billing_address = request.response['results']['billing_address']
-            self.billing_name = request.response['results']['billing_name']
-            self.billing_vat = request.response['results']['billing_vat']
-            self.mode = request.response['results']['mode']
-            self.deposit_id = request.response['results']['deposit_id']
-            self.client_id = request.response['results']['client_id']
-            self.account_number = request.response['results']['account_number']
-            self.iban_brokerage = request.response['results']['iban_brokerage']
-            self.iban_origin = request.response['results']['iban_origin']
-            self.bank_name_origin = request.response['results']['bank_name_origin']
-            self.balance = float(request.response['results']['balance']/10000)
-            self.cash_to_invest = float(request.response['results']['cash_to_invest']/10000)
-            self.cash_to_withdraw = float(request.response['results']['cash_to_withdraw']/10000)
-            self.trading_plan = request.response['results']['trading_plan']
-            self.data_plan = request.response['results']['data_plan']
-            self.tax_allowance = float(request.response['results']['tax_allowance']/10000)
-            self.tax_allowance_start = request.response['results']['tax_allowance_start']
-            self.tax_allowance_end = request.response['results']['tax_allowance_end']
+        Raises:
+                LemonMarketError: if lemon.markets returns an error
+
+        """
+
+        request = ApiRequest(
+            type="paper",
+            endpoint="/account/",
+            method="GET",
+            authorization_token=self.token,
+        )
+
+        if request.response["status"] == "ok":
+            types = get_type_hints(AccountState)
+            # Dynamically set Attributes
+            for k, v in request.response["results"].items():
+                if v is not None:
+                    if f"_{k}" in types:
+                        # Parse ISO string response to datetime if attribute is as datetime annotated
+                        if types[f"_{k}"] == datetime:
+                            setattr(self, f"_{k}", datetime.fromisoformat(str(v)))
+                        else:
+                            setattr(self, f"_{k}", v)
+        else:
+            raise LemonMarketError(
+                request.response["error_code"], request.response["error_message"]
+            )
 
 
 class Account(AccountState, metaclass=Singleton):
-    spaces: list
-
-    def __init__(self, credentials: str) -> None:
+    def __init__(
+        self, credentials: str, trading_type: TRADING_TYPE = TRADING_TYPE.PAPER
+    ) -> None:
         self._token = credentials
-        self.paper_spaces = []
-        self.real_money_spaces = []
         super().__init__()
-        self.__get_spaces()
+        self._mode = trading_type
 
     @property
     def token(self) -> str:
         return self._token
 
-    @property
-    def spaces(self):
-        return self.paper_spaces + self.real_money_spaces
-
-    def withdrawl(self, type: str, amount: int, pin: int, idempotency: str = None):
-        """ Withdraw money from your bank account to your lemon.markets account e.g. amount = 100.0 means 100€ and will be multiplyed by 10000 to get the int value the api handels. Take a look at: https://docs.lemon.markets/trading/overview#working-with-numbers-in-the-trading-api 
+    def withdraw(self, amount: int, pin: int, idempotency: str = None) -> None:
+        """Withdraw money from your bank account to your lemon.markets account e.g. amount = 1000000 means 100€ (hundreths of a cent). Take a look at: https://docs.lemon.markets/trading/overview#working-with-numbers-in-the-trading-api
 
         Args:
-            amount (float): amount of money that will be withdrawn, minimum is 100.0
+                amount: amount of money that will be withdrawn, minimum is 1000000 (100 €)
+                pin: his is the personal verification PIN you set during the onboarding.
+                idempotency: ou can set your own unique idempotency key to prevent duplicate operations. Subsequent requests with the same idempotency key will then not go through and throw an error message. This means you cannot make the same withdrawal twice.
 
-        Returns:
-            str: 'ok' if if request was successful
+        Raises:
+                LemonMarketError: if lemon.markets returns an error
+                ValueError: If the amount is not supported.
         """
         if amount > 0:
-            value = amount * 10000
 
-            body = {"amount": int(value)}
-            request = ApiRequest(type="paper",
-                                 endpoint="/account/withdrawals/",
-                                 method="POST",
-                                 body=body,
-                                 authorization_token=self._token)
-            if request.response['status'] == 'error':
-                raise ValueError(request.response['error_message'])
+            body = {"amount": amount}
+            request = ApiRequest(
+                type=self.mode,
+                endpoint="/account/withdrawals/",
+                method="POST",
+                body=body,
+                authorization_token=self._token,
+            )
+
+            if request.response["status"] == "ok":
+                return
+            else:
+                raise LemonMarketError(
+                    request.response["error_code"], request.response["error_message"]
+                )
+
         else:
-            raise ValueError(f"{amount} is not a valid parameter!")
+            raise ValueError(f"Can't withdraw negative amount {amount}!")
 
-        return request.response['status']
-
-    def documents(self) -> list:
-        """ Get information about all documents linked with this account 
+    def withdrawals(self) -> list[dict]:
+        """Get Withdrawals of the account.
 
         Returns:
-            list: arraylist of dicts
+                pandas.DataFrame: Withdrawals
+                        id: A unique Identification Number of your withdrawal
+                        amount: The amount that you specified for your withdrawal
+                        created_at: Timestamp at which you created the withdrawal
+                        date: Timestamp at which the withdrawal was processed by our partner bank
+                        idempotency: Your own unique idempotency key that you specified in your POST request to prevent duplicate withdrawals.
+
+        Raises:
+                LemonMarketError: if lemon.markets returns an error
+
         """
-        request = ApiRequest(type="paper",
-                             endpoint="/account/documents/",
-                             method="GET",
-                             authorization_token=self._token)
 
-        if request.response['status'] == "ok":
-            if request.response['results'] != []:
-                return request.response['results']
-            else:
-                return "No documents found!"
+        request = ApiRequest(
+            type=self.mode,
+            endpoint="/account/withdrawals/",
+            method="GET",
+            authorization_token=self._token,
+        )
+
+        if request.response["status"] == "ok":
+            return request.response["results"]
         else:
-            return request.response['status']
+            raise LemonMarketError(
+                request.response["error_code"], request.response["error_message"]
+            )
 
-    def get_doc(self, doc_id: str) -> str:
-        """ Download a specific doc by id
+    def bankstatements(
+        self,
+        type: BANKSTATEMENT_TYPE = None,
+        start: datetime = None,
+        end: datetime = None,
+        sorting: SORT = None,
+    ) -> list[dict]:
+        """Get List of all Bankstatements in you Account.
 
         Args:
-            doc_id (str): ID of document
+                type: Filter for different types of Bankstatements: PAY_IN, PAY_OUT, ORDER_BUY, ORDER-SELL, EOD_BALANCE, DIVIDEND
+                start: Filter for bank statements after a specific date.
+                end: Filter for bank statements until a specific date.
+                sorting: Sort either ASCENDING (oldest first) or DESCENDING (newest first)
 
         Returns:
-            str: status
+                List of Bankstatement-Dicts
+                        id: Unique Identification Number of your bank statement
+                        account_id: Unique Identification Number of the account the bank statement is related to
+                        type: Different types of Bankstatements: PAY_IN, PAY_OUT, ORDER_BUY, ORDER-SELL, EOD_BALANCE, DIVIDEND
+                        date: The date that the bank statement relates to (YYYY-MM-DD)
+                        amount: The amount associated with the bank statement
+                        isin: The International Securities Identification Number (ISIN) related to your bank statement. Only for type order_buy and order_sell, otherwise null
+                        isin_title: The title of the International Securities Identification Number (ISIN) related to your bank statement. Only for type order_buy and order_sell, otherwise null
+                        created_at: The timestamp the bank statement was created internally. This can be different to the date, e.g., when there is a weekend in between.
+
+        Raises:
+                LemonMarketError: if lemon.markets returns an error
         """
-        request = ApiRequest(type="paper",
-                             endpoint="/account/documents/{}".format(doc_id),
-                             method="GET",
-                             authorization_token=self._token)
 
-        return request.response['status']
+        params = {
+            "type": type,
+            "from": start.isoformat() if start is not None else None,
+            "to": end.isoformat() if end is not None else None,
+            "sorting": sorting,
+        }
+        request = ApiRequest(
+            type=self.mode,
+            endpoint="/account/bankstatements/",
+            url_params=params,
+            method="GET",
+            authorization_token=self._token,
+        )
 
-    def __get_spaces(self):
-        """ Creating objects for any spaces dedicated in the credential file
-        """
-        request = ApiRequest(type="paper",
-                             endpoint="/spaces/",
-                             method="GET",
-                             authorization_token=self._token)
-
-        if request.response['status'] == "ok":
-            for space in request.response['results']:
-                print(space)
-                self.paper_spaces.append(
-                    Space(init_values=space, trading_type="paper"))
-
-        request = ApiRequest(type="money",
-                             endpoint="/spaces/",
-                             method="GET",
-                             authorization_token=self._token)
-
-        if request.response['status'] == "ok":
-            for space in request.response['results']:
-                self.real_money_spaces.append(
-                    Space(init_values=space, trading_type="money"))
-
-        return request.response['status']
-
-    def new_space(self, type: str, name: str, risk_limit: int, trading_type: str):
-        if self.spaces.count() >= 10:
-            return "Maximum number of spaces reached!"
-        if trading_type == "paper":
-            body = {"name": name, "type": type, "risk_limit": str(risk_limit)}
-            request = ApiRequest(type="paper",
-                                 endpoint="/spaces/",
-                                 method="POST",
-                                 body=body,
-                                 authorization_token=self._token)
-
-            if request.response['status'] == "ok":
-                self.paper_spaces.append(
-                    Space(init_values=request.response['results'], trading_type=trading_type))
-            return request.response['status']
-        elif trading_type == "money":
-            body = {"name": name, "type": type, "risk_limit": str(risk_limit)}
-            request = ApiRequest(type="money",
-                                 endpoint="/spaces/",
-                                 method="POST",
-                                 body=body,
-                                 authorization_token=self._token)
-
-            if request.response['status'] == "ok":
-                self.real_money_spaces.append(
-                    Space(init_values=request.response['results'], trading_type=trading_type))
-
-            return request.response['status']
+        if request.response["status"] == "ok":
+            return request.response["results"]
         else:
-            raise ValueError(
-                f"Tradingtype {trading_type} is not a vaild type!")
+            raise LemonMarketError(
+                request.response["error_code"], request.response["error_message"]
+            )
 
-    def edit_space(self, space_id: str, **kwargs) -> str:
-        payload = {name: kwargs[name]
-                   for name in kwargs if kwargs[name] is not None}
+    def documents(self) -> list[dict]:
+        """Get information about all documents linked with this account
 
-        request = ApiRequest(type="paper",
-                             endpoint="/spaces/{}".format(space_id),
-                             method="PUT",
-                             body=payload,
-                             authorization_token=self._token)
+        Returns:
+                List of Documents as Dict
 
-        if request.response['status'] == "ok":
-            filterd_list = list(
-                filter(lambda x: x._uuid == space_id, self.paper_spaces))
-            if filterd_list == []:
-                filterd_list = list(
-                    filter(lambda x: x._uuid == space_id, self.real_money_spaces))
-                if filterd_list == []:
-                    return f"Cant find spaces with id:{space_id}"
-            else:
-                if len(filterd_list) < 2:
-                    filterd_list[0].name = request.response['results']['name']
-                    filterd_list[0].description = request.response['results']['description']
-                    filterd_list[0].risk_limit = request.response['results']['risk_limit']
-                    if filterd_list[0].trading_type == "money":
-                        filterd_list[0].linked = request.response['results']['linked']
+        Raises:
+                LemonMarketError: if lemon.markets returns an error
+        """
+        request = ApiRequest(
+            type=self.mode,
+            endpoint="/account/documents/",
+            method="GET",
+            authorization_token=self._token,
+        )
 
-        return request.response['status']
+        if request.response["status"] == "ok":
+            return request.response["results"]
+        else:
+            raise LemonMarketError(
+                request.response["error_code"], request.response["error_message"]
+            )
 
-    def delete_space(self, space_id: str):
-        r_value = False
-        request = ApiRequest(type="paper",
-                             endpoint="/spaces/{}".format(space_id),
-                             method="DELETE",
-                             authorization_token=self._token)
-
-        if request.response['status'] == "ok":
-            filterd_list = list(
-                filter(lambda x: x._uuid == space_id, self.paper_spaces))
-            if filterd_list == []:
-                return f"Cant find spaces with id:{space_id}"
-            else:
-                self.paper_spaces.remove(filterd_list[0])
-                r_value = True
-
-        request = ApiRequest(type="money",
-                             endpoint="/spaces/{}".format(space_id),
-                             method="DELETE",
-                             authorization_token=self._token)
-
-        if request.response['status'] == "ok":
-            filterd_list = list(
-                filter(lambda x: x._uuid == space_id, self.real_money_spaces))
-            if filterd_list == []:
-                return f"Cant find spaces with id:{space_id}"
-            else:
-                self.real_money_spaces.remove(filterd_list[0])
-                r_value = True
-
-        return "Done" if r_value else "Failed"
-
-    def space_by_name(self, name: str) -> List[Space]:
-        """ Filter spaces by name 
+    def get_doc(self, doc_id: str) -> dict:
+        """Download a specific doc by id
 
         Args:
-            name (str): Space name
+                doc_id: ID of document
+
+        Raises:
+                LemonMarketError: if lemon.markets returns an error
+        """
+        request = ApiRequest(
+            type=self.mode,
+            endpoint="/account/documents/{}".format(doc_id),
+            method="GET",
+            authorization_token=self._token,
+        )
+
+        if request.response["status"] == "ok":
+            # TODO
+            return request.response["results"]
+        else:
+            raise LemonMarketError(
+                request.response["error_code"], request.response["error_message"]
+            )
+
+    def positions(self, isin: str = None) -> pd.DataFrame:
+        """Get the positions of the account.
+
+        Args:
+                isin: Filter for position of a specific share
 
         Returns:
-            List[Space]: [description]
+                pandas.DataFrame: positions
+                        isin: This is the International Securities Identification Number (ISIN) of the position
+                        isin_title: This is the Title of the instrument
+                        quantity: This is the number of positions you currently hold for the respective Instrument
+                        buy_price_avg: This is the average buy-in price of the respective position. If you buy one share for 100€ and a second one for 110€, the average buy-in price would be 105€.
+                        estimated_price_total: This is the current position valuation to the market trading price. So, if you own 3 shares of stock XYZ, and the current market trading price for XYZ is 100€, this attribute would return 300€
+                        estimated_price: This is the current market trading price for the respective position.
+
+        Raises:
+                LemonMarketError: if lemon.markets returns an error
         """
-        return list(filter(lambda x: x.name == name, self.spaces))
+        params = { "isin" : isin}
 
-    def orders(self, type: str):
-        request = ApiRequest(type=type,
-                             endpoint="/orders/",
-                             method="GET",
-                             authorization_token=self._token)
+        request = ApiRequest(
+            type=self.mode,
+            endpoint=f"/positions/",
+			url_params=params,
+            method="GET",
+            authorization_token=self._token,
+        )
 
-        if request.response['status'] == "ok":
-            return request.response['results']
-        return request.response['error_message']
+        if request.response["status"] == "ok":
+            return pd.DataFrame(request.response["results"])
+        else:
+            raise LemonMarketError(
+                request.response["error_code"], request.response["error_message"]
+            )
 
-    def delete_order(self, order_id: str, type: str) -> str:
-        request = ApiRequest(type=type,
-                             endpoint="/orders/{}".format(order_id),
-                             method="DELETE",
-                             authorization_token=self._token)
+    def orders(
+        self,
+        isin: str = None,
+        status: ORDERSTATUS = None,
+        side: ORDERSIDE = None,
+        start: datetime = None,
+        end: datetime = None,
+        type: ORDERTYPE = None,
+        key_creation_id: str = None,
+    ) -> list[Order]:
+        """Get a list of orders on your account.
 
-        return request.response['status']
+        Args:
+                isin: Filter for specific instrument
+                status: Filter for status
+                side: Filter for 'buy' or 'sell'
+                start: Specify a datetime to get order from a specific date on.
+                end: Specify a datetime to get only orders until a specific date.
+                type: Filter for different types of orders: market, stop, limit, stop_limit
+                key_creation_id: Filter for a specific API you created orders with
 
-    def order(self, order_id: str, type: str):
-        request = ApiRequest(type=type,
-                             endpoint="/orders/{}".format(order_id),
-                             method="GET",
-                             authorization_token=self._token)
+        Returns:
+                List of Orders
 
-        if request.response['status'] == "ok":
-            return request.response['results']
-        return request.response['error_message']
+        Raises:
+                LemonMarketError: if lemon.markets returns an error
+        """
+        payload = {
+			"from" : start.isoformat() if start is not None else None,
+			"to" : end.isoformat() if end is not None else None,
+			"isin" : isin,
+			"status" : str(status) if status is not None else None,
+			"side" : str(side) if status is not None else None,
+			"type" : str(type) if type is not None else None,
+			"key_creation_id" : key_creation_id
+		}
 
-    def withdrawls(self, type: str):
-        request = ApiRequest(type=type,
-                             endpoint="/account/withdrawals/",
-                             method="GET",
-                             authorization_token=self._token)
-        if request.response['status'] == "ok":
-            return request.response['results']
-        return request.response['error_message']
+        request = ApiRequest(
+            type=self.mode,
+            endpoint=f"/orders/",
+            url_params=payload,
+            method="GET",
+            authorization_token=self._token,
+        )
 
-    # def withdraw(self, type: str, amount:int, pin:int, idempotency:str = None):
-    #     body = {"amount": amount*10000, "pin": str(pin)}
-    #     request = ApiRequest(type=type,
-    #                          endpoint="/account/withdrawals/",
-    #                          method="POST",
-    #                          body=body,
-    #                          authorization_token=self._token)
-    #     if request.response['status'] == "ok":
-    #         return request.response['results']
-    #     return request.response['error_message']
+        if request.response["status"] == "ok":
+            # Parse result to list of Orders
+            return [Order.from_result(order) for order in request.response["results"]]
+        else:
+            raise LemonMarketError(
+                request.response["error_code"], request.response["error_message"]
+            )
 
-    def portfolio(self, type: str, **kwargs):
-        query = {name: kwargs[name]
-                 for name in kwargs if kwargs[name] is not None}
-        urlencode(query)
+    def get_order(self, order_id: str) -> Order:
+        """Retrieve information of a specific order.
 
-        request = ApiRequest(type=type,
-                             endpoint="/portfolio/?{}".format(query),
-                             method="GET",
-                             authorization_token=self._token)
-        if request.response['status'] == "ok":
-            return request.response['results']
-        return request.response['error_message']
+        Args:
+                order_id: ID of the order
+
+        Returns:
+                Order: The order with the specified id
+
+        Raises:
+                LemonMarketError: if lemon.markets returns an error
+        """
+        request = ApiRequest(
+            type=self.mode,
+            endpoint=f"/orders/{order_id}",
+            method="GET",
+            authorization_token=self._token,
+        )
+
+        if request.response["status"] == "ok":
+            return Order.from_result(request.response["results"])
+        else:
+            raise LemonMarketError(
+                request.response["error_code"], request.response["error_message"]
+            )
+
+    def cancel_order(self, order_id: str) -> None:
+        """Cancel an order that is placed/inactive or activated (but not executed by the stock exchange)
+
+        Args:
+                order_id: ID of the order
+
+        Raises:
+                LemonMarketError: if lemon.markets returns an error
+        """
+
+        request = ApiRequest(
+            type=self.mode,
+            endpoint="/orders/{}".format(order_id),
+            method="DELETE",
+            authorization_token=self._token,
+        )
+
+        if request.response["status"] == "ok":
+            return
+        else:
+            raise LemonMarketError(
+                request.response["error_code"], request.response["error_message"]
+            )

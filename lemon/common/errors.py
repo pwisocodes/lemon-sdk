@@ -20,3 +20,15 @@ class RestApiError(BaseError):
 
 class StreamError(BaseError):
     pass
+
+
+class OrderStatusError(BaseError):
+    pass
+
+
+class LemonMarketError(BaseError):
+    error_code: str
+    error_message: str
+
+    def __init__(self, error_code: str, error_message):
+        super().__init__(f"{error_code}: {error_message}")

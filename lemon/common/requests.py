@@ -1,10 +1,9 @@
-import logging
-from typing import Dict, Union
+from typing import Union
 
 from lemon.common.settings import (BASE_MARKET_DATA_API_URL,
                                    BASE_PAPER_TRADING_API_URL,
                                    BASE_REAL_MONEY_TRADING_API_URL)
-
+from lemon.common.enums import TRADING_TYPE
 import requests
 
 
@@ -46,7 +45,7 @@ class ApiRequest:
         self._kwargs = kwargs
         self.method = method.lower()
         self.body = body
-        self._build_url(type.lower(), endpoint)
+        self._build_url(str(type).lower(), endpoint)
 
         self._perform_request()
 

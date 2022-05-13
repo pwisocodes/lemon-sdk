@@ -3,13 +3,11 @@
 # Unoffical Python SDK for lemon.markets trading API
 
 ## What features are currently included in this SDK?
-- [x] Management of account properties and spaces
+- [x] Management of account properties
 - [x] Creating, deleting and executing market orders
 - [x] Receiving historical (m1, h1, d1) market data  
 - [x] Searching for instruments, funds, etfs, etc. 
-- [x] Creating and executing strategies in separate spaces  
 - [x] Pagination handling
-- [ ] Backtesting of strategies
 ## Install
 
 Running following command will install all project dependencies. You have to install python and poetry first or using pip by default.
@@ -54,18 +52,12 @@ from lemon.client.auth import credentials
 # loading credentails from your credentials.yaml file or manually load your key
 $ cred = credentials()
 $ acc = Account(credentials=cred)
-
-
-# list your spaces
-$ acc.spaces
-[Space(Name: MasterStrategy, Buying_power: 500000000.0, Risk_limit: 500000000.0, Trading_type: paper,
- Space(Name: Default, Buying_power: 100000000.0, Risk_limit: 100000000.0, Trading_type: paper]
 ```
 
 ```python
 # 
 $ m = MarketData()
-$ m.search_instrument("MSCI")
+$ m.search_instrument(search="MSCI")
 Collecting 504 results....
              isin     wkn                       name  \
 0    LU1291100664  A2ADBR   BNPPE-MSCI EXUKXCW UECEO   
@@ -100,7 +92,7 @@ show more (open the raw output data in a text editor) ...
 503  [{'name': 'Börse München - Gettex', 'title': '...  
 
 
-$ m.ohlc(isin="DE0005933931",timespan="h", start="2021-11-01",end="2021-11-26")
+$ m.ohlc(isin="DE0005933931",timespan=TIMESPAN.HOUR, start=datetime.fromisoformat("2021-11-01"),end=datetime.fromisoformat("2021-11-26"))
          isin       o       h       l       c  \
 0   DE0005933931  133.60  133.66  133.46  133.60   
 1   DE0005933931  133.84  134.30  133.80  134.26   
@@ -113,7 +105,7 @@ $ m.ohlc(isin="DE0005933931",timespan="h", start="2021-11-01",end="2021-11-26")
 8   DE0005933931  134.12  134.16  134.08  134.16  
 ...
 
-$ m.quotes(isin="DE0005933931",mic="XMUN")
+$ m.quotes(isin="DE0005933931",venue=VENUE.GETTEX)
   isin	        b_v	a_v	  b	      a	              t	                mic
 	DE0005933931	160	160	130.04	130.1	2021-11-29T17:20:55.000+00:00	XMUN
 ```
