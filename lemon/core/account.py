@@ -304,7 +304,7 @@ class Account(AccountState, metaclass=Singleton):
         else:
             raise ValueError(f"Can't withdraw negative amount {amount}!")
 
-    def withdrawals(self) -> list[dict]:
+    def withdrawals(self) -> list:
         """Get Withdrawals of the account.
 
         Returns:
@@ -340,7 +340,7 @@ class Account(AccountState, metaclass=Singleton):
         start: datetime = None,
         end: datetime = None,
         sorting: SORT = None,
-    ) -> list[dict]:
+    ) -> list:
         """Get List of all Bankstatements in you Account.
 
         Args:
@@ -385,7 +385,7 @@ class Account(AccountState, metaclass=Singleton):
                 request.response["error_code"], request.response["error_message"]
             )
 
-    def documents(self) -> list[dict]:
+    def documents(self) -> list:
         """Get information about all documents linked with this account
 
         Returns:
@@ -476,7 +476,7 @@ class Account(AccountState, metaclass=Singleton):
         end: datetime = None,
         type: ORDERTYPE = None,
         key_creation_id: str = None,
-    ) -> list[Order]:
+    ) -> list:
         """Get a list of orders on your account.
 
         Args:

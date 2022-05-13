@@ -594,7 +594,7 @@ def test_search_instrument(account, mocker, search_instrument_result):
     )
     m = MarketData()
     res = m.search_instrument(
-        search="nasdaq", currency="EUR", venue=VENUE.GETTEX, tradable=True, type=INSTRUMENT_TYPE.ETF)
+        search="nasdaq", currency="EUR", venue=VENUE.GETTEX, tradable=True, itype=INSTRUMENT_TYPE.ETF)
 
     assert isinstance(res, pd.DataFrame)
     assert len(res) == 4
