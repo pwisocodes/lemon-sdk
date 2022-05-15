@@ -1,3 +1,4 @@
+[![PyTest](https://github.com/pwisocodes/lemon-sdk/actions/workflows/pytest.yml/badge.svg?branch=main)](https://github.com/pwisocodes/lemon-sdk/actions/workflows/pytest.yml)
 # ![](https://www.lemon.markets/images/logo.svg?auto=format&fit=max&w=3840) 
 
 # Unoffical Python SDK for lemon.markets trading API
