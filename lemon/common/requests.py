@@ -1,9 +1,11 @@
 from typing import Union
 
-from lemon.common.settings import (BASE_MARKET_DATA_API_URL,
-                                   BASE_PAPER_TRADING_API_URL,
-                                   BASE_REAL_MONEY_TRADING_API_URL)
-from lemon.common.enums import TRADING_TYPE
+from lemon.common.settings import (
+    BASE_MARKET_DATA_API_URL,
+    BASE_PAPER_TRADING_API_URL,
+    BASE_REAL_MONEY_TRADING_API_URL,
+)
+
 import requests
 
 
@@ -12,7 +14,13 @@ class ApiResponse:
     status: int = 0
     _is_success: bool = True
 
-    def __init__(self, content: Union[str, dict], status: int, is_success: bool, raise_error: bool = True):
+    def __init__(
+        self,
+        content: Union[str, dict],
+        status: int,
+        is_success: bool,
+        raise_error: bool = True,
+    ):
         self.content = content
         self.status = status
         self._is_success = True
@@ -30,14 +38,22 @@ class ApiResponse:
 
 class ApiRequest:
     url: str
-    method: str = "GET"
+    method: str = 'GET'
     body: dict
     authorization_token: str
     _kwargs: dict
     _response: ApiResponse
 
-    def __init__(self, type: str, endpoint: str, method: str = "GET", body: dict = None,
-                 authorization_token: str = None, url_params: dict = None, **kwargs):
+    def __init__(
+        self,
+        type: str,
+        endpoint: str,
+        method: str = 'GET',
+        body: dict = None,
+        authorization_token: str = None,
+        url_params: dict = None,
+        **kwargs,
+    ):
         if authorization_token:
             self.authorization_token = str(authorization_token)
 
@@ -50,42 +66,45 @@ class ApiRequest:
         self._perform_request()
 
     def _build_url(self, type: str, endpoint: str):
-        if type == "paper":
+        if type == 'paper':
             self.url = BASE_PAPER_TRADING_API_URL + endpoint
-        elif type == "money":
+        elif type == 'money':
             self.url = BASE_REAL_MONEY_TRADING_API_URL + endpoint
-        elif type == "data":
+        elif type == 'data':
             self.url = BASE_MARKET_DATA_API_URL + endpoint
         else:
-            raise ValueError("Type is not valid!")
+            raise ValueError('Type is not valid!')
 
     def _perform_request(self):
-        headers = {
-            "Authorization": "Bearer {}".format(self.authorization_token)
-        }
+        headers = {'Authorization': 'Bearer {}'.format(self.authorization_token)}
         try:
-            if self.method == "post":
+            if self.method == 'post':
                 response = requests.post(
-                    self.url, data=self.body, headers=headers, params=self.url_params).json()
+                    self.url, data=self.body, headers=headers, params=self.url_params
+                ).json()
                 self._response = response
-            elif self.method == "put":
+            elif self.method == 'put':
                 response = requests.put(
-                    self.url, data=self.body, headers=headers, params=self.url_params).json()
+                    self.url, data=self.body, headers=headers, params=self.url_params
+                ).json()
                 self._response = response
-            elif self.method == "delete":
+            elif self.method == 'delete':
                 response = requests.delete(
-                    self.url, headers=headers, params=self.url_params).json()
+                    self.url, headers=headers, params=self.url_params
+                ).json()
                 self._response = response
-            elif self.method == "patch":
+            elif self.method == 'patch':
                 response = requests.patch(
-                    self.url, data=self.body, headers=headers, params=self.url_params).json()
+                    self.url, data=self.body, headers=headers, params=self.url_params
+                ).json()
                 self._response = response
             else:
                 response = requests.get(
-                    self.url, headers=headers, params=self.url_params).json()
+                    self.url, headers=headers, params=self.url_params
+                ).json()
                 # Pagination
                 if 'next' in response.keys():
-                    if response['next'] != None:
+                    if response['next'] is not None:
                         # Next available
                         pagination_results = []
                         # Save 100 items from first request
@@ -95,14 +114,20 @@ class ApiRequest:
                         # count = 2000 = 20 requsts a 100 (limit)
                         for offset in range(0, response['total'], 100):
                             response = requests.get(
-                                url=response['next'], headers=headers).json()
+                                url=response['next'], headers=headers
+                            ).json()
                             pagination_results.append(response['results'])
 
-                            if response['next'] == None:
+                            if response['next'] is None:
                                 break
 
-                        self._response = {"results": [
-                            item for sublist in pagination_results for item in sublist]}
+                        self._response = {
+                            'results': [
+                                item
+                                for sublist in pagination_results
+                                for item in sublist
+                            ]
+                        }
                     else:
                         self._response = response
                 else:
@@ -116,4 +141,4 @@ class ApiRequest:
         if self._response:
             return self._response
         else:
-            raise Exception(f"No response available!")
+            raise Exception('No response available!')

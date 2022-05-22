@@ -122,7 +122,7 @@ class Order:
         self._status = __status
 
     @staticmethod
-    def from_result(res: dict) -> "Order":
+    def from_result(res: dict) -> 'Order':
         """Creates an Order Object from an API Response.
 
         Args:
@@ -152,18 +152,18 @@ class Order:
 
         request = ApiRequest(
             type=self._trading_type,
-            endpoint="/orders/",
-            method="POST",
+            endpoint='/orders/',
+            method='POST',
             body=body,
             authorization_token=acc.Account().token,
         )
 
-        if request.response["status"] == "ok":
-            self._attr_from_response(request.response["results"])
+        if request.response['status'] == 'ok':
+            self._attr_from_response(request.response['results'])
             return
         else:
             raise LemonMarketError(
-                request.response["error_code"], request.response["error_message"]
+                request.response['error_code'], request.response['error_message']
             )
 
     def activate(self, pin: str = None) -> None:
@@ -180,27 +180,27 @@ class Order:
         """
 
         if self._status == ORDERSTATUS.DRAFT:
-            raise OrderStatusError("Order must first be placed")
+            raise OrderStatusError('Order must first be placed')
 
         if self._trading_type == TRADING_TYPE.MONEY:
             if pin is None:
-                raise ValueError("Pin must be passed for real money orders.")
+                raise ValueError('Pin must be passed for real money orders.')
             else:
-                data = json.dumps({"pin": pin})
+                data = json.dumps({'pin': pin})
 
         request = ApiRequest(
             type=self._trading_type,
-            endpoint=f"/orders/{self._id}/activate/",
-            method="POST",
+            endpoint=f'/orders/{self._id}/activate/',
+            method='POST',
             body=data if self._trading_type == TRADING_TYPE.MONEY else None,
             authorization_token=acc.Account().token,
         )
 
-        if request.response["status"] == "ok":
+        if request.response['status'] == 'ok':
             return
         else:
             raise LemonMarketError(
-                request.response["error_code"], request.response["error_message"]
+                request.response['error_code'], request.response['error_message']
             )
 
     def cancel(self) -> None:
@@ -225,7 +225,7 @@ class Order:
             res[k[1:]] = v if not isinstance(v, datetime) else v.isoformat()
         return res
 
-    def _attr_from_response(self, res: "Order") -> None:
+    def _attr_from_response(self, res: 'Order') -> None:
         """Overrides the attributes of the object based on the specified dict.
 
         Args:
@@ -234,17 +234,17 @@ class Order:
         types = get_type_hints(Order)
 
         if all(
-            atr in res for atr in ["isin", "expires_at", "side", "quantity", "venue"]
+            atr in res for atr in ['isin', 'expires_at', 'side', 'quantity', 'venue']
         ):
             for k, v in res.items():
-                if f"_{k}" in types:
+                if f'_{k}' in types:
                     # Parse ISO string response to datetime if attribute is annotated as datetime
-                    if types[f"_{k}"] == datetime and v is not None:
-                        setattr(self, f"_{k}", datetime.fromisoformat(v))
+                    if types[f'_{k}'] == datetime and v is not None:
+                        setattr(self, f'_{k}', datetime.fromisoformat(v))
                     else:
-                        setattr(self, f"_{k}", v)
+                        setattr(self, f'_{k}', v)
         else:
-            raise ValueError("Not all mandatory attrributes passed.")
+            raise ValueError('Not all mandatory attrributes passed.')
 
     @property
     def isin(self) -> str:
@@ -334,14 +334,12 @@ class Order:
         else:
             self._expires_at = value
 
-    # Available after placed
-
     @property
     def id(self) -> str:
         if self.status != ORDERSTATUS.DRAFT:
             return self._id
         else:
-            raise AttributeError("Not available until placed")
+            raise AttributeError('Not available until placed')
 
     @property
     def status(self) -> ORDERSTATUS:
@@ -352,120 +350,116 @@ class Order:
         if self.status != ORDERSTATUS.DRAFT:
             return self._regulatory_information
         else:
-            raise AttributeError("Not available until placed")
+            raise AttributeError('Not available until placed')
 
     @property
     def estimated_price(self) -> int:
         if self.status != ORDERSTATUS.DRAFT:
             return self._estimated_price
         else:
-            raise AttributeError("Not available until placed")
-
-    @property
-    def status(self) -> str:
-        return self._status
+            raise AttributeError('Not available until placed')
 
     @property
     def estimated_price_total(self) -> int:
         if self.status != ORDERSTATUS.DRAFT:
             return self._estimated_price_total
         else:
-            raise AttributeError("Not available until placed")
+            raise AttributeError('Not available until placed')
 
     @property
     def created_at(self) -> datetime:
         if self.status != ORDERSTATUS.DRAFT:
             return self._created_at
         else:
-            raise AttributeError("Not available until placed")
+            raise AttributeError('Not available until placed')
 
     @property
     def charge(self) -> int:
         if self.status != ORDERSTATUS.DRAFT:
             return self._charge
         else:
-            raise AttributeError("Not available until placed")
+            raise AttributeError('Not available until placed')
 
     @property
     def chargeable_at(self) -> datetime:
         if self.status != ORDERSTATUS.DRAFT:
             return self._chargeable_at
         else:
-            raise AttributeError("Not available until placed")
+            raise AttributeError('Not available until placed')
 
     @property
     def isin_title(self) -> str:
         if self.status != ORDERSTATUS.DRAFT:
             return self._isin_title
         else:
-            raise AttributeError("Not available until placed")
+            raise AttributeError('Not available until placed')
 
     @property
     def type(self) -> ORDERTYPE:
         if self.status != ORDERSTATUS.DRAFT:
             return self._type
         else:
-            raise AttributeError("Not available until placed")
+            raise AttributeError('Not available until placed')
 
     @property
     def executed_quantity(self) -> int:
         if self.status != ORDERSTATUS.DRAFT:
             return self._executed_quantity
         else:
-            raise AttributeError("Not available until placed")
+            raise AttributeError('Not available until placed')
 
     @property
     def executed_price(self) -> int:
         if self.status != ORDERSTATUS.DRAFT:
             return self._executed_price
         else:
-            raise AttributeError("Not available until placed")
+            raise AttributeError('Not available until placed')
 
     @property
     def executed_price_total(self) -> int:
         if self.status != ORDERSTATUS.DRAFT:
             return self._executed_price_total
         else:
-            raise AttributeError("Not available until placed")
+            raise AttributeError('Not available until placed')
 
     @property
     def activated_at(self) -> datetime:
         if self.status != ORDERSTATUS.DRAFT:
             return self._activated_at
         else:
-            raise AttributeError("Not available until placed")
+            raise AttributeError('Not available until placed')
 
     @property
     def executed_at(self) -> datetime:
         if self.status != ORDERSTATUS.DRAFT:
             return self._executed_at
         else:
-            raise AttributeError("Not available until placed")
+            raise AttributeError('Not available until placed')
 
     @property
     def rejected_at(self) -> datetime:
         if self.status != ORDERSTATUS.DRAFT:
             return self._rejected_at
         else:
-            raise AttributeError("Not available until placed")
+            raise AttributeError('Not available until placed')
 
     @property
     def cancelled_at(self) -> datetime:
         if self.status != ORDERSTATUS.DRAFT:
             return self._cancelled_at
         else:
-            raise AttributeError("Not available until placed")
+            raise AttributeError('Not available until placed')
 
     @property
     def key_creation_id(self) -> str:
         if self.status != ORDERSTATUS.DRAFT:
             return self._key_creation_id
         else:
-            raise AttributeError("Not available until placed")
+            raise AttributeError('Not available until placed')
 
     @property
     def key_activation_id(self) -> str:
         if self.status != ORDERSTATUS.DRAFT:
             return self._key_activation_id
         else:
-            raise AttributeError("Not available until placed")
+            raise AttributeError('Not available until placed')

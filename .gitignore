@@ -157,3 +157,6 @@ credentials.yml
 sdk.ipynb
 dist*
 dist/*
+
+# logger settings
+logger.yml

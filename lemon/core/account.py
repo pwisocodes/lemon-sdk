@@ -224,8 +224,8 @@ class AccountState:
     def __post_init__(self) -> None:
         try:
             self.fetch_state()
-        except:
-            logging.warning("Cant fetch account state")
+        except Exception as e:
+            logging.warning(f'Cant fetch account state {e}')
 
     def fetch_state(self) -> None:
         """Refresh information about this Account.
@@ -236,26 +236,26 @@ class AccountState:
         """
 
         request = ApiRequest(
-            type="paper",
-            endpoint="/account/",
-            method="GET",
+            type='paper',
+            endpoint='/account/',
+            method='GET',
             authorization_token=self.token,
         )
 
-        if request.response["status"] == "ok":
+        if request.response['status'] == 'ok':
             types = get_type_hints(AccountState)
             # Dynamically set Attributes
-            for k, v in request.response["results"].items():
+            for k, v in request.response['results'].items():
                 if v is not None:
-                    if f"_{k}" in types:
+                    if f'_{k}' in types:
                         # Parse ISO string response to datetime if attribute is as datetime annotated
-                        if types[f"_{k}"] == datetime:
-                            setattr(self, f"_{k}", datetime.fromisoformat(str(v)))
+                        if types[f'_{k}'] == datetime:
+                            setattr(self, f'_{k}', datetime.fromisoformat(str(v)))
                         else:
-                            setattr(self, f"_{k}", v)
+                            setattr(self, f'_{k}', v)
         else:
             raise LemonMarketError(
-                request.response["error_code"], request.response["error_message"]
+                request.response['error_code'], request.response['error_message']
             )
 
 
@@ -285,20 +285,20 @@ class Account(AccountState, metaclass=Singleton):
         """
         if amount > 0:
 
-            body = {"amount": amount}
+            body = {'amount': amount}
             request = ApiRequest(
                 type=self.mode,
-                endpoint="/account/withdrawals/",
-                method="POST",
+                endpoint='/account/withdrawals/',
+                method='POST',
                 body=body,
                 authorization_token=self._token,
             )
 
-            if request.response["status"] == "ok":
+            if request.response['status'] == 'ok':
                 return
             else:
                 raise LemonMarketError(
-                    request.response["error_code"], request.response["error_message"]
+                    request.response['error_code'], request.response['error_message']
                 )
 
         else:
@@ -322,16 +322,16 @@ class Account(AccountState, metaclass=Singleton):
 
         request = ApiRequest(
             type=self.mode,
-            endpoint="/account/withdrawals/",
-            method="GET",
+            endpoint='/account/withdrawals/',
+            method='GET',
             authorization_token=self._token,
         )
 
-        if request.response["status"] == "ok":
-            return request.response["results"]
+        if request.response['status'] == 'ok':
+            return request.response['results']
         else:
             raise LemonMarketError(
-                request.response["error_code"], request.response["error_message"]
+                request.response['error_code'], request.response['error_message']
             )
 
     def bankstatements(
@@ -365,24 +365,24 @@ class Account(AccountState, metaclass=Singleton):
         """
 
         params = {
-            "type": type,
-            "from": start.isoformat() if start is not None else None,
-            "to": end.isoformat() if end is not None else None,
-            "sorting": sorting,
+            'type': type,
+            'from': start.isoformat() if start is not None else None,
+            'to': end.isoformat() if end is not None else None,
+            'sorting': sorting,
         }
         request = ApiRequest(
             type=self.mode,
-            endpoint="/account/bankstatements/",
+            endpoint='/account/bankstatements/',
             url_params=params,
-            method="GET",
+            method='GET',
             authorization_token=self._token,
         )
 
-        if request.response["status"] == "ok":
-            return request.response["results"]
+        if request.response['status'] == 'ok':
+            return request.response['results']
         else:
             raise LemonMarketError(
-                request.response["error_code"], request.response["error_message"]
+                request.response['error_code'], request.response['error_message']
             )
 
     def documents(self) -> list:
@@ -396,16 +396,16 @@ class Account(AccountState, metaclass=Singleton):
         """
         request = ApiRequest(
             type=self.mode,
-            endpoint="/account/documents/",
-            method="GET",
+            endpoint='/account/documents/',
+            method='GET',
             authorization_token=self._token,
         )
 
-        if request.response["status"] == "ok":
-            return request.response["results"]
+        if request.response['status'] == 'ok':
+            return request.response['results']
         else:
             raise LemonMarketError(
-                request.response["error_code"], request.response["error_message"]
+                request.response['error_code'], request.response['error_message']
             )
 
     def get_doc(self, doc_id: str) -> dict:
@@ -419,17 +419,17 @@ class Account(AccountState, metaclass=Singleton):
         """
         request = ApiRequest(
             type=self.mode,
-            endpoint="/account/documents/{}".format(doc_id),
-            method="GET",
+            endpoint='/account/documents/{}'.format(doc_id),
+            method='GET',
             authorization_token=self._token,
         )
 
-        if request.response["status"] == "ok":
+        if request.response['status'] == 'ok':
             # TODO
-            return request.response["results"]
+            return request.response['results']
         else:
             raise LemonMarketError(
-                request.response["error_code"], request.response["error_message"]
+                request.response['error_code'], request.response['error_message']
             )
 
     def positions(self, isin: str = None) -> pd.DataFrame:
@@ -450,21 +450,21 @@ class Account(AccountState, metaclass=Singleton):
         Raises:
                 LemonMarketError: if lemon.markets returns an error
         """
-        params = { "isin" : isin}
+        params = {'isin': isin}
 
         request = ApiRequest(
             type=self.mode,
-            endpoint=f"/positions/",
-			url_params=params,
-            method="GET",
+            endpoint='/positions/',
+            url_params=params,
+            method='GET',
             authorization_token=self._token,
         )
 
-        if request.response["status"] == "ok":
-            return pd.DataFrame(request.response["results"])
+        if request.response['status'] == 'ok':
+            return pd.DataFrame(request.response['results'])
         else:
             raise LemonMarketError(
-                request.response["error_code"], request.response["error_message"]
+                request.response['error_code'], request.response['error_message']
             )
 
     def orders(
@@ -495,29 +495,29 @@ class Account(AccountState, metaclass=Singleton):
                 LemonMarketError: if lemon.markets returns an error
         """
         payload = {
-			"from" : start.isoformat() if start is not None else None,
-			"to" : end.isoformat() if end is not None else None,
-			"isin" : isin,
-			"status" : str(status) if status is not None else None,
-			"side" : str(side) if status is not None else None,
-			"type" : str(type) if type is not None else None,
-			"key_creation_id" : key_creation_id
-		}
+            'from': start.isoformat() if start is not None else None,
+            'to': end.isoformat() if end is not None else None,
+            'isin': isin,
+            'status': str(status) if status is not None else None,
+            'side': str(side) if status is not None else None,
+            'type': str(type) if type is not None else None,
+            'key_creation_id': key_creation_id,
+        }
 
         request = ApiRequest(
             type=self.mode,
-            endpoint=f"/orders/",
+            endpoint='/orders/',
             url_params=payload,
-            method="GET",
+            method='GET',
             authorization_token=self._token,
         )
 
-        if request.response["status"] == "ok":
+        if request.response['status'] == 'ok':
             # Parse result to list of Orders
-            return [Order.from_result(order) for order in request.response["results"]]
+            return [Order.from_result(order) for order in request.response['results']]
         else:
             raise LemonMarketError(
-                request.response["error_code"], request.response["error_message"]
+                request.response['error_code'], request.response['error_message']
             )
 
     def get_order(self, order_id: str) -> Order:
@@ -534,16 +534,16 @@ class Account(AccountState, metaclass=Singleton):
         """
         request = ApiRequest(
             type=self.mode,
-            endpoint=f"/orders/{order_id}",
-            method="GET",
+            endpoint=f'/orders/{order_id}',
+            method='GET',
             authorization_token=self._token,
         )
 
-        if request.response["status"] == "ok":
-            return Order.from_result(request.response["results"])
+        if request.response['status'] == 'ok':
+            return Order.from_result(request.response['results'])
         else:
             raise LemonMarketError(
-                request.response["error_code"], request.response["error_message"]
+                request.response['error_code'], request.response['error_message']
             )
 
     def cancel_order(self, order_id: str) -> None:
@@ -558,14 +558,14 @@ class Account(AccountState, metaclass=Singleton):
 
         request = ApiRequest(
             type=self.mode,
-            endpoint="/orders/{}".format(order_id),
-            method="DELETE",
+            endpoint='/orders/{}'.format(order_id),
+            method='DELETE',
             authorization_token=self._token,
         )
 
-        if request.response["status"] == "ok":
+        if request.response['status'] == 'ok':
             return
         else:
             raise LemonMarketError(
-                request.response["error_code"], request.response["error_message"]
+                request.response['error_code'], request.response['error_message']
             )
