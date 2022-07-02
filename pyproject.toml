@@ -5,7 +5,7 @@ description = ""
 authors = ["Patrick Wisotzki <pwisocodes@gmail.com>"]
 
 [tool.poetry.dependencies]
-python = "^3.7.1"
+python = "^3.8"
 requests = "^2.25.1"
 PyYAML = "^5.4.1"
 pandas = "^1.3.4"
